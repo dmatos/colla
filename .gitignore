@@ -1,10 +1,10 @@
 *.class
+*~
 
 # Package Files #
 *.jar
 *.war
 *.ear
-/DeveloperViewer/dist/
 
 #NetBeans specific#
 nbproject/private/
@@ -15,8 +15,22 @@ dist/
 nbdist/
 
 # Logs and databases #
-######################
 *.log
 *.sql
 *.sqlite
 
+#NetBeans custom#
+/DeveloperViewer/dist/
+/DeveloperViewer/data/
+/DeveloperViewer/store/
+/DeveloperViewer/nbproject/private/
+/HostViewer/store/
+/HostViewer/user_jars/
+/Kernel/nbproject/private/
+/SuperServer4/nbproject/private/
+/SuperServer4/store/
+
+#Project specific#
+saida.txt
+exception.txt
+*.csv

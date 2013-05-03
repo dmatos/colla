@@ -1,0 +1,285 @@
+package colla.appl.host_viewer;
+
+// exemplo de um consumidor !!!
+import colla.kernel.api.*;
+import colla.kernel.enumerations.HostOps;
+import colla.kernel.impl.User;
+import colla.kernel.messages.toClient.TaskResultMsg;
+import colla.kernel.messages.toHost.TaskMessage;
+import colla.kernel.messages.toServer.TransmitResultMsg;
+import implementations.sm_kernel.JCL_FacadeImpl;
+import interfaces.kernel.JCL_facade;
+import interfaces.kernel.JCL_result;
+import java.io.*;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
+
+    HostViewer hostViewer;
+    CollAHost host;
+    private final int timeout = 0;
+    String serverIPaddress;
+    int serverPortNumber;
+
+    public CollAConsumer( GenericResource<S> re, HostMicroServer hostMicroServer ){
+        super( re );
+        this.hostViewer = hostMicroServer.getHostViewer();
+        this.host = hostMicroServer.getHost();
+        this.serverIPaddress = hostMicroServer.getServerIPaddress();
+        this.serverPortNumber = hostMicroServer.getServerPortNumber();
+
+    }
+
+    @Override
+    protected void doSomething( S collAMessage ){
+        HostOps operation;
+
+        try {
+            operation = (HostOps) collAMessage.getOperation();
+            //System.err.println(operation.toString());
+            switch (operation) {
+                case PING: {
+                }
+                break;
+                case TASK_EXECUTE: {
+                    TaskMessage taskMessage = (TaskMessage) collAMessage;
+                    CollATask task = taskMessage.getTask();
+                    User client = (User) taskMessage.getUser();
+                    String taskName = task.getTaskName();
+                    HashMap<String, CollAUser> group = taskMessage.getGroup();
+                    String groupName = taskMessage.getGroupName();
+
+                    //running task
+                    JCL_result jclr = this.executeTask(task);
+                    hostViewer.displayStatus("done!!! ");
+                    if (jclr.getErrorResult() == null) {
+                        System.err.println(jclr.getCorrectResult().toString());
+                    } else {
+                        //jclr.getErrorResult().printStackTrace();
+                    }
+                    // Sending a result to client
+                    hostViewer.displayStatus("Sending result back...");
+                    /*if (hostViewer.getHost().hasValidIP()) {
+                     Integer ticketNumber = hostViewer.storeResult(task, jclr);
+                     CollATicket ticket = new Ticket();
+                     ticket.setHostIPaddress(hostViewer.getHost().getIp());
+                     ticket.setHostPort(hostViewer.getHost().getPort());
+                     ticket.setTicket(ticketNumber);
+                     //sending back a msg without a real resulst, only a ticket number to download the result
+                     task.setTicket(ticket);
+                     this.sendResultBack(groupName, group, task, taskName);
+                     } else {*/
+                    task.setResult(jclr);
+                    this.sendResultBack(groupName, group, task, taskName);
+                    //}
+                    //hostViewer.deleteTaskFiles(task);
+                    this.deleteDir(new File("../"+task.getTaskID()));
+                }
+                break; // end case TASK_EXECUTE
+                /*case DOWNLOAD_RESULT: {
+                 DownloadResultMsg msg = (DownloadResultMsg) collAMessage;
+                 Integer ticket = msg.getTicket();
+                 CollATask result = hostViewer.getStoredResult(ticket);
+                 result.removeTicket();
+                 ObjectOutputStream output = new ObjectOutputStream(connection.getOutputStream());
+                 output.writeObject(result);
+                 output.flush();
+                 }
+                 break;*/
+                default:
+                    System.err.println("Operation not supported: " + operation.toString());
+            }
+
+        } catch (SocketException se) {
+            //se.printStackTrace();
+        } catch (ClassNotFoundException cnfe) {
+            //cnfe.printStackTrace();
+        } catch (IOException io) {
+            //io.printStackTrace();
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+    }// end of doSomething
+
+    /**
+     * Send result back to all members of the group
+     *
+     * @param group hashmap of username to User
+     * @param jclr result of javaCaLa
+     * @param taskName name of the task
+     */
+    public void sendResultBack(String groupName, HashMap<String, CollAUser> group, CollATask task, String taskName) {
+        for (String userName : group.keySet()) {
+            if (group.get(userName).hasValidIP()) {                
+                sendResultBackToValidIPClient(groupName, group.get(userName), task);
+                hostViewer.displayStatus("Result was sent back to valid ip.");
+            } else {
+                sendResultBackToInvalidIPClient(groupName, group.get(userName), task);
+            }
+        }
+    }
+
+    /**
+     * Send a result back to a user with valid ip
+     *
+     * @param groupName the name of the user group
+     * @param client the user to send the result
+     * @param task the task that generated the result
+     */
+    public void sendResultBackToValidIPClient(String groupName, CollAUser client, CollATask task) {
+        if (client.isOnline() && client.getPort() > 0) {
+            try {
+                TaskResultMsg outgoingOfClient = new TaskResultMsg(hostViewer.getHost().getName(), task.getTaskName(), task);
+                outgoingOfClient.setGroupName(groupName);
+                //System.err.println("sending result to valid");
+
+                Socket socket = new Socket(InetAddress.getByName(client.getIp()), client.getPort());
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(outgoingOfClient);
+                output.flush();
+                //ACK
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                input.readObject();
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                //sendResultBackToInvalidIPClient(groupName, client, task);
+            }
+        }
+    }
+
+    /**
+     * Send a result back to a user with invalid ip
+     *
+     * @param groupName the name of the user group
+     * @param client the user to send the result
+     * @param task the task that generated the result
+     */
+    public void sendResultBackToInvalidIPClient(String groupName, CollAUser client, CollATask task) {
+        //System.err.println("sending result to invalid");
+        if (client.isOnline()) {
+            try {
+                TransmitResultMsg outgoing = new TransmitResultMsg(client, task.getTaskName(), task);
+                outgoing.setGroupName(groupName);
+                Socket socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(outgoing);
+                output.flush();
+                //ACK
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                input.readObject();
+            } catch (Exception e) {
+                hostViewer.displayStatus("Error: couldn't send result back!");
+            }
+        }
+    }
+
+    /**
+     * Executes an task.
+     *
+     * @param cTask An object of CollATask that has been executed on the host.
+     * @return An JCL_result, que é um resultado obtido pelo jcl.
+     */
+    public JCL_result executeTask(CollATask cTask) {
+        cTask.setStarted();
+        JCL_facade jcl = JCL_FacadeImpl.getInstance();
+
+        File[] jarsToRegister = new File[cTask.getDependencies().size() + 1];
+
+        /*
+         * receive the buffer of file
+         */
+        byte[] taskBuffer = cTask.getTask();
+        String taskName = cTask.getTaskName();
+        Map<String, byte[]> jars = cTask.getDependencies();
+        String classToExecute = cTask.getClassToExecute();
+        String methodToExecute = cTask.getMethodToExecute();
+
+
+        //gathering files into array
+        try {
+            //write temp file for task
+            new File("../" + cTask.getTaskID() + "/").mkdir();
+            File file = new File("../" + cTask.getTaskID() + "/" + taskName);
+            FileOutputStream fout = new FileOutputStream(file);
+            DataOutputStream dout = new DataOutputStream(fout);
+            dout.write(taskBuffer);
+            dout.flush();
+
+            //first element of the array of files must be the task
+            //File file = new File(taskName);
+            jarsToRegister[0] = file;
+
+            //and then dependencies
+            int jarCounter = 1;
+            for (String fileName : jars.keySet()) {
+                //write temp file for dependencies
+                file = new File("../" + cTask.getTaskID() + "/" + fileName);
+                byte[] jar = jars.get(fileName);
+                fout = new FileOutputStream(file);
+                dout = new DataOutputStream(fout);
+                dout.write(jar);
+                dout.flush();
+                //add dependencie to array of files
+                jarsToRegister[jarCounter++] = file;
+            }
+
+            //close file streams
+            dout.close();
+            fout.close();
+
+            //registering task in javaCaLa
+            if (jcl.register(jarsToRegister, classToExecute)) {
+                //System.err.println("jar registrado com sucesso");
+            } else {
+                //System.err.println("jar nao foi registrado com sucesso");
+            }
+
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+
+        String ticket = "";
+
+        //execute task
+
+        JCL_result jclr;
+
+        try {
+            Object[] args = cTask.getArguments();
+            /*System.err.println("class: " + cTask.getClassToExecute());
+            System.err.println("method: " + cTask.getMethodToExecute());
+            System.err.println(("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute()));*/
+            this.hostViewer.displayStatus("Task: " + cTask.getTaskID());
+            ticket = jcl.execute(cTask.getClassToExecute(), cTask.getMethodToExecute(), args);
+            //System.err.println("Recebeu o ticket " + ticket);
+        } catch (Exception e) {
+            //e.printStackTrace();
+        }
+
+        //get result for task
+        jclr = jcl.getResultBlocking(ticket);
+        //System.err.println("Conseguiu resultado para o ticket " + ticket);
+        cTask.setFinished();
+        jcl.removeResult(ticket);
+        
+        return jclr;
+
+    }// end of method executeTask
+
+    public boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
+    
+}

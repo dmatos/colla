@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>system properties test</comment>
+<entry key="java.runtime.name">OpenJDK Runtime Environment</entry>
+<entry key="sun.boot.library.path">/usr/lib/jvm/java-6-openjdk/jre/lib/i386</entry>
+<entry key="java.vm.version">20.0-b11</entry>
+<entry key="java.vm.vendor">Sun Microsystems Inc.</entry>
+<entry key="java.vendor.url">http://java.sun.com/</entry>
+<entry key="path.separator">:</entry>
+<entry key="java.vm.name">OpenJDK Server VM</entry>
+<entry key="file.encoding.pkg">sun.io</entry>
+<entry key="sun.java.launcher">SUN_STANDARD</entry>
+<entry key="user.country">BR</entry>
+<entry key="sun.os.patch.level">unknown</entry>
+<entry key="java.vm.specification.name">Java Virtual Machine Specification</entry>
+<entry key="user.dir">/home/dmatos/NetBeansProjects/Host Viewer</entry>
+<entry key="java.runtime.version">1.6.0_23-b23</entry>
+<entry key="java.awt.graphicsenv">sun.awt.X11GraphicsEnvironment</entry>
+<entry key="java.endorsed.dirs">/usr/lib/jvm/java-6-openjdk/jre/lib/endorsed</entry>
+<entry key="os.arch">i386</entry>
+<entry key="javax.accessibility.assistive_technologies">org.GNOME.Accessibility.JavaBridge</entry>
+<entry key="java.io.tmpdir">/tmp</entry>
+<entry key="line.separator">
+</entry>
+<entry key="java.vm.specification.vendor">Sun Microsystems Inc.</entry>
+<entry key="os.name">Linux</entry>
+<entry key="sun.jnu.encoding">UTF-8</entry>
+<entry key="java.library.path">/usr/lib/jvm/java-6-openjdk/jre/lib/i386/server:/usr/lib/jvm/java-6-openjdk/jre/lib/i386:/usr/lib/jvm/java-6-openjdk/jre/../lib/i386:/usr/lib/jvm/java-6-openjdk/jre/lib/i386/client:/usr/lib/jvm/java-6-openjdk/jre/lib/i386:/usr/lib/jvm/java-6-openjdk/jre/../lib/i386:/usr/java/packages/lib/i386:/usr/lib/jni:/lib:/usr/lib</entry>
+<entry key="java.specification.name">Java Platform API Specification</entry>
+<entry key="java.class.version">50.0</entry>
+<entry key="sun.management.compiler">HotSpot Tiered Compilers</entry>
+<entry key="os.version">3.0.0-17-generic</entry>
+<entry key="user.home">/home/dmatos</entry>
+<entry key="user.timezone">America/Sao_Paulo</entry>
+<entry key="java.awt.printerjob">sun.print.PSPrinterJob</entry>
+<entry key="file.encoding">UTF-8</entry>
+<entry key="java.specification.version">1.6</entry>
+<entry key="java.class.path">/home/dmatos/.netbeans/7.0/modules/ext/AbsoluteLayout.jar:/home/dmatos/NetBeansProjects/Kernel/build/classes:/home/dmatos/NetBeansProjects/Kernel/src:/home/dmatos/NetBeansProjects/Host Viewer/build/classes:/home/dmatos/NetBeansProjects/Host Viewer/src</entry>
+<entry key="user.name">dmatos</entry>
+<entry key="java.vm.specification.version">1.0</entry>
+<entry key="sun.java.command">host.viewer.HostViewer -Xverify:none</entry>
+<entry key="java.home">/usr/lib/jvm/java-6-openjdk/jre</entry>
+<entry key="sun.arch.data.model">32</entry>
+<entry key="user.language">pt</entry>
+<entry key="java.specification.vendor">Sun Microsystems Inc.</entry>
+<entry key="java.vm.info">mixed mode</entry>
+<entry key="java.version">1.6.0_23</entry>
+<entry key="java.ext.dirs">/usr/lib/jvm/java-6-openjdk/jre/lib/ext:/usr/java/packages/lib/ext</entry>
+<entry key="sun.boot.class.path">/usr/lib/jvm/java-6-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/netx.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/plugin.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-6-openjdk/jre/lib/modules/jdk.boot.jar:/usr/lib/jvm/java-6-openjdk/jre/classes</entry>
+<entry key="java.vendor">Sun Microsystems Inc.</entry>
+<entry key="file.separator">/</entry>
+<entry key="java.vendor.url.bug">http://java.sun.com/cgi-bin/bugreport.cgi</entry>
+<entry key="sun.io.unicode.encoding">UnicodeLittle</entry>
+<entry key="sun.cpu.endian">little</entry>
+<entry key="sun.desktop">gnome</entry>
+<entry key="sun.cpu.isalist"/>
+</properties>

@@ -13,6 +13,7 @@ build/
 nbbuild/
 dist/
 nbdist/
+store/
 
 # Logs and databases #
 *.log
@@ -21,6 +22,7 @@ nbdist/
 
 #NetBeans custom#
 /DeveloperViewer/dist/
+/DeveloperViewer/bin/
 /DeveloperViewer/data/
 /DeveloperViewer/store/
 /DeveloperViewer/nbproject/private/
@@ -29,6 +31,8 @@ nbdist/
 /Kernel/nbproject/private/
 /SuperServer4/nbproject/private/
 /SuperServer4/store/
+/TesteNoGUI/store/
+/TesteNoGUI/nbproject/private/
 
 #Project specific#
 saida.txt

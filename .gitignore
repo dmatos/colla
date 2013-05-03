@@ -4,3 +4,19 @@
 *.jar
 *.war
 *.ear
+/DeveloperViewer/dist/
+
+#NetBeans specific#
+nbproject/private/
+bin/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+

@@ -4,6 +4,7 @@
  */
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.kernel.api.*;
 import colla.kernel.impl.Task;
 import colla.kernel.messages.toClient.ChatDirectMessageMsg;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * @author dmatos
  */
-public class DeveloperViewer extends Observable implements Runnable {
+public class DeveloperViewerController extends Observable implements Runnable {
 
     /**
      * Constrói um viewer para que o cliente possa usufruir das funcionalidades
@@ -33,7 +34,7 @@ public class DeveloperViewer extends Observable implements Runnable {
      * @param serverIP the server ip adress
      * @param contacts the contacts of user
      */
-    public DeveloperViewer(CollAUser usr, int serverPort, String serverIP, HashMap<String, CollAUser> contacts) {
+    public DeveloperViewerController(CollAUser usr, int serverPort, String serverIP, HashMap<String, CollAUser> contacts) {
         this.user = usr;
         this.serverIPaddress = serverIP;
         this.serverPortNumber = serverPort;
@@ -88,7 +89,7 @@ public class DeveloperViewer extends Observable implements Runnable {
             input.readObject();
             socket.close();
         } catch (Exception io) {
-           // io.printStackTrace();
+            // io.printStackTrace();
         }
     }
 
@@ -159,7 +160,7 @@ public class DeveloperViewer extends Observable implements Runnable {
     }//fim do método getAvailableHostsOnServer
 
     /**
-     * Send a task to execute in a host
+     * Send a task to execute in any host
      *
      * @param hosts a host sent by a server that is available to run tasks.
      * @param taskID a long representing a task ID which must unique to a
@@ -175,9 +176,10 @@ public class DeveloperViewer extends Observable implements Runnable {
             //Retrieves the tasks from queue of tasks.
             task = tasksToRun.remove();
             debug("tarefa retirada da pilha de tarefas para execução");
+            this.displayInfo(task.getTaskName() + " has been successfully sent.");
         } catch (EmptyStackException e) {
             debug("list tasksToRun is empty!", e);
-            this.displayInfo("Sorry, an error have been ocurred. Try again.");
+            this.displayInfo("Sorry, an error has ocurred. Try again later.");
             return;
         }
 
@@ -247,8 +249,7 @@ public class DeveloperViewer extends Observable implements Runnable {
                 }// fim do else
                 //a result of a task will come by either TCPServer or KeepAliveClient depending on the validity of user's IP address
                 //put the sent task in the hashmap with a message
-                updateResults(task.getGroup(), task.getTaskName(), task);
-
+                updateResults(task.getGroup(), task.getTaskName(), task);                
                 //notify other members about this task
                 //this.notifyGroupAboutTask(task.getGroup(), task.getTaskName(), task);
                 //System.err.println("task " + task.getTaskName() + " sent");
@@ -330,59 +331,6 @@ public class DeveloperViewer extends Observable implements Runnable {
     public HashMap<String, HashMap<String, CollATask>> getTasks() {
         return this.taskResults;
     }
-
-    /**
-     * Notify a group about a task that this user has sent.
-     *
-     * @param groupName name of the group.
-     * @param taskName name of the task.
-     * @param task the task sended.
-     */
-    public void notifyGroupAboutTask(String groupName, String taskName, CollATask task) {
-        /* List<String> group = null;
-         if(this.user.getGroups().get(groupName) != null) {
-         group = this.user.getGroups().get(groupName).getMembers();
-         }
-         HashMap<String, CollAUser> groupMembers = new HashMap<String, CollAUser>();
-
-         if(group != null) {
-         for (String userName : group) {
-         groupMembers.put(userName, this.contacts.get(userName));
-         } 
-         }
-
-         try {
-         //first ask to server notify those members with invalid IP
-         Socket socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
-         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-         TransmitStartNotification msgToServer = new TransmitStartNotification(task);
-         msgToServer.setGroupName(groupName);
-         msgToServer.setTaskName(taskName);
-         output.writeObject(msgToServer);
-         output.flush();*/
-        /*this.closeConnection(socket, output);
-         //then notify those with valid IP
-         if(group != null) {
-         for (String userName : group) {
-         CollAUser usr = this.contacts.get(userName);
-         if (usr != null && !usr.getName().equals(this.user.getName()) && usr.isOnline() && usr.hasValidIP()) {
-         socket = new Socket(InetAddress.getByName(usr.getIp()), usr.getPort());
-         socket.setSoTimeout(40000);
-         output = new ObjectOutputStream(socket.getOutputStream());
-         NotifyTaskStarted msg = new NotifyTaskStarted(task);
-         msg.setGroupName(groupName);
-         msg.setTaskName(taskName);
-         output.writeObject(msg);
-         output.flush();
-         this.closeConnection(socket, output);
-         }
-         }
-         }
-         } catch (Exception e) {
-         e.printStackTrace();
-         }*/
-        //System.err.println("sent notification to everyone");
-    }// fim do método notifyGroupAboutTask
 
     /**
      * Calls the method from DeveloperViewerGUI tha displays the groups
@@ -754,7 +702,8 @@ public class DeveloperViewer extends Observable implements Runnable {
     }// end of method
 
     /**
-     * Reboot its microServer if the DeveloperViewer itself is not down.
+     * Reboot its microServer if the DeveloperViewerController itself is not
+     * down.
      */
     public void restoreMicroServer() {
         if (!this.isDown) {
@@ -830,25 +779,25 @@ public class DeveloperViewer extends Observable implements Runnable {
 
     private void debug(String info, Exception ex) {
         /*this.debugInfo.clear();
-        this.debugInfo.setInfo(info);
-        this.debugInfo.setException(ex);
-        this.notifyObservers(this.debugInfo);
-        System.out.println(info);
-        ex.printStackTrace();*/
+         this.debugInfo.setInfo(info);
+         this.debugInfo.setException(ex);
+         this.notifyObservers(this.debugInfo);
+         System.out.println(info);
+         ex.printStackTrace();*/
     }
 
     private void debug(String info) {
         /*this.debugInfo.clear();
-        this.debugInfo.setInfo(info);
-        this.notifyObservers(this.debugInfo);
-        System.out.println(info);*/
+         this.debugInfo.setInfo(info);
+         this.notifyObservers(this.debugInfo);
+         System.out.println(info);*/
     }
 
     private void debug(Exception ex) {
         /*this.debugInfo.clear();
-        this.debugInfo.setException(ex);
-        this.notifyObservers(this.debugInfo);
-        ex.printStackTrace();*/
+         this.debugInfo.setException(ex);
+         this.notifyObservers(this.debugInfo);
+         ex.printStackTrace();*/
     }
 
     @Override
@@ -858,7 +807,8 @@ public class DeveloperViewer extends Observable implements Runnable {
     }
 
     /**
-     * It's optional because a DeveloperViewer shall work fine without any UI.
+     * It's optional because a DeveloperViewerController shall work fine without
+     * any UI.
      *
      * @param userInterface
      */

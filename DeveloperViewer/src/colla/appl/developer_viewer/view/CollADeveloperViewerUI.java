@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.developer_viewer;
+package colla.appl.developer_viewer.view;
 
 import colla.kernel.api.CollAGroup;
 import colla.kernel.api.CollATask;
@@ -26,4 +26,6 @@ public interface CollADeveloperViewerUI{
     public void listGroupsToJoin(Set<String> groups);
     
     public void refresh_a_group(String groupName, Set<String> group);
+    
+    public void displayMessage(String message);
 }

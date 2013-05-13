@@ -8,9 +8,9 @@
  *
  * Created on 13/05/2012, 13:36:34
  */
-package colla.appl.developer_viewer.GUI;
+package colla.appl.developer_viewer.view;
 
-import colla.appl.developer_viewer.DeveloperViewer;
+import colla.appl.developer_viewer.DeveloperViewerController;
 import colla.kernel.api.CollATask;
 import colla.kernel.api.CollATicket;
 import java.awt.Color;
@@ -34,7 +34,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
     /**
      * Creates new form ResultsWindow
      */
-    public ResultsWindow(DeveloperViewer developerViewer, String resultStoreDirectory) {
+    public ResultsWindow(DeveloperViewerController developerViewer, String resultStoreDirectory) {
 
         super("Results", true, true, true, true);
 
@@ -115,6 +115,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
 
         jSplitPane1.setLeftComponent(jScrollPane1);
 
+        jTextPane_taskInfo.setEditable(false);
         jTextPane_taskInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ResultsWindow.class, "ResultsWindow.jTextPane_taskInfo.border.title"))); // NOI18N
         jTextPane_taskInfo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -156,8 +157,8 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(jComboBox_resultGroups, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -452,7 +453,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTextPane jTextPane_taskInfo;
     // End of variables declaration//GEN-END:variables
-    private DeveloperViewer devViewer;
+    private DeveloperViewerController devViewer;
     private String directory;
     private String objectDir;
 }

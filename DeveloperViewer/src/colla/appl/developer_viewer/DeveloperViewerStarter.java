@@ -4,7 +4,7 @@
  */
 package colla.appl.developer_viewer;
 
-import colla.appl.developer_viewer.GUI.Client_Login;
+import colla.appl.developer_viewer.view.Client_Login;
 import javax.swing.JOptionPane;
 
 /**

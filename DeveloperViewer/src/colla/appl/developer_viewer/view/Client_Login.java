@@ -8,7 +8,7 @@
  *
  * Created on 19/12/2011, 23:14:33
  */
-package colla.appl.developer_viewer.GUI;
+package colla.appl.developer_viewer.view;
 
 import colla.appl.developer_viewer.DevViewerLogin;
 import java.awt.Cursor;
@@ -23,7 +23,6 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
@@ -83,8 +82,6 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         jDialog_signUp.setLocationByPlatform(true);
         jDialog_signUp.setModal(true);
         jDialog_signUp.setResizable(false);
-
-        jPanel1.setBackground(java.awt.SystemColor.control);
 
         jLabel1.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jLabel1.setText("Please, enter the required information:");
@@ -148,7 +145,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 317, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -249,7 +246,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
             }
         });
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Status", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Dialog", 1, 14), java.awt.Color.black)); // NOI18N
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Status", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Dialog", 1, 14))); // NOI18N
 
         jTextArea_status.setBackground(java.awt.Color.white);
         jTextArea_status.setColumns(20);
@@ -283,7 +280,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
             }
         });
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/colla_logo.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/colla_logo.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel_fundoLayout = new javax.swing.GroupLayout(jPanel_fundo);
         jPanel_fundo.setLayout(jPanel_fundoLayout);

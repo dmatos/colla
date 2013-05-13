@@ -32,7 +32,7 @@ class DevMicroServer extends Observable implements Runnable {
      * @param ipAddress server ip adress.
      * @param portNumber the server port number.
      */
-    public DevMicroServer(DeveloperViewer developerViewer, CollAUser usr, String ipAddress, int portNumber) {
+    public DevMicroServer(DeveloperViewerController developerViewer, CollAUser usr, String ipAddress, int portNumber) {
         this.timeout = 90000;
         this.serverIPaddress = ipAddress;
         this.serverPortNumber = portNumber;
@@ -159,7 +159,7 @@ private void debug(String info, Exception ex){
         ex.printStackTrace();*/
     }
 
-    public DeveloperViewer getDevViewer(){
+    public DeveloperViewerController getDevViewer(){
         return devViewer;
     }
 
@@ -179,7 +179,7 @@ private void debug(String info, Exception ex){
     private Socket keepAlive;
     private String serverIPaddress;
     private Integer serverPortNumber;
-    private DeveloperViewer devViewer;
+    private DeveloperViewerController devViewer;
     private boolean active;
     private final boolean validIP;
     private ServerSocket serverSocket;

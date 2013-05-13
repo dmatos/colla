@@ -4,7 +4,8 @@
  */
 package colla.appl.developer_viewer;
 
-import colla.appl.developer_viewer.GUI.DeveloperViewerGUI;
+import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
+import colla.appl.developer_viewer.view.DeveloperViewerGUI;
 import colla.kernel.api.CollAUser;
 import colla.kernel.impl.User;
 import colla.kernel.messages.toClient.DeveloperViewerLoginAnswerMsg;
@@ -55,11 +56,12 @@ public class DevViewerLogin extends Observable{
 
     /**
      * 
-     * @return
-     * @throws Exception 
+     * @return if data was successfully restored.
+     * @throws Exception  
      */
     private boolean restoredData() throws Exception{
-        //create data directory if it does not alredy exist
+        //TODO use XML instead of java objects
+        //create data directory if it does not alredy exist       
         new File("data/").mkdir();
 
         if (new File("data/config.data").exists()) {
@@ -162,7 +164,7 @@ public class DevViewerLogin extends Observable{
      * @return um DeveloperViewre se conseguiu logar, null caso contrário
      * @throws Exception 
      */
-    public DeveloperViewer logInServer(String userName, String password) throws Exception {
+    public DeveloperViewerController logInServer(String userName, String password) throws Exception {
         this.retrieveIPaddress();
         HashMap<String, CollAUser> groupMembers;
 
@@ -190,7 +192,7 @@ public class DevViewerLogin extends Observable{
                 groupMembers = incoming.getContacts();
                 this.user = incoming.getUser();
                 this.user.setIp(this.machineIP);
-                DeveloperViewer devViewer = new DeveloperViewer(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
+                DeveloperViewerController devViewer = new DeveloperViewerController(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
                 for(Observer observer : this.devViewerObservers){
                     devViewer.addObserver(observer);
                 }
@@ -259,7 +261,7 @@ public class DevViewerLogin extends Observable{
     
     /**
      * 
-     * @param userInterface an UI to be used in DeveloperViewer, not here in this class!
+     * @param userInterface an UI to be used in DeveloperViewerController, not here in this class!
      */
     public void setDeveloperViewerUI(CollADeveloperViewerUI userInterface){
         this.devUI = userInterface;

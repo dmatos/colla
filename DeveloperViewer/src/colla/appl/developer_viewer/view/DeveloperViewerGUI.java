@@ -9,13 +9,12 @@
  *
  * Created on 15/03/2012, 00:19:40
  */
-package colla.appl.developer_viewer.GUI;
+package colla.appl.developer_viewer.view;
 
 import colla.appl.developer_viewer.ClientConfigurations;
-import colla.appl.developer_viewer.CollADeveloperViewerUI;
 import colla.appl.developer_viewer.ConfigException;
 import colla.appl.developer_viewer.DevViewerLogin;
-import colla.appl.developer_viewer.DeveloperViewer;
+import colla.appl.developer_viewer.DeveloperViewerController;
 import colla.kernel.api.CollAGroup;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollATask;
@@ -51,7 +50,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     /**
      * Creates new form DeveloperViewerGUI
      */
-    public DeveloperViewerGUI(DeveloperViewer dev, String userName) {
+    public DeveloperViewerGUI(DeveloperViewerController dev, String userName) {
         super("CollA Client - " + userName);
         this.setIconImage(new ImageIcon(getClass().getResource(BackGround.COLLA_LOGO_ICON.getPath())).getImage());
         UIManager.put("DesktopPaneUI", "javax.swing.plaf.basic.BasicDesktopPaneUI");
@@ -826,7 +825,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_acceptMembers.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane8.setViewportView(jList_acceptMembers);
 
-        jButton_toAccepted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/arrow_button_right.jpg"))); // NOI18N
+        jButton_toAccepted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/arrow_button_right.jpg"))); // NOI18N
         jButton_toAccepted.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton_toAccepted.text")); // NOI18N
         jButton_toAccepted.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -834,7 +833,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             }
         });
 
-        jButton_fromAccept2Wating.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/arrow_button_left.jpg"))); // NOI18N
+        jButton_fromAccept2Wating.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/arrow_button_left.jpg"))); // NOI18N
         jButton_fromAccept2Wating.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton_fromAccept2Wating.text")); // NOI18N
         jButton_fromAccept2Wating.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -847,7 +846,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_refuse.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane11.setViewportView(jList_refuse);
 
-        jButton_toRefused.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/arrow_button_right.jpg"))); // NOI18N
+        jButton_toRefused.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/arrow_button_right.jpg"))); // NOI18N
         jButton_toRefused.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton_toRefused.text")); // NOI18N
         jButton_toRefused.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -855,7 +854,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             }
         });
 
-        jButton_froRefuse2Wating.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/arrow_button_left.jpg"))); // NOI18N
+        jButton_froRefuse2Wating.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/arrow_button_left.jpg"))); // NOI18N
         jButton_froRefuse2Wating.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton_froRefuse2Wating.text")); // NOI18N
         jButton_froRefuse2Wating.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -1046,7 +1045,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         jButton_generalSettings.setBackground(java.awt.Color.white);
         jButton_generalSettings.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
-        jButton_generalSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/Gear-icon.png"))); // NOI18N
+        jButton_generalSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/Gear-icon.png"))); // NOI18N
         jButton_generalSettings.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton_generalSettings.text")); // NOI18N
         jButton_generalSettings.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton_generalSettings.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1060,7 +1059,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         jButton2.setBackground(java.awt.Color.white);
         jButton2.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/GUI/images/Network-Internet-Connection-icon.png"))); // NOI18N
+        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/colla/appl/developer_viewer/view/images/Network-Internet-Connection-icon.png"))); // NOI18N
         jButton2.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButton2.text")); // NOI18N
         jButton2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1816,6 +1815,10 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         }
     }//GEN-LAST:event_RemoveAtachActionPerformed
 
+    /**
+     * Sends task to execute in a host
+     * @param evt 
+     */
     private void jButton_submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_submitActionPerformed
         String method = (String) jComboBox_methodToExecute.getSelectedItem();
         this.chosenGroup = (String) jComboBox_taskGroup.getSelectedItem();
@@ -2201,7 +2204,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      *
      * @param info information to be displayed
      */
-    //@Override
+    @Override
     public void displayMessage(String info) {
         TimeAndDate time = new TimeAndDate();
         StyledDocument doc = this.jTextPane_info.getStyledDocument();
@@ -2291,7 +2294,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private ResultsWindow resultsWindow;
     private Set<String> groupsName;
     private String thisUserName;
-    private DeveloperViewer devViewer;
+    private DeveloperViewerController devViewer;
     //Variables used to send a task
     private HashMap<String, ArrayList<Method>> methods; //key: classToExecute, value: methods of the class
     private File taskFile;

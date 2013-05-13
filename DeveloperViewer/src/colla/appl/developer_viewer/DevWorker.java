@@ -135,19 +135,8 @@ public class DevWorker extends Observable{
                 
                 debug( "Command still not available: " + operation.toString() );
             }// end of switch
-
-//                this.shutdownCounter = 0;
         }catch( Exception e ){
             debug( e );
-               //TODO Este restoreMicroServer funciona? Pq essa thread aqui não é finalizada, ela vai continuar no loop.
-//                devViewer.restoreMicroServer();
-                        //TODO esse shutdownCounter++ funciona? Porque ele não está junto com o catch da excessão SocletException?
-//                this.shutdownCounter++;
-//                if (this.shutdownCounter == 10) {
-//                    JOptionPane.showMessageDialog(null, "Error: connection lost", "Connection error", JOptionPane.ERROR_MESSAGE);
-//                    this.devViewer.shutdown();
-//                    System.exit(1);
-//                }
         }
 
     }// end method execute
@@ -202,5 +191,5 @@ public class DevWorker extends Observable{
     private boolean validIP;
     private DebugInfo debugInfo;
     private CollAUser user;
-    private DeveloperViewer devViewer;
+    private DeveloperViewerController devViewer;
 }// end of class DevWorker

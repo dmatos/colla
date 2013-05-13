@@ -8,11 +8,11 @@
  *
  * Created on 14/03/2012, 20:05:01
  */
-package colla.appl.developer_viewer.GUI;
+package colla.appl.developer_viewer.view;
 
 import colla.kernel.util.ImagePane;
 import colla.kernel.util.TimeAndDate;
-import colla.appl.developer_viewer.DeveloperViewer;
+import colla.appl.developer_viewer.DeveloperViewerController;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,7 +39,7 @@ import org.openide.awt.TabbedPaneFactory;
 public class ChatWindow extends javax.swing.JInternalFrame {
 
     /** Creates new form ChatWindow */
-    public ChatWindow(String serverIp, int serverPort, String clientName, DeveloperViewer viewer) {
+    public ChatWindow(String serverIp, int serverPort, String clientName, DeveloperViewerController viewer) {
         super("CollA - Chat", true, true, true, true);
         initComponents();
         this.devViewer = viewer;
@@ -108,7 +108,7 @@ public class ChatWindow extends javax.swing.JInternalFrame {
         jPanel2.setBackground(new java.awt.Color(234, 235, 237));
 
         jButton_cleanInput.setBackground(java.awt.Color.white);
-        jButton_cleanInput.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
+        jButton_cleanInput.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
         jButton_cleanInput.setText(org.openide.util.NbBundle.getMessage(ChatWindow.class, "ChatWindow.jButton_cleanInput.text")); // NOI18N
         jButton_cleanInput.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -117,7 +117,7 @@ public class ChatWindow extends javax.swing.JInternalFrame {
         });
 
         jButton_submit.setBackground(java.awt.Color.white);
-        jButton_submit.setFont(new java.awt.Font("DejaVu Sans", 0, 12));
+        jButton_submit.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
         jButton_submit.setText(org.openide.util.NbBundle.getMessage(ChatWindow.class, "ChatWindow.jButton_submit.text")); // NOI18N
         jButton_submit.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -125,13 +125,13 @@ public class ChatWindow extends javax.swing.JInternalFrame {
             }
         });
 
-        jCheckBox_submitWithEnter.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        jCheckBox_submitWithEnter.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
         jCheckBox_submitWithEnter.setForeground(java.awt.Color.black);
         jCheckBox_submitWithEnter.setSelected(true);
         jCheckBox_submitWithEnter.setText(org.openide.util.NbBundle.getMessage(ChatWindow.class, "ChatWindow.jCheckBox_submitWithEnter.text")); // NOI18N
 
         jTextArea_inputMessage.setColumns(20);
-        jTextArea_inputMessage.setFont(new java.awt.Font("SansSerif", 0, 14));
+        jTextArea_inputMessage.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jTextArea_inputMessage.setLineWrap(true);
         jTextArea_inputMessage.setRows(5);
         jTextArea_inputMessage.setText(org.openide.util.NbBundle.getMessage(ChatWindow.class, "ChatWindow.jTextArea_inputMessage.text")); // NOI18N
@@ -378,7 +378,7 @@ public class ChatWindow extends javax.swing.JInternalFrame {
             appendMessage(jTabbedPane_conversations.getSelectedIndex(), contactName, message);
         }
     }
-    private DeveloperViewer devViewer;
+    private DeveloperViewerController devViewer;
     private String userName;
     final private int timeout = 40000;
     private Map<String, String> contactsMap; //key: name of contact, value: group to which contact belongs

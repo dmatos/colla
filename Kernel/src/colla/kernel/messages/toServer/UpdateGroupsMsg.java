@@ -4,18 +4,19 @@
  */
 package colla.kernel.messages.toServer;
 
-import colla.kernel.api.CollAGroup;
-import colla.kernel.api.CollAMessage;
-import colla.kernel.api.CollAUser;
-import colla.kernel.enumerations.ServerOps;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import colla.kernel.api.CollAGroup;
+import colla.kernel.api.CollAMessage;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class UpdateGroupsMsg implements CollAMessage, Serializable{
 
     public UpdateGroupsMsg(){
@@ -45,4 +46,5 @@ public class UpdateGroupsMsg implements CollAMessage, Serializable{
     
     private List<CollAGroup> groups;
     private String userName;
+    private static final long serialVersionUID = 1L;
 }

@@ -5,15 +5,16 @@
 package colla.kernel.messages.toServer;
 
 import java.io.Serializable;
-import colla.kernel.enumerations.ServerOps;
+
 import colla.kernel.api.CollAMessage;
-import colla.kernel.api.CollAUser;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  * Create a group on the server
  * 
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class AskToCreateGroupMsg implements Serializable, CollAMessage {
 
     public AskToCreateGroupMsg() {
@@ -70,4 +71,5 @@ public class AskToCreateGroupMsg implements Serializable, CollAMessage {
     private final Enum operation;
     String adminName;
     String groupName;
+    private static final long serialVersionUID = 1L;
 }

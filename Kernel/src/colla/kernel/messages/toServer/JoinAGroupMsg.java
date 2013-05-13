@@ -12,6 +12,7 @@ import java.io.Serializable;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class JoinAGroupMsg implements Serializable, CollAMessage {
 
     public JoinAGroupMsg() {       
@@ -42,4 +43,5 @@ public class JoinAGroupMsg implements Serializable, CollAMessage {
     private String groupName;
     private String sender;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

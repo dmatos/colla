@@ -5,15 +5,16 @@
 package colla.kernel.messages.toClient;
 
 import java.io.Serializable;
-import colla.kernel.enumerations.ClientOps;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollATask;
-import interfaces.kernel.JCL_result;
+import colla.kernel.enumerations.ClientOps;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public final class TaskResultMsg implements Serializable, CollAMessage{
 
     /**
@@ -68,4 +69,5 @@ public final class TaskResultMsg implements Serializable, CollAMessage{
     private final Enum operation;
     private String taskName;
     private CollATask task;
+    private static final long serialVersionUID = 1L;
 }

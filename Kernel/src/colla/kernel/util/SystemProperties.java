@@ -4,11 +4,7 @@
  */
 package colla.kernel.util;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Enumeration;
 
 /**
  *
@@ -16,7 +12,9 @@ import java.util.Enumeration;
  */
 public class SystemProperties implements Serializable {
 
-    /**
+	private static final long serialVersionUID = 1L;
+
+	/**
      * 
      * @return a String containing some system properties
      */

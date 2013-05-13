@@ -12,6 +12,7 @@ import colla.kernel.api.CollAMessage;
  *Ping a client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class PingClientMsg implements Serializable, CollAMessage{
     
     public PingClientMsg(){
@@ -34,5 +35,5 @@ public class PingClientMsg implements Serializable, CollAMessage{
 
     private String sender;
     private final Enum operation;
-    
+    private static final long serialVersionUID = 1L;
 }

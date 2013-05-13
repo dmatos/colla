@@ -14,8 +14,8 @@ import java.io.Serializable;
  * @author dmatos
  */
 public class Session implements CollASession, Serializable {
-
-    public Session() {
+	
+	public Session() {
         TimeAndDate time = new TimeAndDate();
         jobs = new CollAJob[20];
         counter = 0;
@@ -64,4 +64,5 @@ public class Session implements CollASession, Serializable {
     private int counter;
     private int maximum;
     private long sessionID;
+    private static final long serialVersionUID = 1L;
 }

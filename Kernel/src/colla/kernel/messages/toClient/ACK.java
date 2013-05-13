@@ -13,14 +13,19 @@ import java.io.Serializable;
  * @author bruno
  */
 public class ACK implements Serializable, CollAMessage{
-    public ACK(){
+   
+	private static final long serialVersionUID = 1L;
+
+	public ACK(){
         this.operation = ClientOps.ACK;
     }
     
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Enum getOperation(){
         return this.operation;
     }
     
-    private final Enum operation;
+    @SuppressWarnings("rawtypes")
+	private final Enum operation;
 }

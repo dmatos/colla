@@ -12,6 +12,7 @@ import colla.kernel.api.CollAMessage;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class DeveloperViewerLoginMsg implements Serializable, CollAMessage {
 
     public DeveloperViewerLoginMsg() {
@@ -65,4 +66,5 @@ public class DeveloperViewerLoginMsg implements Serializable, CollAMessage {
     String password;
     String userName;
     String ip;
+    private static final long serialVersionUID = 1L;
 }

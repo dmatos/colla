@@ -13,6 +13,7 @@ import java.util.ArrayList;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class SendStoredResultsMsg implements CollAMessage, Serializable{
 
     public SendStoredResultsMsg(ArrayList<TaskResultMsg> results){
@@ -41,5 +42,6 @@ public class SendStoredResultsMsg implements CollAMessage, Serializable{
     private String sender;
     private final Enum operation;
     private ArrayList<TaskResultMsg> results;
+    private static final long serialVersionUID = 1L;
     
 }

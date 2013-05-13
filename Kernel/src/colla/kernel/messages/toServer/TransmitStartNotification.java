@@ -4,15 +4,17 @@
  */
 package colla.kernel.messages.toServer;
 
+import java.io.Serializable;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollATask;
 import colla.kernel.enumerations.ServerOps;
-import java.io.Serializable;
 
 /**
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class TransmitStartNotification implements CollAMessage, Serializable{
 
     public TransmitStartNotification(CollATask task){
@@ -49,5 +51,6 @@ public class TransmitStartNotification implements CollAMessage, Serializable{
     private String taskName;
     private String group;
     private CollATask task;
+    private static final long serialVersionUID = 1L;
     
 }

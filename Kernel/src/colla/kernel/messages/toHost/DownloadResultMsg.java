@@ -12,8 +12,10 @@ import java.io.Serializable;
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
-public class DownloadResultMsg implements CollAMessage, Serializable{
-    private Integer ticket;
+@SuppressWarnings("rawtypes")
+public class DownloadResultMsg implements CollAMessage, Serializable{    
+	private static final long serialVersionUID = 1L;
+	private Integer ticket;
 
     @Override
     public Enum getOperation() {

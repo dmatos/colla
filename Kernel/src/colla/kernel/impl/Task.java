@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class Task implements CollATask, Serializable {
 
-    private TimeAndDate time;
+	private static final long serialVersionUID = 1L;
+	private TimeAndDate time;
     private String methodToExecute;
     private String name;
     private byte[] task;
@@ -29,7 +30,7 @@ public class Task implements CollATask, Serializable {
     private Map<String, byte[]> dependencies;
     private String startTime;
     private String finishTime;
-    private String totalTime;
+    //private String totalTime;
     private Object result;
     private String owner;
     private String group;
@@ -74,6 +75,8 @@ public class Task implements CollATask, Serializable {
         DataInputStream diin = new DataInputStream(fiin);
         this.task = new byte[(int) taskFile.length()];
         diin.read(this.task);
+        diin.close();
+        fiin.close();
     }
 
     @Override
@@ -108,6 +111,8 @@ public class Task implements CollATask, Serializable {
         byte fileBuffer[] = new byte[(int) file.length()];
         diin.read(fileBuffer);
         this.dependencies.put(file.getName(), fileBuffer);
+        diin.close();
+        fiin.close();
     }
 
     @Override
@@ -227,6 +232,8 @@ public class Task implements CollATask, Serializable {
         diin.read(fileBuffer);
         this.parameters.add(fileBuffer);
         this.parametersFilename.add(file.getName());
+        diin.close();
+        fiin.close();
     }
 
     @Override
@@ -240,6 +247,8 @@ public class Task implements CollATask, Serializable {
                 dout.flush();
                 File f = new File(this.parametersFilename.get(i));
                 args[i] = f;
+                dout.close();
+                fout.close();
             }
             return args;
         }
@@ -286,8 +295,9 @@ public class Task implements CollATask, Serializable {
     @Override
     public void clean(){
         this.classToExecute = null;
-        for(String name : this.dependencies.keySet()){
-            byte[] b = this.dependencies.remove( name );
+        for(String name : this.dependencies.keySet()){        	
+            @SuppressWarnings("unused")
+			byte[] b = this.dependencies.remove( name );
             b = null;
         }
         this.dependencies.clear();
@@ -299,12 +309,14 @@ public class Task implements CollATask, Serializable {
         this.name = null;
         this.owner = null;
         for(int i = 0; i < parameters.size(); i ++){
+        	@SuppressWarnings("unused")
             byte[] b = parameters.remove( i );
             b = null;
         }
         this.parameters.clear();
         this.parameters = null;
         for(int i = 0; i < parametersFilename.size(); i ++){
+        	@SuppressWarnings("unused")
             String s = parametersFilename.remove( i );
             s = null;
         }

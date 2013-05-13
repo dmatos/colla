@@ -13,7 +13,8 @@ import java.io.Serializable;
  */
 public class Ticket implements CollATicket, Serializable{
 
-    private Integer ticket;
+	private static final long serialVersionUID = 1L;
+	private Integer ticket;
     private Integer hostPort;
     private String hostIPaddress;
     

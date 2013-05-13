@@ -4,15 +4,15 @@
  */
 package colla.kernel.messages.toHost;
 
-import colla.kernel.api.CollAMessage;
 import java.io.Serializable;
-import colla.kernel.enumerations.ServerOps;
+
 import colla.kernel.api.CollAMessage;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class ServerHostRegisterAnswerMsg implements CollAMessage, Serializable {
 
     public ServerHostRegisterAnswerMsg() {
@@ -47,4 +47,5 @@ public class ServerHostRegisterAnswerMsg implements CollAMessage, Serializable {
     private String hostName;
     private String sender;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

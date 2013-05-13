@@ -13,9 +13,9 @@ import colla.kernel.api.CollAMessage;
  * Server acts as an intermediate.
  * @author dmatos
  */
-public class ChatDirectMessageMsg implements Serializable, CollAMessage{
-    
-    public ChatDirectMessageMsg(String sender, String message){
+public class ChatDirectMessageMsg implements Serializable, CollAMessage{    
+ 
+	public ChatDirectMessageMsg(String sender, String message){
         this.operation = ClientOps.MESSAGE;
         this.sender = sender;
         this.message = message;
@@ -33,7 +33,8 @@ public class ChatDirectMessageMsg implements Serializable, CollAMessage{
         return this.sender;
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Enum getOperation() {
         return this.operation;
     }
@@ -42,8 +43,10 @@ public class ChatDirectMessageMsg implements Serializable, CollAMessage{
         this.sender = sender;
     }    
     
-    private final Enum operation;
+    @SuppressWarnings("rawtypes")
+	private final Enum operation;
     private String sender;
-    private String message;    
+    private String message; 
+ 	private static final long serialVersionUID = 1L;
     
 }

@@ -28,7 +28,8 @@ public class CreateGroupAnswerMsg implements CollAMessage, Serializable {
         return this.confirmation;
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Enum getOperation() {
         return this.operation;
     }
@@ -44,5 +45,7 @@ public class CreateGroupAnswerMsg implements CollAMessage, Serializable {
     private boolean confirmation;
     private String groupName;
     private String sender;
-    private final Enum operation;
+    @SuppressWarnings("rawtypes")
+	private final Enum operation;
+ 	private static final long serialVersionUID = 1L;
 }

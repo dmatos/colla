@@ -5,17 +5,18 @@
 package colla.kernel.messages.toServer;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollATask;
 import colla.kernel.api.CollAUser;
 import colla.kernel.enumerations.ServerOps;
-import colla.kernel.impl.User;
-import java.util.ArrayList;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public final class TransmitTaskMsg implements Serializable, CollAMessage {
 
     public TransmitTaskMsg() {        
@@ -91,4 +92,5 @@ public final class TransmitTaskMsg implements Serializable, CollAMessage {
     private String sender;
     private CollATask task;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

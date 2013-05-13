@@ -10,7 +10,8 @@ package colla.kernel.api;
 public interface CollAMessage {
     
     /**
-     * @return an Enum representing an operation to be performed by the receiver
+     * @return an Enum representing the operation to be performed by the receiver
      */
-     public Enum getOperation();
+     @SuppressWarnings("rawtypes")
+	public Enum getOperation();
 }

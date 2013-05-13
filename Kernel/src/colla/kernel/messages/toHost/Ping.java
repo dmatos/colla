@@ -12,11 +12,14 @@ import java.io.Serializable;
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class Ping implements Serializable, CollAMessage{
 
     @Override
     public Enum getOperation() {
         return HostOps.PING;
     }
+    
+    private static final long serialVersionUID = 1L;
     
 }

@@ -4,17 +4,21 @@
  */
 package colla.kernel.messages.toHost;
 
-import colla.kernel.api.*;
-import colla.kernel.enumerations.HostOps;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import colla.kernel.api.CollAMessage;
+import colla.kernel.api.CollATask;
+import colla.kernel.api.CollAUser;
+import colla.kernel.enumerations.HostOps;
+
 /**
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class TaskMessage implements CollAMessage, Serializable {
 
     public TaskMessage() {
@@ -114,4 +118,5 @@ public class TaskMessage implements CollAMessage, Serializable {
     private ArrayList<String> attachNames;
     private CollAUser user;
     private Date date;
+    private static final long serialVersionUID = 1L;
 }

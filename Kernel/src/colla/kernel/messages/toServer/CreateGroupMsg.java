@@ -4,17 +4,17 @@
  */
 package colla.kernel.messages.toServer;
 
-import colla.kernel.api.CollAGroup;
 import java.io.Serializable;
-import java.util.HashMap;
-import colla.kernel.enumerations.ServerOps;
+
+import colla.kernel.api.CollAGroup;
 import colla.kernel.api.CollAMessage;
-import java.util.Set;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class CreateGroupMsg implements Serializable, CollAMessage {
 
     public CreateGroupMsg() {        
@@ -54,4 +54,5 @@ public class CreateGroupMsg implements Serializable, CollAMessage {
     private final Enum operation;
     private CollAGroup group;
     private String sender;
+    private static final long serialVersionUID = 1L;
 }

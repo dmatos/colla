@@ -12,8 +12,10 @@ import java.io.Serializable;
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class Ping implements CollAMessage, Serializable{
     private long id;
+    private static final long serialVersionUID = 1L;
     
     public Ping(long id){
         this.id = id;

@@ -5,15 +5,16 @@
 package colla.kernel.messages.toServer;
 
 import java.io.Serializable;
-import colla.kernel.enumerations.ServerOps;
-import colla.kernel.impl.User;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollAUser;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class DeveloperViewerDisconnectMsg implements Serializable, CollAMessage {
     
     public DeveloperViewerDisconnectMsg(CollAUser user){
@@ -42,4 +43,5 @@ public class DeveloperViewerDisconnectMsg implements Serializable, CollAMessage 
     private final Enum operation;
     private String sender;
     private CollAUser user;
+    private static final long serialVersionUID = 1L;
 }

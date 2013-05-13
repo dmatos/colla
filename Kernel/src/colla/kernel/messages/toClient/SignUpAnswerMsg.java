@@ -5,13 +5,14 @@
 package colla.kernel.messages.toClient;
 
 import java.io.Serializable;
-import colla.kernel.impl.User;
+
 import colla.kernel.api.CollAMessage;
 
 /**
  * Send confirmation of signup to a client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class SignUpAnswerMsg implements Serializable, CollAMessage {
 
     public SignUpAnswerMsg() {
@@ -42,4 +43,5 @@ public class SignUpAnswerMsg implements Serializable, CollAMessage {
     private String sender;
     private final Enum operation;
     private Boolean confirmName;
+    private static final long serialVersionUID = 1L;
 }

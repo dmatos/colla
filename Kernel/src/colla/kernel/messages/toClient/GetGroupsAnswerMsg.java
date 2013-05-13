@@ -13,6 +13,7 @@ import colla.kernel.api.CollAMessage;
  * Send a list containing the names of all groups to client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class GetGroupsAnswerMsg implements Serializable, CollAMessage{
     
     public GetGroupsAnswerMsg(){
@@ -43,4 +44,5 @@ public class GetGroupsAnswerMsg implements Serializable, CollAMessage{
     private String sender;
     private final Enum operation;
     private TreeSet<String> groups;
+    private static final long serialVersionUID = 1L;
 }

@@ -11,6 +11,7 @@ import java.io.Serializable;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class ServerHostLoginAnswer implements CollAMessage, Serializable {
 
     public ServerHostLoginAnswer(Boolean isConnected, Boolean isValidIP, String realIP) {
@@ -62,6 +63,7 @@ public class ServerHostLoginAnswer implements CollAMessage, Serializable {
     private String sender;
     private final Enum operation;
     private String realIP;
+    private static final long serialVersionUID = 1L;
 
     
 }

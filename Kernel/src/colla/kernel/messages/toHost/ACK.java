@@ -4,11 +4,10 @@
  */
 package colla.kernel.messages.toHost;
 
-import colla.kernel.messages.toClient.*;
-import colla.kernel.api.CollAMessage;
-import colla.kernel.enumerations.ClientOps;
-import colla.kernel.enumerations.HostOps;
 import java.io.Serializable;
+
+import colla.kernel.api.CollAMessage;
+import colla.kernel.enumerations.HostOps;
 
 /**
  *
@@ -19,10 +18,13 @@ public class ACK implements Serializable, CollAMessage{
         this.operation = HostOps.ACK;
     }
     
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public Enum getOperation(){
         return this.operation;
     }
     
-    private final Enum operation;
+    @SuppressWarnings("rawtypes")
+	private final Enum operation;    
+ 	private static final long serialVersionUID = 1L;
 }

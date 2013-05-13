@@ -15,7 +15,9 @@ import java.util.HashMap;
  * Send confirmation of joining a group to client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class JoinAGroupAnswerMsg implements Serializable, CollAMessage{
+	
     
     public JoinAGroupAnswerMsg( CollAGroup group ){
         this.operation = ClientOps.RECEIVE_A_GROUP;
@@ -63,4 +65,5 @@ public class JoinAGroupAnswerMsg implements Serializable, CollAMessage{
     private final Enum operation;
     private HashMap<String, CollAUser> usersMap;
     private CollAGroup group;
+    private static final long serialVersionUID = 1L;
 }

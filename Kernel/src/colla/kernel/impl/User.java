@@ -15,7 +15,7 @@ import java.util.TreeSet;
 
 public class User implements Serializable, Comparable<CollAUser>, CollAUser {
 
-    private final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private String name;
     private String ip;
     private int port;

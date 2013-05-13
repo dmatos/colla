@@ -12,6 +12,7 @@ import java.io.Serializable;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class RetrieveStoredResultsMsg implements CollAMessage, Serializable {
 
     public RetrieveStoredResultsMsg(String userName) {
@@ -33,4 +34,5 @@ public class RetrieveStoredResultsMsg implements CollAMessage, Serializable {
     }
     private String sender;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

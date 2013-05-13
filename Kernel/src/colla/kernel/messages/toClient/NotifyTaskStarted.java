@@ -13,6 +13,7 @@ import java.io.Serializable;
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class NotifyTaskStarted implements CollAMessage, Serializable{
 
     public NotifyTaskStarted(CollATask task){
@@ -49,4 +50,5 @@ public class NotifyTaskStarted implements CollAMessage, Serializable{
     private String taskName;
     private String group;
     CollATask task;
+    private static final long serialVersionUID = 1L;
 }

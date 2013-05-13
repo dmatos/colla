@@ -5,14 +5,16 @@
 package colla.kernel.messages.toServer;
 
 import java.io.Serializable;
-import colla.kernel.enumerations.ServerOps;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollAUser;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class UpdateUserMsg implements Serializable, CollAMessage {
 
     public UpdateUserMsg(CollAUser usr) {       
@@ -40,4 +42,5 @@ public class UpdateUserMsg implements Serializable, CollAMessage {
     private CollAUser user;
     private String sender;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

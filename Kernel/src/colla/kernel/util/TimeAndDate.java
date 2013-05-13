@@ -16,7 +16,7 @@ import java.util.GregorianCalendar;
  */
 public class TimeAndDate implements Serializable {
 
-    private final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private long seconds,
                  minutes,
                  hour;

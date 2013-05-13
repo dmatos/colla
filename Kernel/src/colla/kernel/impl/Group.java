@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class Group implements Serializable, Comparable<CollAGroup>, CollAGroup{
 
-    private final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private String name;
     private List<String> members;
     private List<String> membersAdmin;

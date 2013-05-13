@@ -14,6 +14,7 @@ import java.util.LinkedList;
  * Send all hosts of a client to him
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class SendOwnedHostsMsg implements Serializable, CollAMessage {
 
     public SendOwnedHostsMsg() {
@@ -45,4 +46,5 @@ public class SendOwnedHostsMsg implements Serializable, CollAMessage {
     private String sender;
     private final Enum operation;
     private LinkedList<CollAHost> list;
+    private static final long serialVersionUID = 1L;
 }

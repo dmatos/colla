@@ -5,15 +5,16 @@
 package colla.kernel.messages.toClient;
 
 import java.io.Serializable;
-import colla.kernel.impl.User;
+import java.util.HashMap;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollAUser;
-import java.util.HashMap;
 
 /**
  * Confirm login on the DeveloperViewer to client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class DeveloperViewerLoginAnswerMsg implements Serializable, CollAMessage {
 
     public DeveloperViewerLoginAnswerMsg() {
@@ -73,4 +74,5 @@ public class DeveloperViewerLoginAnswerMsg implements Serializable, CollAMessage
     private String sender;
     private final Enum operation;
     private CollAUser user;
+    private static final long serialVersionUID = 1L;
 }

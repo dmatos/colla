@@ -4,15 +4,16 @@
  */
 package colla.kernel.messages.toServer;
 
-import colla.kernel.api.CollAMessage;
 import java.io.Serializable;
-import colla.kernel.enumerations.ServerOps;
+
 import colla.kernel.api.CollAMessage;
+import colla.kernel.enumerations.ServerOps;
 
 /**
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class TransmitChatMsg implements Serializable, CollAMessage {
 
     public TransmitChatMsg() {

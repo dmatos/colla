@@ -4,17 +4,18 @@
  */
 package colla.kernel.messages.toServer;
 
+import java.io.Serializable;
+
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollATask;
 import colla.kernel.api.CollAUser;
 import colla.kernel.enumerations.ServerOps;
-import interfaces.kernel.JCL_result;
-import java.io.Serializable;
 
 /**
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
+@SuppressWarnings("rawtypes")
 public class TransmitResultMsg implements Serializable, CollAMessage{
 
     public TransmitResultMsg(CollAUser client, String taskName, CollATask task){
@@ -67,4 +68,5 @@ public class TransmitResultMsg implements Serializable, CollAMessage{
     private CollAUser user;
     private String taskName;
     private CollATask task;
+    private static final long serialVersionUID = 1L;
 }

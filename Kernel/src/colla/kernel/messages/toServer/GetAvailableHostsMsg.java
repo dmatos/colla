@@ -12,6 +12,7 @@ import colla.kernel.api.CollAMessage;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class GetAvailableHostsMsg implements Serializable, CollAMessage {
 
     public GetAvailableHostsMsg() {
@@ -41,6 +42,7 @@ public class GetAvailableHostsMsg implements Serializable, CollAMessage {
     private String sender;
     private final Enum operation;
     private String group;
+    private static final long serialVersionUID = 1L;
  
 
 }

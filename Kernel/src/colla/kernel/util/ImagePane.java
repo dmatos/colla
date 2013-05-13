@@ -4,10 +4,10 @@
  */
 package colla.kernel.util;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
@@ -17,7 +17,8 @@ import javax.swing.JPanel;
  */
 public class ImagePane extends JPanel{
     
-    private Image image;
+	private static final long serialVersionUID = 1L;
+	private Image image;
     
     public ImagePane(){
         this.image = null;

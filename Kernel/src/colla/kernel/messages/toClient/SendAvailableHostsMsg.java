@@ -14,6 +14,7 @@ import java.util.LinkedList;
  * Send an avaylable host to client
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class SendAvailableHostsMsg implements Serializable, CollAMessage{
     
     public SendAvailableHostsMsg(Long taskID){
@@ -51,4 +52,5 @@ public class SendAvailableHostsMsg implements Serializable, CollAMessage{
     private final Enum operation;
     private LinkedList<CollAHost> list;  
     private Long taskID;
+    private static final long serialVersionUID = 1L;
 }

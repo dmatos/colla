@@ -12,6 +12,7 @@ import java.io.Serializable;
  *
  * @author dmatos
  */
+@SuppressWarnings("rawtypes")
 public class HostLoginMsg implements CollAMessage, Serializable {
 
     public HostLoginMsg() {
@@ -58,4 +59,5 @@ public class HostLoginMsg implements CollAMessage, Serializable {
     private String ip;
     private String sender;
     private final Enum operation;
+    private static final long serialVersionUID = 1L;
 }

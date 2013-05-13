@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
 
-    private final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private String name;
     private String nameUser;
     private String ip;

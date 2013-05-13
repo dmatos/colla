@@ -8,6 +8,7 @@ import colla.kernel.api.*;
 import colla.kernel.enumerations.HostOps;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -22,41 +23,44 @@ public class TaskMessage implements CollAMessage, Serializable {
         this.attachNames = new ArrayList<String>();
         this.task = null;
         this.sender = null;
+        this.date = null;
     }
 
     public void setTask(CollATask task) {
         this.task = task;
     }
-    
-    public void setUser(CollAUser usr){
+
+    public void setUser(CollAUser usr) {
         this.user = usr;
         this.sender = usr.getName();
     }
-    
-    public CollAUser getUser(){
+
+    public CollAUser getUser() {
         return this.user;
     }
-    
-    public void  setGroupName(String groupName){
+
+    public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
-    
-    public String getGroupName(){
+
+    public String getGroupName() {
         return this.groupName;
     }
-    
+
     /**
-     * The result will return to all members of the group 
-     * @param groupName 
+     * It is necessary because the result should return to all members of the
+     * group.
+     *
+     * @param group
      */
-    public void setGroup(HashMap<String, CollAUser> group){
+    public void setGroup(HashMap<String, CollAUser> group) {
         this.group = group;
     }
-    
-    public HashMap<String, CollAUser> getGroup(){
+
+    public HashMap<String, CollAUser> getGroup() {
         return this.group;
     }
-    
+
     public void setSender(String sender) {
         this.sender = sender;
     }
@@ -82,12 +86,25 @@ public class TaskMessage implements CollAMessage, Serializable {
         return this.attachNames;
     }
 
+    public boolean hasSchedule() {
+        if (this.date != null) {
+            return true;
+        }
+        return false;
+    }
+    
+    public Date getDate(){
+        return this.date;
+    }
+    
+    public void setDate(Date date){
+        this.date = date;
+    }
+
     @Override
     public Enum getOperation() {
         return this.operation;
     }
-    
-    
     private String groupName;
     private CollATask task;
     private String sender;
@@ -96,4 +113,5 @@ public class TaskMessage implements CollAMessage, Serializable {
     private ArrayList<byte[]> attaches;
     private ArrayList<String> attachNames;
     private CollAUser user;
+    private Date date;
 }

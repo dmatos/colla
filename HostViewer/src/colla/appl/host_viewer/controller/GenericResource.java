@@ -1,4 +1,4 @@
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

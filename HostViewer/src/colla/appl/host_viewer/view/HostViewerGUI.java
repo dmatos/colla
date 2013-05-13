@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.host_viewer.GUI;
+package colla.appl.host_viewer.view;
 
-import colla.appl.host_viewer.HostViewer;
+import colla.appl.host_viewer.controller.HostViewerController;
 import colla.kernel.impl.Host;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -19,7 +19,7 @@ public class HostViewerGUI extends javax.swing.JFrame {
     /**
      * Creates new form HostViewRegisterGUI
      */
-    public HostViewerGUI(HostViewer hvl) {
+    public HostViewerGUI(HostViewerController hvl) {
         this.login = hvl;
         initComponents();
 
@@ -78,14 +78,13 @@ public class HostViewerGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new colla.kernel.util.ImagePane("/colla/appl/host_viewer/GUI/images/login_fundo.jpg");
+        jPanel1 = new colla.kernel.util.ImagePane("/colla/appl/host_viewer/view/images/login_fundo.jpg");
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaStatus = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("CollAHost");
-        setBackground(java.awt.SystemColor.control);
 
         jLabel1.setFont(new java.awt.Font("Verdana", 1, 15)); // NOI18N
         jLabel1.setText("Host is logging...");
@@ -143,7 +142,7 @@ public class HostViewerGUI extends javax.swing.JFrame {
     private String ipServidor;
     private int portServidor;
     private boolean conexao_estabelecida;
-    private HostViewer login;
+    private HostViewerController login;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

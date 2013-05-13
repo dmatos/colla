@@ -1,4 +1,4 @@
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
 // exemplo de um consumidor !!!
 import colla.kernel.api.*;
@@ -16,20 +16,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
-
-    HostViewer hostViewer;
+    
     CollAHost host;
     private final int timeout = 0;
     String serverIPaddress;
     int serverPortNumber;
 
-    public CollAConsumer( GenericResource<S> re, HostMicroServer hostMicroServer ){
+    public CollAConsumer( GenericResource<S> re, HostViewerMicroServer hostMicroServer ){
         super( re );
-        this.hostViewer = hostMicroServer.getHostViewer();
-        this.host = hostMicroServer.getHost();
+        this.host = HostViewerController.getInstance().getHost();
         this.serverIPaddress = hostMicroServer.getServerIPaddress();
         this.serverPortNumber = hostMicroServer.getServerPortNumber();
-
     }
 
     @Override
@@ -53,14 +50,14 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
 
                     //running task
                     JCL_result jclr = this.executeTask(task);
-                    hostViewer.displayStatus("done!!! ");
+                    HostViewerController.getInstance().displayStatus("done!!! ");
                     if (jclr.getErrorResult() == null) {
                         System.err.println(jclr.getCorrectResult().toString());
                     } else {
                         //jclr.getErrorResult().printStackTrace();
                     }
                     // Sending a result to client
-                    hostViewer.displayStatus("Sending result back...");
+                    HostViewerController.getInstance().displayStatus("Sending result back...");
                     /*if (hostViewer.getHost().hasValidIP()) {
                      Integer ticketNumber = hostViewer.storeResult(task, jclr);
                      CollATicket ticket = new Ticket();
@@ -114,7 +111,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
         for (String userName : group.keySet()) {
             if (group.get(userName).hasValidIP()) {                
                 sendResultBackToValidIPClient(groupName, group.get(userName), task);
-                hostViewer.displayStatus("Result was sent back to valid ip.");
+                HostViewerController.getInstance().displayStatus("Result was sent back to valid ip.");
             } else {
                 sendResultBackToInvalidIPClient(groupName, group.get(userName), task);
             }
@@ -131,7 +128,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
     public void sendResultBackToValidIPClient(String groupName, CollAUser client, CollATask task) {
         if (client.isOnline() && client.getPort() > 0) {
             try {
-                TaskResultMsg outgoingOfClient = new TaskResultMsg(hostViewer.getHost().getName(), task.getTaskName(), task);
+                TaskResultMsg outgoingOfClient = new TaskResultMsg(HostViewerController.getInstance().getHost().getName(), task.getTaskName(), task);
                 outgoingOfClient.setGroupName(groupName);
                 //System.err.println("sending result to valid");
 
@@ -171,7 +168,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                 input.readObject();
             } catch (Exception e) {
-                hostViewer.displayStatus("Error: couldn't send result back!");
+                HostViewerController.getInstance().displayStatus("Error: couldn't send result back!");
             }
         }
     }
@@ -252,7 +249,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
             /*System.err.println("class: " + cTask.getClassToExecute());
             System.err.println("method: " + cTask.getMethodToExecute());
             System.err.println(("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute()));*/
-            this.hostViewer.displayStatus("Task: " + cTask.getTaskID());
+            HostViewerController.getInstance().displayStatus("Task: " + cTask.getTaskID());
             ticket = jcl.execute(cTask.getClassToExecute(), cTask.getMethodToExecute(), args);
             //System.err.println("Recebeu o ticket " + ticket);
         } catch (Exception e) {

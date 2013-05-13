@@ -2,15 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAMessage;
 import colla.kernel.messages.toClient.ACK;
+import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.MapConnection;
 import implementations.util.CoresAutodetect;
 import java.io.*;
 import java.net.*;
+import java.util.Date;
+import java.util.Timer;
 
 /**
  * Cria um servidor que deixa o host disponível para receber solicitações a
@@ -18,38 +21,37 @@ import java.net.*;
  *
  * @author dmatos
  */
-class HostMicroServer extends Thread{
+class HostViewerMicroServer extends Thread{
 
     /**
      * Constroi um micro server com as informações necessárias para seu
      * funcionamento.
-     *
-     * @param hostViewer       the host viewer linked with this server
+     * 
      * @param serverIPadress   the server IP address
      * @param serverPortNumber the server port number
      */
-    public HostMicroServer( HostViewer hostViewer, String serverIPaddress, int serverPortNumber ){
-        this.hostViewer = hostViewer;
+    public HostViewerMicroServer(String serverIPaddress, int serverPortNumber ){
         this.active = true;
         this.serverIPaddress = serverIPaddress;
-        this.serverPortNumber = serverPortNumber;   
+        this.serverPortNumber = serverPortNumber;         
+        this.timer = new Timer();
         this.init();
-    }// end method constructor
+    }
     
     private void init(){
-           if( this.hostViewer.getHost().hasValidIP() ){
+           if( HostViewerController.getInstance().getHost().hasValidIP() ){
             try{
                 this.serverSocket = new ServerSocket( 8080 );
-                CollAHost hostAux = this.hostViewer.getHost();
+                CollAHost hostAux = HostViewerController.getInstance().getHost();
                 hostAux.setPort( serverSocket.getLocalPort() );
-                this.hostViewer.setHost( hostAux );
+                HostViewerController.getInstance().setHost( hostAux );
                 //System.err.println("ServerSocket criado!");
             }catch( IOException e ){
                 //e.printStackTrace();
             }
         }else{
             try{
-                MapConnection outgoing = new MapConnection( this.hostViewer.getHost().getName() );
+                MapConnection outgoing = new MapConnection( HostViewerController.getInstance().getHost().getName() );
                 this.keepAlive = new Socket( InetAddress.getByName( this.serverIPaddress ), serverPortNumber );
                 ObjectOutputStream output = new ObjectOutputStream( keepAlive.getOutputStream() );
                 //ask the server to put this connection into in a map
@@ -72,40 +74,43 @@ class HostMicroServer extends Thread{
         serverR = new GenericResource<CollAMessage>();
 
         for( int i = 0; i < numOfThreads; i++ ){
-            serverThreads[i] = new CollAConsumer<CollAMessage>( serverR , this);
+            serverThreads[i] = new CollAConsumer<CollAMessage>( serverR , this);            
             serverThreads[i].start();
-        }
+        }        
         //System.err.println( "server on port " + port + " with " + numOfThreads + " threads started" );       
     }
 
     @Override
     public void run(){
         Socket connection;
-        this.hostViewer.uploadHostToServer();
+        HostViewerController.getInstance().uploadHostToServer();
         while( active ){
             try{
                 //System.out.println( "microserver waiting connection..." );
-                //if host IP is valid the socketServer is working, else the connection must keep alive
-                if( hostViewer.getHost().hasValidIP() ){
+                //if host IP is valid the socketServer is working, else the connection must be kept alive
+                if( HostViewerController.getInstance().getHost().hasValidIP() ){
                     connection = serverSocket.accept();
                 }else{
                     connection = keepAlive;
-                }
+                }                
                 
                 ObjectInputStream input = new ObjectInputStream( connection.getInputStream() );
                 CollAMessage collAMessage = ( CollAMessage ) input.readObject();
                 ObjectOutputStream output = new ObjectOutputStream( connection.getOutputStream() );
                 output.writeObject( new ACK() );
                 output.flush();
-                serverR.putRegister( collAMessage );
+                
+                if(((TaskMessage)collAMessage).hasSchedule()){
+                    Date date = ((TaskMessage)collAMessage).getDate();
+                    this.timer.schedule(new ScheduledTask(collAMessage, this.serverR), date);
+                } else {
+                    serverR.putRegister( collAMessage );
+                }
+                
             }catch( Exception e ){
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }// end while
-    }
-
-    public HostViewer getHostViewer(){
-        return hostViewer;
     }
 
     /**
@@ -125,10 +130,6 @@ class HostMicroServer extends Thread{
         }        
     }
 
-    public CollAHost getHost(){
-        return this.hostViewer.getHost();
-    }
-
     public String getServerIPaddress(){
         return serverIPaddress;
     }
@@ -139,14 +140,14 @@ class HostMicroServer extends Thread{
 
     private ServerSocket serverSocket; // para conexões quando se tem IP válido
     private Socket keepAlive; // para conexões quando não se tem 
-    private volatile HostViewer hostViewer;
     private boolean active;
     private String serverIPaddress;
     private int serverPortNumber;
+    private Timer timer;
     //Variáveis do código server multthread do Joubert
     protected GenericConsumer<CollAMessage>[] serverThreads;
     protected GenericResource<CollAMessage> serverR;
     protected int port;
     protected boolean isStopped;
-    protected long initialTime;
+    protected long initialTime;    
 }

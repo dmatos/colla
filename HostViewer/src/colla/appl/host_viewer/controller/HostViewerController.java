@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
-import colla.appl.host_viewer.GUI.HostViewerGUI;
+import colla.appl.host_viewer.view.HostViewerGUI;
 import colla.kernel.api.*;
 import colla.kernel.messages.toHost.ServerHostLoginAnswer;
 import colla.kernel.messages.toServer.*;
@@ -17,24 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @todo Logger para todos os exception e mensagens importantes para debug dadas
- * por print
- */
-/**
- * Classe responsável pelo login e por diversas funcionalidades do host.
+ * Implements the control point for a Host.
  *
  * @author Bruno
  */
-public class HostViewer {
+public class HostViewerController {
 
-    /**
-     * Cria um novo HostViewer e inicializa as suas informações.
-     *
-     * @param host o CollAHost vinculado ao HostViewer
-     */
-    public HostViewer(CollAHost host) {
-        this.me = host;
-        this.timeout = 40000;
+    private HostViewerController() {
         this.storedResults = new HashMap<Integer, CollATask>();
         // Read IP
         SAXReader reader = new SAXReader();
@@ -52,16 +41,33 @@ public class HostViewer {
     }
 
     /**
+     * Singleton
+     * 
+     * @return an unique instance of HostViewerController
+     */
+    public static HostViewerController getInstance() {
+        if (instance == null) {
+            synchronized (HostViewerController.class) {
+                if (instance == null) {
+                    instance = new HostViewerController();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * Connects the host on server
      */
-    public void login() {
-        me.setOnline();
-        String hostName = me.getName();
+    public void login(CollAHost host) {
+        this.setHost(host);
+        collAHost.setOnline();
+        String hostName = collAHost.getName();
         try {
             HostLoginMsg outgoing = new HostLoginMsg();
-            outgoing.setIPAddress(me.getIp());
+            outgoing.setIPAddress(collAHost.getIp());
             outgoing.setHostName(hostName);
-            outgoing.setSender(me.getNameUser());
+            outgoing.setSender(collAHost.getNameUser());
             this.displayStatus("Contacting the server...");
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
             socket.setSoTimeout(40000);
@@ -78,10 +84,10 @@ public class HostViewer {
                 //retorna o usuário com ValidIP checado
                 // If host have a valid ip
                 if (incoming.isValidIP()) {
-                    me.validateIP();
-                    me.setIp(incoming.getRealIP());
+                    collAHost.validateIP();
+                    collAHost.setIp(incoming.getRealIP());
                 } else {
-                    me.invalidateIP();
+                    collAHost.invalidateIP();
                 }
                 conexao_estabelecida = true;
 
@@ -89,31 +95,27 @@ public class HostViewer {
                 conexao_estabelecida = false;
             }
             if (conexao_estabelecida) {
-                me.setOnline();
+                collAHost.setOnline();
                 this.displayStatus(hostName + " is conected!");
             } else {
-                me.setOffline();
+                collAHost.setOffline();
                 this.displayStatus("Conection couldn't be established");
             }
-            this.microServer = new HostMicroServer(this, serverIPaddress, serverPortNumber);
-            this.microServer.start(); 
-            
+            this.microServer = new HostViewerMicroServer(serverIPaddress, serverPortNumber);
+            this.microServer.start();
+
         } catch (Exception e) {
             Treater.treat(e);
             conexao_estabelecida = false;
-        }        
+        }
     }
-
-    /**
-     * Sets host
-     *
-     * @param host the host
-     */
+    
+    
     public void setHost(CollAHost host) {
-        this.me = host;
-        if (this.me.hasValidIP()) {
-            this.displayStatus("Ip: " + this.me.getIp());
-            this.displayStatus("Listening to port: " + this.me.getPort());
+        this.collAHost = host;
+        if (this.collAHost.hasValidIP()) {
+            this.displayStatus("Ip: " + this.collAHost.getIp());
+            this.displayStatus("Listening to port: " + this.collAHost.getPort());
         }
     }
 
@@ -127,12 +129,12 @@ public class HostViewer {
     }
 
     /**
-     * Sends the information from host to server
+     * Sends host status to server
      */
     public void uploadHostToServer() {
         //System.out.println("uploadHostToServer()");
         try {
-            HostUpdateMsg outgoing = new HostUpdateMsg(this.me);
+            HostUpdateMsg outgoing = new HostUpdateMsg(this.collAHost);
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
             socket.setSoTimeout(10000);
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -148,11 +150,11 @@ public class HostViewer {
     }
 
     /**
-     * Disconects the host from server.
+     * Disconnects from server.
      */
     public void disconnectFromServer() {
         try {
-            CollAMessage outgoing = new HostDisconnectMsg(me);
+            CollAMessage outgoing = new HostDisconnectMsg(collAHost);
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
             socket.setSoTimeout(40000);
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -167,7 +169,6 @@ public class HostViewer {
         }
         this.microServer.shutdown();
         System.exit(0);
-
     }
 
     /**
@@ -194,7 +195,7 @@ public class HostViewer {
     }
 
     public CollAHost getHost() {
-        return me;
+        return collAHost;
     }
 
     public String getServerIPaddress() {
@@ -212,12 +213,13 @@ public class HostViewer {
     public void setServerPortNumber(int serverPortNumber) {
         this.serverPortNumber = serverPortNumber;
     }
-    private CollAHost me;
+    private static HostViewerController instance;
+    private CollAHost collAHost;
     private String serverIPaddress;
     private int serverPortNumber;
     private boolean conexao_estabelecida;
     private HostViewerGUI hostLoginGUI;
-    private HostMicroServer microServer;
+    private HostViewerMicroServer microServer;
     private Map<Integer, CollATask> storedResults;
-    private final int timeout;
+    private final int timeout = 40000;
 }

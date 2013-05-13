@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.host_viewer.GUI;
+package colla.appl.host_viewer.view;
 
-import colla.appl.host_viewer.HostViewRegister;
+import colla.appl.host_viewer.controller.HostViewerRegister;
 
 /**
  *
@@ -12,7 +12,7 @@ import colla.appl.host_viewer.HostViewRegister;
  */
 public class HostViewRegisterGUI extends javax.swing.JFrame{
 /** Creates new form HostViewRegisterGUI */
-public HostViewRegisterGUI(HostViewRegister hv){
+public HostViewRegisterGUI(HostViewerRegister hv){
     this.hostViewRegister = hv;
     initComponents();
     this.setLocation(400, 150);
@@ -28,7 +28,7 @@ public HostViewRegisterGUI(HostViewRegister hv){
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new colla.kernel.util.ImagePane("/colla/appl/host_viewer/GUI/images/login_fundo.jpg");
+        jPanel1 = new colla.kernel.util.ImagePane("/colla/appl/host_viewer/view/images/login_fundo.jpg");
         jTextFieldUser = new javax.swing.JTextField();
         jPasswordFieldPass = new javax.swing.JPasswordField();
         jButtonRegister = new javax.swing.JButton();
@@ -114,7 +114,7 @@ public HostViewRegisterGUI(HostViewRegister hv){
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonRegister)
                     .addComponent(jLabel_warn))
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jPasswordFieldPass, jTextFieldPort, jTextFieldUser});
@@ -159,7 +159,7 @@ private void jButtonRegisterMouseClicked( java.awt.event.MouseEvent evt ){//GEN-
         
 }//GEN-LAST:event_jButtonRegisterMouseClicked
 
-private HostViewRegister hostViewRegister;
+private HostViewerRegister hostViewRegister;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonRegister;
     private javax.swing.JLabel jLabel1;

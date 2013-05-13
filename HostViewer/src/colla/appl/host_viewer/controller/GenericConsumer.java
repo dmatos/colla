@@ -1,4 +1,4 @@
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
 public abstract class GenericConsumer<S> extends Thread{
 

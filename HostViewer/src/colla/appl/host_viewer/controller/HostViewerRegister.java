@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.host_viewer;
+package colla.appl.host_viewer.controller;
 
-import colla.appl.host_viewer.GUI.HostViewRegisterGUI;
+import colla.appl.host_viewer.view.HostViewRegisterGUI;
 import colla.kernel.api.CollAHost;
+import colla.kernel.impl.Host;
 import colla.kernel.messages.toHost.ServerHostRegisterAnswerMsg;
 import colla.kernel.messages.toServer.HostRegisterMsg;
 import colla.kernel.util.SAXReader;
@@ -20,11 +21,11 @@ import org.xml.sax.SAXException;
  * Classe responsável por efetuar o registro do host no servidor.
  * @author Bruno
  */
-public class HostViewRegister{
+public class HostViewerRegister{
 
-    public HostViewRegister( CollAHost host ){
+    public HostViewerRegister(){
         try{
-            this.me = host;
+            this.collAHost = new Host();
             SAXReader reader = new SAXReader();
             reader.parse( "server_conf.xml" );
             serverIP = reader.getIPfromXML();
@@ -43,7 +44,7 @@ public class HostViewRegister{
                     if( !inetAddress.isLoopbackAddress()
                         && !inetAddress.toString().substring( 1 ).startsWith( "127" )
                         && inetAddress.toString().substring( 1 ).contains( "." ) ){
-                        me.setIp( inetAddress.toString().substring( 1 ) );
+                        collAHost.setIp( inetAddress.toString().substring( 1 ) );
                     }
                 }
             }
@@ -76,9 +77,9 @@ public class HostViewRegister{
             //enviar senha encriptada
             outgoing.setUserPass( crypt );
 
-            me.setPort( port );
+            collAHost.setPort( port );
             //enviar host
-            outgoing.setHost( me );
+            outgoing.setHost( collAHost );
 
             Socket connect = new Socket( InetAddress.getByName( serverIP ), serverPort );
             connect.setSoTimeout( 0 );
@@ -95,10 +96,10 @@ public class HostViewRegister{
                 //System.err.println("Invalid username or password");
                 return false;
             } else {
-                me.setName( incoming.getHostName() );
-                me.setNameUser( userName );
+                collAHost.setName( incoming.getHostName() );
+                collAHost.setNameUser( userName );
                 this.hostRegisterGUI.dispose();
-                HostViewerStarter.login(me);
+                HostViewerController.getInstance().login(collAHost);
             }
            // System.err.println("register");
            // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
@@ -138,7 +139,7 @@ public class HostViewRegister{
          */
     }
 
-    private CollAHost me; //usuario que irá logar
+    private CollAHost collAHost; //usuario que irá logar
     private String serverIP;
     private int serverPort;
     private HostViewRegisterGUI hostRegisterGUI;

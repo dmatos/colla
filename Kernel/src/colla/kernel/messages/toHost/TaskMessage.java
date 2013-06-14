@@ -27,7 +27,6 @@ public class TaskMessage implements CollAMessage, Serializable {
         this.attachNames = new ArrayList<String>();
         this.task = null;
         this.sender = null;
-        this.date = null;
     }
 
     public void setTask(CollATask task) {
@@ -90,21 +89,6 @@ public class TaskMessage implements CollAMessage, Serializable {
         return this.attachNames;
     }
 
-    public boolean hasSchedule() {
-        if (this.date != null) {
-            return true;
-        }
-        return false;
-    }
-    
-    public Date getDate(){
-        return this.date;
-    }
-    
-    public void setDate(Date date){
-        this.date = date;
-    }
-
     @Override
     public Enum getOperation() {
         return this.operation;
@@ -117,6 +101,5 @@ public class TaskMessage implements CollAMessage, Serializable {
     private ArrayList<byte[]> attaches;
     private ArrayList<String> attachNames;
     private CollAUser user;
-    private Date date;
     private static final long serialVersionUID = 1L;
 }

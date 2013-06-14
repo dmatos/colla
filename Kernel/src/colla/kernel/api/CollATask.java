@@ -2,6 +2,7 @@ package colla.kernel.api;
 
 import interfaces.kernel.JCL_result;
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -193,7 +194,26 @@ public interface CollATask {
     public Long getTaskID();
     
     /**
-     * Destrutor
+     * 
+     * @return task schedule
+     */
+    public Date getSchedule();
+    
+    /**
+     * 
+     * @param date Date to schedule task to run. It might be null so the task 
+     * will run as soon as a host is available.
+     */
+    public void setSchedule(Date date);
+    
+    /**
+     * 
+     * @return true if the task has a schedule, false otherwise
+     */
+    public boolean hasSchedule();
+    
+    /**
+     * Destructor
      */
     public void clean();
     

@@ -10,6 +10,7 @@ import colla.kernel.util.TimeAndDate;
 import interfaces.kernel.JCL_result;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,8 @@ import java.util.Map;
  */
 public class Task implements CollATask, Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private TimeAndDate time;
+    private static final long serialVersionUID = 1L;
+    private TimeAndDate time;
     private String methodToExecute;
     private String name;
     private byte[] task;
@@ -41,6 +42,7 @@ public class Task implements CollATask, Serializable {
     private Boolean hasTicket;
     private CollATicket ticket;
     private Long taskID;
+    private Date schedule;
 
     public Task() {
         this.methodToExecute = "";
@@ -57,6 +59,7 @@ public class Task implements CollATask, Serializable {
         this.parametersFilename = new ArrayList<String>();
         this.hasTicket = false;
         this.taskID = new Long(0);
+        this.schedule = null;
     }
 
     @Override
@@ -130,10 +133,10 @@ public class Task implements CollATask, Serializable {
     }
 
     @Override
-    public boolean isFinished(){
+    public boolean isFinished() {
         return this.finished;
     }
-    
+
     @Override
     public void setFinished() {
         if (!this.finished) {
@@ -192,13 +195,13 @@ public class Task implements CollATask, Serializable {
     }
 
     @Override
-    public File getFileFromResult() throws Exception{
-        if (this.result instanceof File) {              
+    public File getFileFromResult() throws Exception {
+        if (this.result instanceof File) {
             File temp = (File) this.result;
             FileOutputStream fout = new FileOutputStream(temp);
             DataOutputStream dout = new DataOutputStream(fout);
             dout.write(this.fileResult);
-            dout.flush();            
+            dout.flush();
             dout.close();
             fout.close();
             return temp;
@@ -215,12 +218,12 @@ public class Task implements CollATask, Serializable {
     public String getOwner() {
         return this.owner;
     }
-    
-    public String getGroup(){
+
+    public String getGroup() {
         return group;
     }
 
-    public void setGroup( String group ){
+    public void setGroup(String group) {
         this.group = group;
     }
 
@@ -273,11 +276,11 @@ public class Task implements CollATask, Serializable {
 
     @Override
     public boolean removeTicket() {
-        if(this.hasTicket){
-            this.ticket = null;        
+        if (this.hasTicket) {
+            this.ticket = null;
             this.hasTicket = false;
             return true;
-            
+
         }
         return false;
     }
@@ -291,13 +294,13 @@ public class Task implements CollATask, Serializable {
     public Long getTaskID() {
         return this.taskID;
     }
-    
+
     @Override
-    public void clean(){
+    public void clean() {
         this.classToExecute = null;
-        for(String name : this.dependencies.keySet()){        	
+        for (String name : this.dependencies.keySet()) {
             @SuppressWarnings("unused")
-			byte[] b = this.dependencies.remove( name );
+            byte[] b = this.dependencies.remove(name);
             b = null;
         }
         this.dependencies.clear();
@@ -308,24 +311,39 @@ public class Task implements CollATask, Serializable {
         this.methodToExecute = null;
         this.name = null;
         this.owner = null;
-        for(int i = 0; i < parameters.size(); i ++){
-        	@SuppressWarnings("unused")
-            byte[] b = parameters.remove( i );
+        for (int i = 0; i < parameters.size(); i++) {
+            @SuppressWarnings("unused")
+            byte[] b = parameters.remove(i);
             b = null;
         }
         this.parameters.clear();
         this.parameters = null;
-        for(int i = 0; i < parametersFilename.size(); i ++){
-        	@SuppressWarnings("unused")
-            String s = parametersFilename.remove( i );
+        for (int i = 0; i < parametersFilename.size(); i++) {
+            @SuppressWarnings("unused")
+            String s = parametersFilename.remove(i);
             s = null;
         }
         this.parametersFilename.clear();
         this.parametersFilename = null;
         this.result = null;
         this.startTime = null;
-        this.task = null;        
+        this.task = null;
+    }
+
+    @Override
+    public Date getSchedule() {
+        return this.schedule;
+    }
+
+    @Override
+    public void setSchedule(Date date) {
+        this.schedule = date;
     }
     
-    
+    @Override
+    public boolean hasSchedule(){
+        if(this.schedule == null)
+            return false;
+        return true;
+    }
 }

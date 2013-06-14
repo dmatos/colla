@@ -104,7 +104,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @param methodToExecute the method name to be executed.
      * @param group o grupo ao qual a tarefa pertence.
      */
-    public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group) {
+    public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
         try {
             //Insert the taskFile into queue to send when host is arrived.
             try {
@@ -114,7 +114,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 task.setTask(taskFile);
                 task.setTaskName(taskFile.getName());
                 task.setClassToExecute(classToExecute);
-                task.setMethodToExecute(methodToExecute);
+                task.setMethodToExecute(methodToExecute);   
+                task.setSchedule(schedule);
                 Iterator<File> dependencyIterator = attachFiles.iterator();
                 Iterator<File> parameterIterator = args.iterator();
                 while (dependencyIterator.hasNext()) {
@@ -249,7 +250,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 }// fim do else
                 //a result of a task will come by either TCPServer or KeepAliveClient depending on the validity of user's IP address
                 //put the sent task in the hashmap with a message
-                updateResults(task.getGroup(), task.getTaskName(), task);                
+                updateResults(task.getGroup(), task.getTaskName(), task);
                 //notify other members about this task
                 //this.notifyGroupAboutTask(task.getGroup(), task.getTaskName(), task);
                 //System.err.println("task " + task.getTaskName() + " sent");

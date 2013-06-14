@@ -409,12 +409,12 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="jPanel6" alignment="0" max="32767" attributes="0"/>
+              <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="jPanel6" max="32767" attributes="0"/>
+              <Component id="jPanel6" min="-2" max="-2" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -430,56 +430,67 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="jComboBox_taskGroup" pref="472" max="32767" attributes="0"/>
-                              <EmptySpace min="-2" pref="123" max="-2" attributes="0"/>
-                          </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jScrollPane5" pref="472" max="32767" attributes="1"/>
-                                  <Component id="jScrollPane12" pref="472" max="32767" attributes="1"/>
-                                  <Component id="jTextFieldTask" alignment="0" max="32767" attributes="1"/>
-                                  <Component id="jComboBox_classToExecute" alignment="0" max="32767" attributes="1"/>
-                                  <Component id="jComboBox_methodToExecute" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="jLabelError" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jComboBox_taskGroup" alignment="0" min="-2" pref="454" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
+                                      <Component id="jLabel11" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jCheckBoxSchedule" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jCalendarSendTask" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="jLabelError" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jTextFieldSchedule" min="-2" pref="223" max="-2" attributes="0"/>
+                                          <Component id="jButtonTime" min="-2" pref="100" max="-2" attributes="0"/>
+                                          <Group type="102" alignment="1" attributes="0">
+                                              <Component id="Cancel" linkSize="8" min="-2" pref="87" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="jButton_submit" linkSize="8" min="-2" pref="87" max="-2" attributes="1"/>
+                                          </Group>
                                       </Group>
-                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="AddTask" linkSize="8" alignment="0" max="32767" attributes="1"/>
-                                  <Component id="RemoveAtach" linkSize="8" alignment="0" max="32767" attributes="1"/>
-                                  <Component id="AddAtach" linkSize="8" alignment="0" min="-2" pref="92" max="-2" attributes="1"/>
-                                  <Component id="jButton_addArgument" linkSize="8" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton_rmArgument" linkSize="8" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jComboBox_classToExecute" max="32767" attributes="1"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jComboBox_methodToExecute" max="32767" attributes="1"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="jTextFieldTask" max="32767" attributes="1"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="AddTask" linkSize="8" max="32767" attributes="1"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="jScrollPane12" alignment="1" max="32767" attributes="1"/>
+                                  <Component id="jScrollPane5" max="32767" attributes="1"/>
                               </Group>
-                              <EmptySpace pref="475" max="32767" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="AddAtach" linkSize="8" alignment="1" pref="92" max="32767" attributes="1"/>
+                                  <Component id="RemoveAtach" linkSize="8" alignment="1" max="32767" attributes="1"/>
+                                  <Component id="jButton_addArgument" linkSize="8" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jButton_rmArgument" linkSize="8" alignment="1" max="32767" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
-                  </Group>
-                  <Group type="102" attributes="0">
-                      <EmptySpace min="-2" pref="204" max="-2" attributes="0"/>
-                      <Component id="Cancel" linkSize="8" min="-2" pref="87" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jButton_submit" linkSize="8" min="-2" pref="87" max="-2" attributes="1"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -506,21 +517,34 @@
                       <Component id="jLabelError" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jTextFieldTask" linkSize="10" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                          <Component id="jTextFieldTask" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
                           <Component id="AddTask" linkSize="7" alignment="3" min="-2" pref="28" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jComboBox_classToExecute" linkSize="10" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jComboBox_methodToExecute" linkSize="10" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jComboBox_classToExecute" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="Cancel" linkSize="7" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jButton_submit" linkSize="7" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jComboBox_methodToExecute" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="jButtonTime" min="-2" pref="30" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jTextFieldSchedule" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="jButton_submit" linkSize="7" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="Cancel" linkSize="7" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Component id="jCheckBoxSchedule" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel11" min="-2" max="-2" attributes="0"/>
+                          <Component id="jCalendarSendTask" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
@@ -808,6 +832,51 @@
               <Events>
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jButton_rmArgumentMouseClicked"/>
               </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel11">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="colla/appl/developer_viewer/view/Bundle.properties" key="DeveloperViewerGUI.jLabel11.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="jCheckBoxSchedule">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="colla/appl/developer_viewer/view/Bundle.properties" key="DeveloperViewerGUI.jCheckBoxSchedule.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxScheduleActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="com.toedter.calendar.JCalendar" name="jCalendarSendTask">
+              <Properties>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="minSelectableDate" type="java.util.Date" editor="org.netbeans.beaninfo.editors.DateEditor">
+                  <SerializedValue value="-84,-19,0,5,115,114,0,14,106,97,118,97,46,117,116,105,108,46,68,97,116,101,104,106,-127,1,75,89,116,25,3,0,0,120,112,119,8,-1,-1,-57,124,-29,-66,-82,112,120"/>
+                </Property>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="jButtonTime">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="colla/appl/developer_viewer/view/Bundle.properties" key="DeveloperViewerGUI.jButtonTime.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new org.jbundle.thin.base.screen.jcalendarbutton.JTimeButton()"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JTextField" name="jTextFieldSchedule">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="colla/appl/developer_viewer/view/Bundle.properties" key="DeveloperViewerGUI.jTextFieldSchedule.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
@@ -1911,7 +1980,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jSplitPane_desktopAndContacts" alignment="1" pref="543" max="32767" attributes="0"/>
+          <Component id="jSplitPane_desktopAndContacts" alignment="1" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -2069,7 +2138,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jComboBox_hosts" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jScrollPane4" pref="176" max="32767" attributes="0"/>
+                          <Component id="jScrollPane4" pref="192" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -2144,7 +2213,7 @@
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
-                  <JSplitPaneConstraints position="left"/>
+                  <JSplitPaneConstraints position="top"/>
                 </Constraint>
               </Constraints>
 

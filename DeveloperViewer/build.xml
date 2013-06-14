@@ -108,6 +108,12 @@
         </zip>
 
         <delete file="${store.dir}/temp_final.jar"/>
+        
+         <copy todir="${store.dir}" overwrite="true">
+            <fileset dir="${store.dir}/..">
+                <include name="**/server_conf.xml" />
+            </fileset>
+        </copy>
 
     </target>
 </project>

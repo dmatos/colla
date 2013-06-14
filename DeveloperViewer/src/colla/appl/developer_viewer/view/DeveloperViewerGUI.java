@@ -22,14 +22,18 @@ import colla.kernel.api.CollAUser;
 import colla.kernel.util.ImagePane;
 import colla.kernel.util.TimeAndDate;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -38,6 +42,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.*;
 import javax.swing.text.html.HTML;
+import org.jbundle.thin.base.screen.jcalendarbutton.JCalendarButton;
+import org.jbundle.thin.base.screen.jcalendarbutton.JTimeButton;
 import org.openide.util.Exceptions;
 
 /**
@@ -82,6 +88,23 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
+
+        jCalendarSendTask.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                setDateTime(jCalendarSendTask.getDate());
+                System.out.println(jCalendarSendTask.getDate());
+            }
+        });
+
+        jButtonTime.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (evt.getNewValue() instanceof Date) {
+                    setDateTime((Date) evt.getNewValue());
+                }
+            }
+        });
 
         this.setVisible(true);
     }
@@ -165,7 +188,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jFileChooser_resultDirectory = new JFileChooser();
         jFileChooser_resultDirectory.setDialogTitle("Select directory to save results");
         jFileChooser_resultDirectory.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
     }
 
     /**
@@ -282,6 +304,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_parameters = new javax.swing.JList<File>();
         jButton_addArgument = new javax.swing.JButton();
         jButton_rmArgument = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        jCheckBoxSchedule = new javax.swing.JCheckBox();
+        jCalendarSendTask = new com.toedter.calendar.JCalendar();
+        jButtonTime = new org.jbundle.thin.base.screen.jcalendarbutton.JTimeButton();
+        jTextFieldSchedule = new javax.swing.JTextField();
         jDialog_manageGroups = new javax.swing.JDialog();
         imagePane1 = new colla.kernel.util.ImagePane(BackGround.RADIAL_GREEN.getPath());
         jComboBox_grpManager = new javax.swing.JComboBox<String>();
@@ -690,6 +717,25 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             }
         });
 
+        jLabel11.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jLabel11.text")); // NOI18N
+
+        jCheckBoxSchedule.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jCheckBoxSchedule.text")); // NOI18N
+        jCheckBoxSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxScheduleActionPerformed(evt);
+            }
+        });
+
+        jCalendarSendTask.setEnabled(false);
+        jCalendarSendTask.setMinSelectableDate(new java.util.Date(-62135765914000L));
+
+        jButtonTime.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jButtonTime.text")); // NOI18N
+        jButtonTime.setEnabled(false);
+
+        jTextFieldSchedule.setEditable(false);
+        jTextFieldSchedule.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jTextFieldSchedule.text")); // NOI18N
+        jTextFieldSchedule.setEnabled(false);
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -698,39 +744,48 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addComponent(jComboBox_taskGroup, 0, 472, Short.MAX_VALUE)
-                        .addGap(123, 123, 123))
-                    .addGroup(jPanel6Layout.createSequentialGroup()
                         .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
-                            .addComponent(jScrollPane12, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
-                            .addComponent(jTextFieldTask)
-                            .addComponent(jComboBox_classToExecute, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBox_methodToExecute, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel6Layout.createSequentialGroup()
-                                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabelError)
-                                    .addComponent(jLabel3))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(AddTask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(RemoveAtach, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(AddAtach, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton_addArgument)
-                            .addComponent(jButton_rmArgument))
-                        .addGap(25, 25, 25))
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelError)
                             .addComponent(jLabel4)
-                            .addComponent(jLabel1))
-                        .addContainerGap(475, Short.MAX_VALUE))))
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(204, 204, 204)
-                .addComponent(Cancel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton_submit, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jComboBox_taskGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 454, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCheckBoxSchedule)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jCalendarSendTask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldSchedule, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButtonTime, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                                        .addComponent(Cancel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton_submit, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBox_classToExecute, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBox_methodToExecute, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addComponent(jTextFieldTask)
+                        .addGap(18, 18, 18)
+                        .addComponent(AddTask, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane12)
+                            .addComponent(jScrollPane5))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(AddAtach, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                            .addComponent(RemoveAtach, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton_addArgument, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton_rmArgument, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
 
         jPanel6Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {AddAtach, AddTask, Cancel, RemoveAtach, jButton_addArgument, jButton_rmArgument, jButton_submit});
@@ -762,24 +817,31 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldTask, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(AddTask, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox_classToExecute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox_methodToExecute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(6, 6, 6)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox_classToExecute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(Cancel)
-                    .addComponent(jButton_submit))
+                    .addComponent(jLabel3)
+                    .addComponent(jComboBox_methodToExecute, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jButtonTime, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldSchedule, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton_submit)
+                            .addComponent(Cancel)))
+                    .addComponent(jCheckBoxSchedule)
+                    .addComponent(jLabel11)
+                    .addComponent(jCalendarSendTask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel6Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {AddAtach, AddTask, Cancel, RemoveAtach, jButton_addArgument, jButton_rmArgument, jButton_submit});
-
-        jPanel6Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jComboBox_classToExecute, jComboBox_methodToExecute, jTextFieldTask});
 
         jPanel6Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jScrollPane12, jScrollPane5});
 
@@ -787,11 +849,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jDialog_sendTask.getContentPane().setLayout(jDialog_sendTaskLayout);
         jDialog_sendTaskLayout.setHorizontalGroup(
             jDialog_sendTaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         jDialog_sendTaskLayout.setVerticalGroup(
             jDialog_sendTaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         jDialog_manageGroups.setTitle(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jDialog_manageGroups.title")); // NOI18N
@@ -1361,7 +1423,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1373,7 +1435,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         jDesktopPane_desktop.setBackground(java.awt.Color.white);
-        jSplitPane2.setLeftComponent(jDesktopPane_desktop);
+        jSplitPane2.setTopComponent(jDesktopPane_desktop);
 
         jTextPane_info.setEditable(false);
         jTextPane_info.setFont(new java.awt.Font("DejaVu Sans", 0, 14)); // NOI18N
@@ -1750,7 +1812,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     jComboBox_taskGroup.addItem(gs);
                 }
             }
-            jDialog_sendTask.pack();
+            jDialog_sendTask.pack();            
+            jCalendarSendTask.setMinSelectableDate(new Date());
             jDialog_sendTask.setVisible(true);
         } else {
             this.displayMessage("To send a task you must be part of a group.");
@@ -1817,7 +1880,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
     /**
      * Sends task to execute in a host
-     * @param evt 
+     *
+     * @param evt
      */
     private void jButton_submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_submitActionPerformed
         String method = (String) jComboBox_methodToExecute.getSelectedItem();
@@ -1837,7 +1901,18 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     for (int i = 0; i < argumentsModel.getSize(); i++) {
                         this.argumentsFiles.add((File) argumentsModel.get(i));
                     }
-                    this.devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup);
+                    if (this.jCheckBoxSchedule.isSelected()) {
+                        try {
+                            this.selectedDate = dateTimeFormat.parse(jTextFieldSchedule.getText());
+                        } catch (ParseException ex) {
+                            Exceptions.printStackTrace(ex);
+                            this.selectedDate = null;
+                        }
+                    } else {
+                        this.selectedDate = null;
+                    }
+
+                    this.devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate);
                     /*
                      * Clear fields to send another task after that
                      */
@@ -2178,6 +2253,26 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         this.jTextField_nonFileResultsDir.setText(dir);
     }//GEN-LAST:event_jButton_ResultsDirNonFileMouseClicked
 
+    private void jCheckBoxScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxScheduleActionPerformed
+        if (jCheckBoxSchedule.isSelected()) {
+            this.showScheduleOptions();
+        } else {
+            this.hideScheduleOptions();
+        }
+    }//GEN-LAST:event_jCheckBoxScheduleActionPerformed
+
+    private void showScheduleOptions() {
+        this.jCalendarSendTask.setEnabled(true);
+        this.jButtonTime.setEnabled(true);
+        this.jTextFieldSchedule.setEnabled(true);
+    }
+
+    private void hideScheduleOptions() {
+        this.jCalendarSendTask.setEnabled(false);
+        this.jButtonTime.setEnabled(false);
+        this.jTextFieldSchedule.setEnabled(false);
+    }
+
     private void getInfoFromCard1() {
         //System.err.println("card 1");
         this.config.setResultDir(jTextField_resultsDir.getText());
@@ -2197,6 +2292,9 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         this.jTextFieldTask.setText("");
         jComboBox_classToExecute.removeAllItems();
         jComboBox_methodToExecute.removeAllItems();
+        jCheckBoxSchedule.setSelected(false);
+        jTextFieldSchedule.setText("");
+        this.hideScheduleOptions();
     }
 
     /**
@@ -2287,6 +2385,41 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             //gets double click and opens a chatWindow with the selected contact
         }
     }
+
+    /**
+     * Validate and set the datetime field on the screen given a datetime
+     * string.
+     *
+     * @param dateTime The datetime string
+     */
+    public void setDateTime(String dateTimeString) {
+        Date dateTime = null;
+        try {
+            if ((dateTimeString != null) && (dateTimeString.length() > 0)) {
+                dateTime = dateTimeFormat.parse(dateTimeString);
+            }
+        } catch (Exception e) {
+            dateTime = null;
+        }
+        this.setDateTime(dateTime);
+    }
+
+    /**
+     * Validate and set the datetime field on the screen given a date.
+     *
+     * @param dateTime The datetime object
+     */
+    public void setDateTime(Date dateTime) {
+        String dateTimeString = "";
+        if (dateTime != null) {
+            dateTimeString = dateTimeFormat.format(dateTime);
+        }
+        jTextFieldSchedule.setText(dateTimeString);
+
+        JTimeButton btnTime = (JTimeButton) jButtonTime;
+
+        btnTime.setTargetDate(dateTime);
+    }
     private HashMap<String, java.util.List<String>> acceptedMembers;
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;
@@ -2303,6 +2436,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private DefaultListModel<File> dependencyModel;
     private DefaultListModel<File> argumentsModel;
     private ArrayList<File> argumentsFiles;
+    private Date selectedDate;
+    public static DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
     //Variables to manage settings
     private JFileChooser jFileChooser_resultDirectory;
     private final String generalSettings = "General settings";
@@ -2318,6 +2453,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private colla.kernel.util.ImagePane imagePane3;
     private colla.kernel.util.ImagePane imagePane4;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButtonTime;
     private javax.swing.JButton jButton_ResultsDirNonFile;
     private javax.swing.JButton jButton_addArgument;
     private javax.swing.JButton jButton_applyGrpManager;
@@ -2339,6 +2475,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JButton jButton_submit;
     private javax.swing.JButton jButton_toAccepted;
     private javax.swing.JButton jButton_toRefused;
+    private com.toedter.calendar.JCalendar jCalendarSendTask;
+    private javax.swing.JCheckBox jCheckBoxSchedule;
     private javax.swing.JComboBox<String> jComboBox_classToExecute;
     private javax.swing.JComboBox<String> jComboBox_groups;
     private javax.swing.JComboBox<String> jComboBox_grpManager;
@@ -2355,6 +2493,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JFileChooser jFileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -2411,6 +2550,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JSplitPane jSplitPane_desktopAndContacts;
     private javax.swing.JTabbedPane jTabbedPane_manageGroups;
     private javax.swing.JTextArea jTextArea_hostProp;
+    private javax.swing.JTextField jTextFieldSchedule;
     private javax.swing.JTextField jTextFieldTask;
     private javax.swing.JTextField jTextField_groupName;
     private javax.swing.JTextField jTextField_groupSearch;

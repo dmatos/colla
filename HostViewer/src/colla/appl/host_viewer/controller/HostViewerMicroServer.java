@@ -21,47 +21,47 @@ import java.util.Timer;
  *
  * @author dmatos
  */
-class HostViewerMicroServer extends Thread{
+class HostViewerMicroServer extends Thread {
 
     /**
      * Constroi um micro server com as informações necessárias para seu
      * funcionamento.
-     * 
-     * @param serverIPadress   the server IP address
+     *
+     * @param serverIPadress the server IP address
      * @param serverPortNumber the server port number
      */
-    public HostViewerMicroServer(String serverIPaddress, int serverPortNumber ){
+    public HostViewerMicroServer(String serverIPaddress, int serverPortNumber) {
         this.active = true;
         this.serverIPaddress = serverIPaddress;
-        this.serverPortNumber = serverPortNumber;         
+        this.serverPortNumber = serverPortNumber;
         this.timer = new Timer();
         this.init();
     }
-    
-    private void init(){
-           if( HostViewerController.getInstance().getHost().hasValidIP() ){
-            try{
-                this.serverSocket = new ServerSocket( 8080 );
+
+    private void init() {
+        if (HostViewerController.getInstance().getHost().hasValidIP()) {
+            try {
+                this.serverSocket = new ServerSocket(8080);
                 CollAHost hostAux = HostViewerController.getInstance().getHost();
-                hostAux.setPort( serverSocket.getLocalPort() );
-                HostViewerController.getInstance().setHost( hostAux );
+                hostAux.setPort(serverSocket.getLocalPort());
+                HostViewerController.getInstance().setHost(hostAux);
                 //System.err.println("ServerSocket criado!");
-            }catch( IOException e ){
+            } catch (IOException e) {
                 //e.printStackTrace();
             }
-        }else{
-            try{
-                MapConnection outgoing = new MapConnection( HostViewerController.getInstance().getHost().getName() );
-                this.keepAlive = new Socket( InetAddress.getByName( this.serverIPaddress ), serverPortNumber );
-                ObjectOutputStream output = new ObjectOutputStream( keepAlive.getOutputStream() );
+        } else {
+            try {
+                MapConnection outgoing = new MapConnection(HostViewerController.getInstance().getHost().getName());
+                this.keepAlive = new Socket(InetAddress.getByName(this.serverIPaddress), serverPortNumber);
+                ObjectOutputStream output = new ObjectOutputStream(keepAlive.getOutputStream());
                 //ask the server to put this connection into in a map
-                output.writeObject( outgoing );
+                output.writeObject(outgoing);
                 output.flush();
                 // espera por ACK
-                ObjectInputStream input = new ObjectInputStream( keepAlive.getInputStream() );
+                ObjectInputStream input = new ObjectInputStream(keepAlive.getInputStream());
                 input.readObject();
                 //System.err.println("Conexão mapeada!");
-            }catch( Exception e ){
+            } catch (Exception e) {
                 //e.printStackTrace();
             }
         }// end else
@@ -70,44 +70,48 @@ class HostViewerMicroServer extends Thread{
         //Joubert
         this.port = 8080;
         int numOfThreads = CoresAutodetect.detect();
-        serverThreads = new CollAConsumer[ numOfThreads ];
+        serverThreads = new CollAConsumer[numOfThreads];
         serverR = new GenericResource<CollAMessage>();
 
-        for( int i = 0; i < numOfThreads; i++ ){
-            serverThreads[i] = new CollAConsumer<CollAMessage>( serverR , this);            
+        for (int i = 0; i < numOfThreads; i++) {
+            serverThreads[i] = new CollAConsumer<CollAMessage>(serverR, this);
             serverThreads[i].start();
-        }        
+        }
         //System.err.println( "server on port " + port + " with " + numOfThreads + " threads started" );       
     }
 
     @Override
-    public void run(){
+    public void run() {
         Socket connection;
         HostViewerController.getInstance().uploadHostToServer();
-        while( active ){
-            try{
+        while (active) {
+            try {
                 //System.out.println( "microserver waiting connection..." );
                 //if host IP is valid the socketServer is working, else the connection must be kept alive
-                if( HostViewerController.getInstance().getHost().hasValidIP() ){
+                if (HostViewerController.getInstance().getHost().hasValidIP()) {
                     connection = serverSocket.accept();
-                }else{
-                    connection = keepAlive;
-                }                
-                
-                ObjectInputStream input = new ObjectInputStream( connection.getInputStream() );
-                CollAMessage collAMessage = ( CollAMessage ) input.readObject();
-                ObjectOutputStream output = new ObjectOutputStream( connection.getOutputStream() );
-                output.writeObject( new ACK() );
-                output.flush();
-                
-                if(((TaskMessage)collAMessage).hasSchedule()){
-                    Date date = ((TaskMessage)collAMessage).getDate();
-                    this.timer.schedule(new ScheduledTask(collAMessage, this.serverR), date);
                 } else {
-                    serverR.putRegister( collAMessage );
+                    connection = keepAlive;
                 }
-                
-            }catch( Exception e ){
+
+                ObjectInputStream input = new ObjectInputStream(connection.getInputStream());
+                CollAMessage collAMessage = (CollAMessage) input.readObject();
+                ObjectOutputStream output = new ObjectOutputStream(connection.getOutputStream());
+                output.writeObject(new ACK());
+                output.flush();
+
+                if (collAMessage instanceof TaskMessage) {
+                    if (((TaskMessage) collAMessage).getTask().hasSchedule()) {
+                        Date date = ((TaskMessage) collAMessage).getTask().getSchedule();
+                        this.timer.schedule(new ScheduledTask(collAMessage, this.serverR), date);
+                    } else {
+                        serverR.putRegister(collAMessage);
+                    }
+                } else {
+                    serverR.putRegister(collAMessage);
+                }
+
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }// end while
@@ -116,28 +120,27 @@ class HostViewerMicroServer extends Thread{
     /**
      * Shuts down the micro server.
      */
-    public void shutdown(){
+    public void shutdown() {
         active = false;
-        try{
-            if( keepAlive != null && !keepAlive.isClosed() ){
+        try {
+            if (keepAlive != null && !keepAlive.isClosed()) {
                 keepAlive.close();
             }
-            if( serverSocket != null && !serverSocket.isClosed() ){
+            if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
-            }                        
-        }catch( IOException io ){
+            }
+        } catch (IOException io) {
             //io.printStackTrace();
-        }        
+        }
     }
 
-    public String getServerIPaddress(){
+    public String getServerIPaddress() {
         return serverIPaddress;
     }
 
-    public int getServerPortNumber(){
+    public int getServerPortNumber() {
         return serverPortNumber;
     }
-
     private ServerSocket serverSocket; // para conexões quando se tem IP válido
     private Socket keepAlive; // para conexões quando não se tem 
     private boolean active;
@@ -149,5 +152,5 @@ class HostViewerMicroServer extends Thread{
     protected GenericResource<CollAMessage> serverR;
     protected int port;
     protected boolean isStopped;
-    protected long initialTime;    
+    protected long initialTime;
 }

@@ -8,6 +8,7 @@ package colla.kernel.enumerations;
 public enum HostOps{
     TASK_RECEIVE,
     TASK_EXECUTE,
+    TASK_CANCEL,
     DOWNLOAD_RESULT,
     PING,
     ACK;

@@ -8,6 +8,7 @@ import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.kernel.api.*;
 import colla.kernel.impl.Task;
 import colla.kernel.messages.toClient.ChatDirectMessageMsg;
+import colla.kernel.messages.toHost.CancelTask;
 import colla.kernel.messages.toHost.DownloadResultMsg;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
@@ -17,6 +18,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import org.openide.util.Exceptions;
 
 /**
  * Works as union point and controller of the all GUI's
@@ -48,6 +50,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.devUI = null;
         this.debugInfo = new DebugInfo();
         this.debugInfo.setDebuggedName(user.getName());
+        this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
     }
 
     @Override
@@ -114,7 +117,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 task.setTask(taskFile);
                 task.setTaskName(taskFile.getName());
                 task.setClassToExecute(classToExecute);
-                task.setMethodToExecute(methodToExecute);   
+                task.setMethodToExecute(methodToExecute);
                 task.setSchedule(schedule);
                 Iterator<File> dependencyIterator = attachFiles.iterator();
                 Iterator<File> parameterIterator = args.iterator();
@@ -214,12 +217,15 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     output = new ObjectOutputStream(socket.getOutputStream());
                     output.writeObject(outgoing);
                     output.flush();
-                    // espera por ACK
+                    // receives ACK
                     input = new ObjectInputStream(socket.getInputStream());
                     input.readObject();
                     socket.close();
+                    
+                    this.hostsWithScheduledTasks.put(task.getTaskID(), host);
+                    
                     debug("task" + task.getTaskID() + " sent to host " + host.getName() + " (valid ip)");
-                    notifyObservers(task);
+                    notifyObservers(task);                    
                 }//fim do if(host.hasValidIP())
                 else {
                     //creating a message to send to a host
@@ -230,10 +236,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     outgoing.setGroup(task.getGroup());
                     outgoing.setReceiver(host.getName());
 
-                    /*
-                     * A host that doesn't have a valid IP addres is contacted by 
-                     * a Server or another randezvou like a SuperHost
-                     */
                     debug("abrindo comunicação para enviar tarefa...");
                     socket = new Socket(serverIPaddress, serverPortNumber);
                     socket.setSoTimeout(timeout);
@@ -263,8 +265,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
             this.displayInfo("Sorry, there are not available hosts. Try again later.");
         }
         // Destruindo o objeto task
-        task.clean();
-        task = null;
+        //task.clean();
+        //task = null;
     }// fim do método sendTaskToRun
 
     /**
@@ -777,6 +779,51 @@ public class DeveloperViewerController extends Observable implements Runnable {
         //send updated groups to server
         this.uploadGroupsToServer(msg);
     }
+    
+    /**
+     * Cancels a scheduled task.
+     * @param groupName group selected for the scheduled task
+     * @param taskName name of the scheduled task
+     * @return true if the schedule has been canceled, false otherwise
+     */
+    public boolean cancelScheduledTask(String groupName, String taskName){
+        boolean success = false;
+        CollATask task = this.getTaskResult(groupName, taskName);
+        Long taskID = task.getTaskID();
+        if(this.hostsWithScheduledTasks.containsKey(taskID)){
+            this.cancelScheduledTask(hostsWithScheduledTasks.get(taskID), taskID);
+            this.hostsWithScheduledTasks.remove(taskID);    
+            this.taskResults.get(groupName).remove(taskName);
+            success = true;
+        }
+        return success;
+    }
+
+    /**
+     * Asks a host to cancel a scheduled task.
+     *
+     * @param host a host to which a task has been scheduled
+     * @param taskID id of the scheduled task
+     */
+    private void cancelScheduledTask(CollAHost host, Long taskID) {
+        CancelTask msg = new CancelTask(taskID);
+        Socket socket;
+        try {
+            socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
+            socket.setSoTimeout(timeout);
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(msg);
+            output.flush();
+            // receives ACK
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+            input.readObject();
+            socket.close();
+        } catch (IOException ex) {
+            //Exceptions.printStackTrace(ex);
+        } catch (ClassNotFoundException ex){
+            //ex.printStackTrace();
+        }
+    }
 
     private void debug(String info, Exception ex) {
         /*this.debugInfo.clear();
@@ -824,10 +871,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
     public int serverPortNumber;
     public String serverIPaddress;
     private CollAUser user;
-    //private ChatWindow chatWindow;
-    /**
-     * @todo aqui vai uma lista de tasks a partir da proxima versao Variables
-     * used to send a Task
+    /*
+     * Sending a Task
      */
     private Queue<Task> tasksToRun; //tarefas armazenadas e que serão enviadas assim que um host for recebido.
     private File taskFile;
@@ -835,7 +880,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     private List<File> taskArgs;
     private String classToHostExecute;
     private String methodToExecute;
-    //private String chosenGroup;
     private HashMap<String, CollAUser> contacts;
-    private HashMap<String, HashMap<String, CollATask>> taskResults; //key: group, value: hash<taskName, result> >   
+    private HashMap<String, HashMap<String, CollATask>> taskResults; //key: group, value: hash<taskName, result> >  
+    private HashMap<Long, CollAHost> hostsWithScheduledTasks;
 }

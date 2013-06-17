@@ -34,7 +34,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
     /**
      * Creates new form ResultsWindow
      */
-    public ResultsWindow(DeveloperViewerController developerViewer, String resultStoreDirectory) {
+    public ResultsWindow(DeveloperViewerController developerViewer) {
 
         super("Results", true, true, true, true);
 
@@ -188,7 +188,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
         String group = (String) comboModel.getSelectedItem();
         DefaultListModel model = (DefaultListModel) this.jList_tasks.getModel();
         int listIndex = jList_tasks.getSelectedIndex();
-        if (model.getElementAt(listIndex) != null) {
+        if (listIndex > -1 && model.getElementAt(listIndex) != null) {
             String taskName = (String) model.getElementAt(listIndex);
             showResult(group, taskName);
         }
@@ -205,7 +205,8 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
             String[] href = (String[]) attr.getAttribute(HTML.Attribute.HREF);
             String[] data = (String[]) attr.getAttribute(HTML.Attribute.DATA);
             String[] archive = (String[]) attr.getAttribute(HTML.Attribute.ARCHIVE);
-            if (href != null || data != null || archive != null) {
+            String[] code  = (String[]) attr.getAttribute(HTML.Attribute.CODE);
+            if (href != null || data != null || archive != null || code != null) {
                 jTextPane_taskInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             } else {
                 jTextPane_taskInfo.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -226,7 +227,16 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
             String[] archive = (String[]) attr.getAttribute(HTML.Attribute.ARCHIVE);
             String[] href = (String[]) attr.getAttribute(HTML.Attribute.HREF);
             String[] data = (String[]) attr.getAttribute(HTML.Attribute.DATA);
-            if (href != null) {
+            String[] code = (String[]) attr.getAttribute(HTML.Attribute.CODE);
+            if (code != null) {
+                groupName = code[0];
+                taskName = code[1];
+                int cancelTask = JOptionPane.showConfirmDialog(this, "Are you sure that you want abort this task?", "Abort Task " + taskName, JOptionPane.YES_NO_OPTION);
+                if (cancelTask == JOptionPane.YES_OPTION) {
+                    devViewer.cancelScheduledTask(groupName, taskName);
+                    this.updateResults();
+                }
+            } else if (href != null) {
                 groupName = href[0];
                 taskName = href[1];
                 File file;
@@ -240,8 +250,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
                 groupName = data[0];
                 taskName = data[1];
                 Object result = devViewer.getTaskResult(groupName, taskName);
-                this.saveNonFileResult(result, this.objectDir);
-                //TODO implementar download dos tipos e também informar ao usuário que o resultado deve ser serializable
+                this.saveNonFileResult(result);
             } else if (archive != null) {
                 groupName = archive[0];
                 taskName = archive[1];
@@ -251,7 +260,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
                 } else {
                     this.showResult(groupName, taskName);
                 }
-                
+
             }
         }
     }//GEN-LAST:event_jTextPane_taskInfoMouseClicked
@@ -272,10 +281,16 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
                 model.addElement(task);
             }
         }
+        if(model.isEmpty()){
+            this.jTextPane_taskInfo.setText("");
+        }
         this.repaint();
     }
 
     public void showResult(String groupName, String taskName) {
+
+        CollATask result = devViewer.getTaskResult(groupName, taskName);
+
         StyledDocument doc = this.jTextPane_taskInfo.getStyledDocument();
         SimpleAttributeSet infoAttr = new SimpleAttributeSet();
         SimpleAttributeSet msgAttr = new SimpleAttributeSet();
@@ -285,19 +300,20 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
         StyleConstants.setFontFamily(infoAttr, "sansserif");
         StyleConstants.setFontSize(msgAttr, 14);
         StyleConstants.setFontSize(infoAttr, 14);
-
-        //insert link to open file
-        MutableAttributeSet fileLink = new SimpleAttributeSet();
+        
         String[] groupAndTask = new String[2];
         groupAndTask[0] = groupName;
         groupAndTask[1] = taskName;
+
+        //insert link to save file
+        MutableAttributeSet fileLink = new SimpleAttributeSet();        
         fileLink.addAttribute(HTML.Attribute.HREF, groupAndTask);
         StyleConstants.setUnderline(fileLink, true);
         StyleConstants.setForeground(fileLink, Color.BLUE);
         StyleConstants.setFontFamily(fileLink, "sansserif");
         StyleConstants.setFontSize(fileLink, 14);
 
-        //insert link to download file from host
+        //insert link to save object
         MutableAttributeSet objectLink = new SimpleAttributeSet();
         objectLink.addAttribute(HTML.Attribute.DATA, groupAndTask);
         StyleConstants.setUnderline(objectLink, true);
@@ -313,7 +329,14 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
         StyleConstants.setFontFamily(downloadFileLink, "sansserif");
         StyleConstants.setFontSize(downloadFileLink, 14);
 
-        CollATask result = devViewer.getTaskResult(groupName, taskName);
+        //insert link to cancel a scheduled task
+        MutableAttributeSet cancelScheduleLink = new SimpleAttributeSet();
+        cancelScheduleLink.addAttribute(HTML.Attribute.CODE, groupAndTask);
+        StyleConstants.setUnderline(cancelScheduleLink, true);
+        StyleConstants.setForeground(cancelScheduleLink, Color.BLUE);
+        StyleConstants.setFontFamily(cancelScheduleLink, "sansserif");
+        StyleConstants.setFontSize(cancelScheduleLink, 14);
+
         try {
             doc.remove(0, doc.getLength());
             doc.insertString(doc.getLength(), "Task: ", infoAttr);
@@ -334,7 +357,17 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
             } else if (result.getResult() instanceof File) {
                 doc.insertString(doc.getLength(), result.getResult().toString() + " (click here to save and open the file)\n", fileLink);
             } else {
-                doc.insertString(doc.getLength(), result.getResult().toString() + " (click here to save the object to a file)\n", objectLink);
+                if (result.isFinished()) {
+                    doc.insertString(doc.getLength(), result.getResult().toString() + " (click here to save the object to a file)\n", objectLink);
+                } else {
+                    if (result.hasSchedule()) {
+                        //@todo remover a task de todas as listas se for cancelada (como se nunca houvesse existido)
+                        //@todo ao clicar, deve-se perguntar ao usuario se realmente deseja cancelar a task
+                        doc.insertString(doc.getLength(), "Schedule: " + result.getSchedule().toString() + " (click here to cancel schedule)\n", cancelScheduleLink);
+                    } else {
+                        doc.insertString(doc.getLength(), result.getResult().toString(), msgAttr);
+                    }
+                }
             }
             this.jTextPane_taskInfo.setCaretPosition(doc.getLength());
         } catch (BadLocationException ble) {
@@ -371,14 +404,16 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
         temp.delete();
     }
 
-    private void saveNonFileResult(Object result, String directory) {
+    private void saveNonFileResult(Object result) {
         if (result instanceof Serializable) {
             String filename = (String) JOptionPane.showInputDialog(this, "Save oject as:", result.toString());
             if (filename != null) {
-                File file = new File(directory, filename);
-                file.mkdir();
+                File dir = new File(this.objectDir);
+                dir.mkdirs();
+                File file = new File(dir, filename);
                 try {
-                    FileOutputStream f_out = new FileOutputStream(directory);
+                    file.createNewFile();
+                    FileOutputStream f_out = new FileOutputStream(file);
                     ObjectOutputStream output = new ObjectOutputStream(f_out);
                     output.writeObject(result);
                     output.flush();
@@ -395,7 +430,6 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
         }
     }
 
-    //TODO criar metodo para fazer download de object
     /**
      * Copy a file form a directory to another and return the new File
      *
@@ -434,7 +468,6 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
             return file;
         }
         return null;
-
     }
 
     public void setResultsDir(String dir) {

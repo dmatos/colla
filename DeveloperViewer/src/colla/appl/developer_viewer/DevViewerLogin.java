@@ -60,8 +60,7 @@ public class DevViewerLogin extends Observable{
      * @throws Exception  
      */
     private boolean restoredData() throws Exception{
-        //TODO use XML instead of java objects
-        //create data directory if it does not alredy exist       
+        //creates a data directory if it does not alredy exists       
         new File("data/").mkdir();
 
         if (new File("data/config.data").exists()) {

@@ -154,8 +154,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             input.close();
             f_in.close();
             this.resultsWindow.setResultsDir(this.config.getResulstDir());
+            this.resultsWindow.setNonFileResultDir(this.config.getNonFileResulstDir());
             return true;
         }
+        this.resultsWindow.setResultsDir(this.config.getResulstDir());
+        this.resultsWindow.setNonFileResultDir(this.config.getNonFileResulstDir());
         return false;
     }
 
@@ -164,7 +167,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      */
     private void initCustomComponents() {
         this.config = new ClientConfigurations();
-        this.resultsWindow = new ResultsWindow(this.devViewer, this.config.getResulstDir());
+        this.resultsWindow = new ResultsWindow(this.devViewer);
         this.dependencyModel = new DefaultListModel<File>();
         this.argumentsModel = new DefaultListModel<File>();
         this.AtachsList.setModel(dependencyModel);
@@ -284,6 +287,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jPanel5 = new javax.swing.JPanel();
         jFileChooser = new javax.swing.JFileChooser();
         jDialog_sendTask = new javax.swing.JDialog();
+        jPanel7 = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
         jPanel6 = new colla.kernel.util.ImagePane(BackGround.SOFT_GREEN.getPath());
         jLabelError = new javax.swing.JLabel();
         AddTask = new javax.swing.JButton();
@@ -609,9 +614,9 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jDialog_sendTask.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         jDialog_sendTask.setTitle(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jDialog_sendTask.title")); // NOI18N
         jDialog_sendTask.setLocationByPlatform(true);
-        jDialog_sendTask.setMinimumSize(new java.awt.Dimension(588, 540));
+        jDialog_sendTask.setMaximumSize(new java.awt.Dimension(657, 674));
+        jDialog_sendTask.setMinimumSize(new java.awt.Dimension(657, 200));
         jDialog_sendTask.setModal(true);
-        jDialog_sendTask.setResizable(false);
 
         jLabelError.setFont(new java.awt.Font("DejaVu Sans", 1, 14)); // NOI18N
         jLabelError.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jLabelError.text")); // NOI18N
@@ -762,7 +767,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                                         .addComponent(Cancel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jButton_submit, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 7, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -838,22 +843,35 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     .addComponent(jCheckBoxSchedule)
                     .addComponent(jLabel11)
                     .addComponent(jCalendarSendTask, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         jPanel6Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {AddAtach, AddTask, Cancel, RemoveAtach, jButton_addArgument, jButton_rmArgument, jButton_submit});
 
         jPanel6Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jScrollPane12, jScrollPane5});
 
+        jScrollPane6.setViewportView(jPanel6);
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 657, Short.MAX_VALUE)
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jDialog_sendTaskLayout = new javax.swing.GroupLayout(jDialog_sendTask.getContentPane());
         jDialog_sendTask.getContentPane().setLayout(jDialog_sendTaskLayout);
         jDialog_sendTaskLayout.setHorizontalGroup(
             jDialog_sendTaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jDialog_sendTaskLayout.setVerticalGroup(
             jDialog_sendTaskLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jDialog_manageGroups.setTitle(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jDialog_manageGroups.title")); // NOI18N
@@ -1228,7 +1246,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addGroup(jPanel_card1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField_nonFileResultsDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton_ResultsDirNonFile))
-                .addContainerGap(128, Short.MAX_VALUE))
+                .addContainerGap(130, Short.MAX_VALUE))
         );
 
         jPanel_settingsMain.add(jPanel_card1, "card1");
@@ -1255,7 +1273,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSpinner_portNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel8))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(92, Short.MAX_VALUE))
         );
         jPanel_card2Layout.setVerticalGroup(
             jPanel_card2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1266,7 +1284,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addGroup(jPanel_card2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(jSpinner_portNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(211, Short.MAX_VALUE))
+                .addContainerGap(212, Short.MAX_VALUE))
         );
 
         jPanel_settingsMain.add(jPanel_card2, "card2");
@@ -1423,7 +1441,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2420,6 +2438,9 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         btnTime.setTargetDate(dateTime);
     }
+    
+    
+    
     private HashMap<String, java.util.List<String>> acceptedMembers;
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;
@@ -2528,6 +2549,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel_card1;
     private javax.swing.JPanel jPanel_card2;
     private javax.swing.JPanel jPanel_myHosts;
@@ -2540,6 +2562,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JScrollPane jScrollPane9;

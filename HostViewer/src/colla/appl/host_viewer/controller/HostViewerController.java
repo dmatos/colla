@@ -7,6 +7,7 @@ package colla.appl.host_viewer.controller;
 import colla.appl.host_viewer.view.HostViewerGUI;
 import colla.kernel.api.*;
 import colla.kernel.messages.toHost.ServerHostLoginAnswer;
+import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
 import colla.kernel.util.SAXReader;
 import colla.kernel.util.Treater;
@@ -213,6 +214,29 @@ public class HostViewerController {
     public void setServerPortNumber(int serverPortNumber) {
         this.serverPortNumber = serverPortNumber;
     }
+    
+    /**
+     * Cancels a scheduled task.
+     * 
+     * @param taskID id of a scheduled task to cancel
+     */
+    public void cancelScheduledTask(long taskID){
+        if(this.microServer.cancelTask(taskID)){
+            this.displayStatus("Task: "+ taskID + " has been canceled.");
+        } else {
+            this.displayStatus("Task: "+ taskID + " could not be canceled.");
+        }
+    }
+    
+    /**
+     * Schedules a task.
+     * 
+     * @param taskMessage message containing a task to schedule. 
+     */
+    public void scheduleTask(TaskMessage taskMessage){
+        this.microServer.scheduleTask(taskMessage);
+    }
+    
     private static HostViewerController instance;
     private CollAHost collAHost;
     private String serverIPaddress;

@@ -21,7 +21,7 @@ public class ScheduledTask extends TimerTask {
 
     @Override
     public void run() {
-       this.resource.putRegister(this.taskMessage);
+        this.resource.putRegister(this.taskMessage);
     }
     
     private final CollAMessage taskMessage;

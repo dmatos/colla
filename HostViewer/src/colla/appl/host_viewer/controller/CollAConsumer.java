@@ -5,6 +5,7 @@ import colla.kernel.api.*;
 import colla.kernel.enumerations.HostOps;
 import colla.kernel.impl.User;
 import colla.kernel.messages.toClient.TaskResultMsg;
+import colla.kernel.messages.toHost.CancelTask;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.TransmitResultMsg;
 import implementations.sm_kernel.JCL_FacadeImpl;
@@ -15,22 +16,22 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
-    
+public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
+
     CollAHost host;
     private final int timeout = 0;
     String serverIPaddress;
     int serverPortNumber;
 
-    public CollAConsumer( GenericResource<S> re, HostViewerMicroServer hostMicroServer ){
-        super( re );
+    public CollAConsumer(GenericResource<S> re, HostViewerMicroServer hostMicroServer) {
+        super(re);
         this.host = HostViewerController.getInstance().getHost();
         this.serverIPaddress = hostMicroServer.getServerIPaddress();
         this.serverPortNumber = hostMicroServer.getServerPortNumber();
     }
 
     @Override
-    protected void doSomething( S collAMessage ){
+    protected void doSomething(S collAMessage) {
         HostOps operation;
 
         try {
@@ -43,38 +44,37 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
                 case TASK_EXECUTE: {
                     TaskMessage taskMessage = (TaskMessage) collAMessage;
                     CollATask task = taskMessage.getTask();
-                    User client = (User) taskMessage.getUser();
-                    String taskName = task.getTaskName();
-                    HashMap<String, CollAUser> group = taskMessage.getGroup();
-                    String groupName = taskMessage.getGroupName();
 
-                    //running task
-                    JCL_result jclr = this.executeTask(task);
-                    HostViewerController.getInstance().displayStatus("done!!! ");
-                    if (jclr.getErrorResult() == null) {
-                        System.err.println(jclr.getCorrectResult().toString());
+                    if (task.hasSchedule()) {
+                        HostViewerController.getInstance().scheduleTask(taskMessage);                        
                     } else {
-                        //jclr.getErrorResult().printStackTrace();
+                        User client = (User) taskMessage.getUser();
+                        String taskName = task.getTaskName();
+                        HashMap<String, CollAUser> group = taskMessage.getGroup();
+                        String groupName = taskMessage.getGroupName();
+
+                        //running task
+                        JCL_result jclr = this.executeTask(task);
+                        HostViewerController.getInstance().displayStatus("done!!! ");
+                        if (jclr.getErrorResult() == null) {
+                            System.err.println(jclr.getCorrectResult().toString());
+                        } else {
+                            //jclr.getErrorResult().printStackTrace();
+                        }
+                        // Sending a result to client
+                        HostViewerController.getInstance().displayStatus("Sending result back...");
+                        task.setResult(jclr);
+                        this.sendResultBack(groupName, group, task, taskName);
+                        this.deleteDir(new File("../" + task.getTaskID()));
                     }
-                    // Sending a result to client
-                    HostViewerController.getInstance().displayStatus("Sending result back...");
-                    /*if (hostViewer.getHost().hasValidIP()) {
-                     Integer ticketNumber = hostViewer.storeResult(task, jclr);
-                     CollATicket ticket = new Ticket();
-                     ticket.setHostIPaddress(hostViewer.getHost().getIp());
-                     ticket.setHostPort(hostViewer.getHost().getPort());
-                     ticket.setTicket(ticketNumber);
-                     //sending back a msg without a real resulst, only a ticket number to download the result
-                     task.setTicket(ticket);
-                     this.sendResultBack(groupName, group, task, taskName);
-                     } else {*/
-                    task.setResult(jclr);
-                    this.sendResultBack(groupName, group, task, taskName);
-                    //}
-                    //hostViewer.deleteTaskFiles(task);
-                    this.deleteDir(new File("../"+task.getTaskID()));
                 }
                 break; // end case TASK_EXECUTE
+                case TASK_CANCEL:{
+                    CancelTask msg = (CancelTask) collAMessage;
+                    long taskID = msg.getTaskID();
+                    HostViewerController.getInstance().cancelScheduledTask(taskID);
+                }
+                break;
                 /*case DOWNLOAD_RESULT: {
                  DownloadResultMsg msg = (DownloadResultMsg) collAMessage;
                  Integer ticket = msg.getTicket();
@@ -109,7 +109,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
      */
     public void sendResultBack(String groupName, HashMap<String, CollAUser> group, CollATask task, String taskName) {
         for (String userName : group.keySet()) {
-            if (group.get(userName).hasValidIP()) {                
+            if (group.get(userName).hasValidIP()) {
                 sendResultBackToValidIPClient(groupName, group.get(userName), task);
                 HostViewerController.getInstance().displayStatus("Result was sent back to valid ip.");
             } else {
@@ -247,8 +247,8 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
         try {
             Object[] args = cTask.getArguments();
             /*System.err.println("class: " + cTask.getClassToExecute());
-            System.err.println("method: " + cTask.getMethodToExecute());
-            System.err.println(("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute()));*/
+             System.err.println("method: " + cTask.getMethodToExecute());
+             System.err.println(("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute()));*/
             HostViewerController.getInstance().displayStatus("Task: " + cTask.getTaskID());
             ticket = jcl.execute(cTask.getClassToExecute(), cTask.getMethodToExecute(), args);
             //System.err.println("Recebeu o ticket " + ticket);
@@ -261,7 +261,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
         //System.err.println("Conseguiu resultado para o ticket " + ticket);
         cTask.setFinished();
         jcl.removeResult(ticket);
-        
+
         return jclr;
 
     }// end of method executeTask
@@ -278,5 +278,4 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S>{
         }
         return dir.delete();
     }
-    
 }

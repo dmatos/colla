@@ -13,6 +13,8 @@ import implementations.util.CoresAutodetect;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 
 /**
@@ -35,6 +37,7 @@ class HostViewerMicroServer extends Thread {
         this.serverIPaddress = serverIPaddress;
         this.serverPortNumber = serverPortNumber;
         this.timer = new Timer();
+        this.scheduleMap = new HashMap<Long, ScheduledTask>();
         this.init();
     }
 
@@ -99,17 +102,8 @@ class HostViewerMicroServer extends Thread {
                 ObjectOutputStream output = new ObjectOutputStream(connection.getOutputStream());
                 output.writeObject(new ACK());
                 output.flush();
-
-                if (collAMessage instanceof TaskMessage) {
-                    if (((TaskMessage) collAMessage).getTask().hasSchedule()) {
-                        Date date = ((TaskMessage) collAMessage).getTask().getSchedule();
-                        this.timer.schedule(new ScheduledTask(collAMessage, this.serverR), date);
-                    } else {
-                        serverR.putRegister(collAMessage);
-                    }
-                } else {
-                    serverR.putRegister(collAMessage);
-                }
+                
+                serverR.putRegister(collAMessage);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -141,12 +135,44 @@ class HostViewerMicroServer extends Thread {
     public int getServerPortNumber() {
         return serverPortNumber;
     }
+
+    /**
+     * Cancels a scheduled task.
+     *
+     * @param taskID id of a scheduled task to cancel.
+     * @return true if the task exists and was canceled, otherwise returns
+     * false.
+     */
+    public boolean cancelTask(long taskID) {
+        boolean success = false;
+        if (scheduleMap.containsKey(taskID)) {
+            success = scheduleMap.get(taskID).cancel();
+            if (success) {
+                scheduleMap.remove(taskID);
+            }
+        }
+        return success;
+    }
+
+    /**
+     * Schedules a task.
+     *
+     * @param taskMessage a message containing a task to schedule.
+     */
+    public void scheduleTask(TaskMessage collAMessage) {
+        Date date = ((TaskMessage) collAMessage).getTask().getSchedule();
+        Long taskID = ((TaskMessage) collAMessage).getTask().getTaskID();
+        ScheduledTask scheduledTask = new ScheduledTask(collAMessage, this.serverR);
+        this.scheduleMap.put(taskID, scheduledTask);
+        this.timer.schedule(scheduledTask, date);
+    }
     private ServerSocket serverSocket; // para conexões quando se tem IP válido
     private Socket keepAlive; // para conexões quando não se tem 
     private boolean active;
     private String serverIPaddress;
     private int serverPortNumber;
     private Timer timer;
+    private Map<Long, ScheduledTask> scheduleMap;
     //Variáveis do código server multthread do Joubert
     protected GenericConsumer<CollAMessage>[] serverThreads;
     protected GenericResource<CollAMessage> serverR;

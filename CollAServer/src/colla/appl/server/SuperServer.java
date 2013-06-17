@@ -1,4 +1,4 @@
-package colla.appl.super_server;
+package colla.appl.server;
 
 import colla.kernel.api.*;
 import colla.kernel.messages.toClient.SendOwnedHostsMsg;

@@ -7,6 +7,7 @@
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -201,10 +202,8 @@
                                           <Component id="jTextField_isOnline" linkSize="1" alignment="0" min="-2" max="-2" attributes="1"/>
                                           <Component id="jTextField_group" linkSize="1" alignment="0" min="-2" max="-2" attributes="1"/>
                                           <Component id="jTextField_ipValido" linkSize="1" alignment="0" min="-2" max="-2" attributes="1"/>
-                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                              <Component id="jTextField_country" linkSize="1" alignment="0" pref="301" max="32767" attributes="0"/>
-                                              <Component id="jTextField_email" linkSize="1" alignment="0" max="32767" attributes="0"/>
-                                          </Group>
+                                          <Component id="jTextField_country" linkSize="1" alignment="0" pref="301" max="32767" attributes="0"/>
+                                          <Component id="jTextField_email" linkSize="1" alignment="0" max="32767" attributes="0"/>
                                           <Component id="jTextField_clientCompany" linkSize="1" alignment="0" min="-2" pref="301" max="-2" attributes="0"/>
                                           <Component id="jScrollPane5" linkSize="1" alignment="0" max="32767" attributes="0"/>
                                       </Group>
@@ -229,8 +228,8 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jTextField_clientCompany" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jScrollPane5" pref="144" max="32767" attributes="0"/>
-                                      <EmptySpace max="32767" attributes="0"/>
+                                      <Component id="jScrollPane5" pref="151" max="32767" attributes="0"/>
+                                      <EmptySpace pref="19" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>

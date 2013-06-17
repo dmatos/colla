@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.super_server;
+package colla.appl.server;
 
-import colla.appl.super_server.GUI.SuperServerGUI;
+import colla.appl.server.GUI.SuperServerGUI;
 
 /**
  * Classe principal que inicializa o servidor.

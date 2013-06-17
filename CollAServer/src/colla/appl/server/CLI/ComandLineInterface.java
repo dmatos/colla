@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.super_server.CLI;
+package colla.appl.server.CLI;
 
 import java.util.Observable;
 import java.util.Observer;

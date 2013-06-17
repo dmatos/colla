@@ -8,9 +8,9 @@
  *
  * Created on 10/01/2012, 14:42:22
  */
-package colla.appl.super_server.GUI;
+package colla.appl.server.GUI;
 
-import colla.appl.super_server.SuperServer;
+import colla.appl.server.SuperServer;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAJob;
 import colla.kernel.api.CollAServer;
@@ -79,7 +79,7 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
         jTree_clients.addTreeSelectionListener(new UsersTreeSelectionListener());
         jTabbedPane_server.setTitleAt(0, "Server Status");
         jTabbedPane_server.setTitleAt(1, "Clients");
-        displayMessage("Server started.");
+        displayMessage("Server initialized.");
 
         //search and shows the IP addresses of the machine
         NetworkDevices netDevices = new NetworkDevices();

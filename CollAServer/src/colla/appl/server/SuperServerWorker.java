@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.super_server;
+package colla.appl.server;
 
 import colla.kernel.api.*;
 import colla.kernel.enumerations.ActivityID;

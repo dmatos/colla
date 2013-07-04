@@ -71,4 +71,8 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <target depends="javadoc" description="build javadoc jar" name="package-docs">
+        <jar compress="true" destfile="dist/kernel-javadoc.jar" basedir="doc" />
+    </target>
 </project>

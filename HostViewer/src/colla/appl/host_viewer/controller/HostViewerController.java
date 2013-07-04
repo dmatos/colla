@@ -58,7 +58,7 @@ public class HostViewerController {
     }
 
     /**
-     * Connects the host on server
+     * Connects the host to the server.
      */
     public void login(CollAHost host) {
         this.setHost(host);
@@ -111,7 +111,10 @@ public class HostViewerController {
         }
     }
     
-    
+    /*@todo este metodo deveria chamar-se updateHost e deveria checar se o host 
+     * a ser inserido possui o mesmo nome do host atual por questoes de 
+     * seguranca.
+     */
     public void setHost(CollAHost host) {
         this.collAHost = host;
         if (this.collAHost.hasValidIP()) {
@@ -121,7 +124,7 @@ public class HostViewerController {
     }
 
     /**
-     * Displays a simple sentence on the display
+     * Displays a simple sentence on the display.
      *
      * @param s the string to be displayed
      */
@@ -218,7 +221,7 @@ public class HostViewerController {
     /**
      * Cancels a scheduled task.
      * 
-     * @param taskID id of a scheduled task to cancel
+     * @param taskID id of a scheduled task to cancel.
      */
     public void cancelScheduledTask(long taskID){
         if(this.microServer.cancelTask(taskID)){

@@ -62,7 +62,7 @@ public class HostViewerRegister{
     /**
      * Registers the host on server.
      * @param userName the name of the user who owns the host
-     * @param pass the pass of the user who owns the host
+     * @param pass the password of the user who owns the host
      * @param port the port for register
      */
     public boolean register( String userName, String pass, int port ){
@@ -111,8 +111,8 @@ public class HostViewerRegister{
         return true;
     }
 
-//calcular o hexadecimal da senha
-    public String byteArrayToHexString( byte[] b ){
+    //calcular o hexadecimal da senha
+    private String byteArrayToHexString( byte[] b ){
         StringBuffer sb = new StringBuffer( b.length * 2 );
         for( int i = 0; i < b.length; i++ ){
             int v = b[i] & 0xff;
@@ -127,7 +127,7 @@ public class HostViewerRegister{
     /* método para computar o hash da senha
      * retirado do site http://www.rgagnon.com/javadetails/java-0400.html
      */
-    public byte[] computeHash( String x ) throws Exception{
+    private byte[] computeHash( String x ) throws Exception{
         java.security.MessageDigest d;
         d = java.security.MessageDigest.getInstance( "SHA-1" );
         d.reset();

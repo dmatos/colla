@@ -1,6 +1,5 @@
 package colla.appl.host_viewer.controller;
 
-// exemplo de um consumidor !!!
 import colla.kernel.api.*;
 import colla.kernel.enumerations.HostOps;
 import colla.kernel.impl.User;

@@ -17,19 +17,19 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
- * SuperServer is an implementation of CollAServer that uses javaCaLa (http://www.joubertlima.com.br/calapp.html)
+ * Server is an implementation of CollAServer that uses javaCaLa (http://www.joubertlima.com.br/calapp.html)
  * to work with as many threads as the machine may offers within the Producer/Consumer paradigm.
  * 
  * Diogo Matos <dmatos88 at gmail.com>
  */
-public class SuperServer extends Observable implements CollAServer, Runnable {
+public class Server extends Observable implements CollAServer, Runnable {
 
     /**
      * 
      * @param portN   port number to which the server must listen.
      * @param timeOut time, in miliseconds, to set timeout for connections. 
      */
-    public SuperServer(int portN, int timeOut) {
+    public Server(int portN, int timeOut) {
         this.portNumber = portN;
         this.timeout = timeOut;
         this.userPasswords = new ConcurrentHashMap<String, String>();
@@ -61,13 +61,13 @@ public class SuperServer extends Observable implements CollAServer, Runnable {
 
     @Override
     public void run() {
-        ConnectionMonitor connMonitor = new ConnectionMonitor(this);
+        ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor(this);
         Long monitorDelayAndPeriod = new Long(300000); //start in 5 minutes (delay) and repeat each 5 minutes (period)
         this.checkOnlineUsers.schedule(connMonitor, monitorDelayAndPeriod, monitorDelayAndPeriod);
 
         //registering consumers in JavaCaLa
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
-        jcl.register(SuperServerWorker.class, SuperServerWorker.class.getName());
+        jcl.register(ServerWorker.class, ServerWorker.class.getName());
         JCL_result jclr = null;
         Socket socketAccept;
         while (true) {
@@ -77,7 +77,7 @@ public class SuperServer extends Observable implements CollAServer, Runnable {
                 socketAccept = serverSocket.accept();
                 connection_address = socketAccept.getInetAddress().toString().substring(1);
                 Object[] args = {socketAccept, this};
-                jcl.execute(SuperServerWorker.class.getName(), args);
+                jcl.execute(ServerWorker.class.getName(), args);
             } catch(IOException io){
                 //treat( "ex! Problema com socket passado pro jcl", io );
             }
@@ -348,7 +348,7 @@ public class SuperServer extends Observable implements CollAServer, Runnable {
                 user.setOffline();
             } catch (IOException ex) {
                 treat( ex );
-                Logger.getLogger(SuperServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -389,4 +389,4 @@ public class SuperServer extends Observable implements CollAServer, Runnable {
     protected ConcurrentHashMap<String, Socket> connectionsMap;// map clients/hosts with invalid IP's
     protected volatile int currentHost;
     protected ConcurrentHashMap<String, ArrayList<TaskResultMsg>> resultsMap; // store results for offline clients until they connet again
-}//fim da classe SuperServer
+}//fim da classe Server

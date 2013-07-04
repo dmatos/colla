@@ -17,13 +17,13 @@ import java.net.*;
 import java.util.*;
 
 /**
- * Consumer of sockets provided by SuperServer
+ * Consumer of sockets provided by Server.
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
-public class SuperServerWorker {        
+public class ServerWorker {        
 
-    public void execute(Socket s, SuperServer srvr) {
+    public void execute(Socket s, Server srvr) {
         this.server = srvr;
         Socket socket = s;
         ServerOps operation = ServerOps.PING;
@@ -369,7 +369,7 @@ public class SuperServerWorker {
      * @param activity the activity id that will be recorded
      * @param outro an optional activity description
      */
-    public void recordActivities(CollAUser user, ActivityID activity, String outro) {
+    private void recordActivities(CollAUser user, ActivityID activity, String outro) {
         HashMap<String, String> record;
         String pastActivities;
         if (outro == null) {
@@ -389,12 +389,12 @@ public class SuperServerWorker {
     }
 
     /**
-     * Gathers all contacts of an user in its groups in a hashmap
+     * Gathers all contacts of an user in its groups in a map
      *
      * @param userName name of the user
-     * @return a hashmap of name to user
+     * @return a map of name to user
      */
-    public HashMap<String, CollAUser> getUserContacts(String userName) {
+    private HashMap<String, CollAUser> getUserContacts(String userName) {
         HashMap<String, CollAUser> contacts = new HashMap<String, CollAUser>();
         CollAUser tmp = this.server.getUser(userName);
         for (String groupName : tmp.getGroups().keySet()) {
@@ -412,7 +412,7 @@ public class SuperServerWorker {
      * @param outro an optional activity description
      */
      
-    public void recordActivities(CollAHost host, ActivityID activity, String outro) {
+    private void recordActivities(CollAHost host, ActivityID activity, String outro) {
         HashMap<String, String> record;
         String pastActivities;
         if (outro == null) {
@@ -441,7 +441,7 @@ public class SuperServerWorker {
      * @param taskName name of the task.
      * @param task the task.
      */
-    public void transmitStartNotification(String groupName, String taskName, CollATask task) {
+    private void transmitStartNotification(String groupName, String taskName, CollATask task) {
         CollAGroup group = server.getGroup(groupName);
         for (String userName : group.getMembers()) {
             CollAUser user = server.getUser(userName);
@@ -472,7 +472,7 @@ public class SuperServerWorker {
      *
      * @param usr
      */
-    public void updateUser(CollAUser usr) {
+    private void updateUser(CollAUser usr) {
         server.updateUser(usr);
     }
 
@@ -481,7 +481,7 @@ public class SuperServerWorker {
      *
      * @param host
      */
-    public void updateHost(CollAHost host) {
+    private void updateHost(CollAHost host) {
         server.updateHost(host);
     }
 
@@ -490,7 +490,7 @@ public class SuperServerWorker {
      *
      * @param userName  user name to be updated.
      */
-    public void sendMemberUpdateToGroups(String userName) {
+    private void sendMemberUpdateToGroups(String userName) {
         CollAUser usr = this.server.getUser(userName);
         try {
             if (usr.getGroups() != null) {
@@ -510,7 +510,7 @@ public class SuperServerWorker {
      * @param groupName name of the group
      * @param userName name of the user
      */
-    public void sendGroupUpdateToMembers(String groupName, String userName) {
+    private void sendGroupUpdateToMembers(String groupName, String userName) {
         CollAGroup groupUpdated = server.getGroup(groupName);
         HashMap<String, CollAUser> usersMap = new HashMap<String, CollAUser>();
         for (String memberName : groupUpdated.getMembers()) {
@@ -569,7 +569,7 @@ public class SuperServerWorker {
      * @param groupName name of the group
      * @param user an CollAUser
      */
-    public void sendGroupUpdateToAdmins(String groupName, CollAUser user) {
+    private void sendGroupUpdateToAdmins(String groupName, CollAUser user) {
         CollAGroup groupUpdated = server.getGroup(groupName);
         HashMap<String, CollAUser> adminsMap = new HashMap<String, CollAUser>();
         HashMap<String, CollAUser> membersMap = new HashMap<String, CollAUser>();
@@ -634,7 +634,7 @@ public class SuperServerWorker {
      *
      * @return the port in which the ServerSocket is listening
      */
-    public int getPortNumber() {
+    private int getPortNumber() {
         return server.portNumber;
     }
 
@@ -644,7 +644,7 @@ public class SuperServerWorker {
      *
      * @return an object of User
      */
-    public CollAUser getUser(String userName) {
+    private CollAUser getUser(String userName) {
         return server.getUser(userName);
 
     }
@@ -657,7 +657,7 @@ public class SuperServerWorker {
      * @param receiver client that has will receive the message
      * @param message the message itself
      */
-    public void retransmitMessage(String sender, String receiver, String message) {
+    private void retransmitMessage(String sender, String receiver, String message) {
         Socket socket = server.connectionsMap.get(receiver);
         ObjectOutputStream output;
         ObjectInputStream  input;
@@ -705,7 +705,7 @@ public class SuperServerWorker {
      * @param attachBuffers some attaches over the task will work on
      * @param attachNames name of the attaches
      */
-    public void retransmitTask(String group, String sender, String receiver, CollATask task, ArrayList<byte[]> attachBuffers, ArrayList<String> attachNames) {
+    private void retransmitTask(String group, String sender, String receiver, CollATask task, ArrayList<byte[]> attachBuffers, ArrayList<String> attachNames) {
         treat("Retransmit with group "+group);
         treat("Sender = " + sender + " Receiver = " + receiver);
         Socket socket = server.connectionsMap.get(receiver);
@@ -754,7 +754,7 @@ public class SuperServerWorker {
      * @param taskName name of the task
      * @param jclr the result of the task
      */
-    public void retransmitTaskResult(String sender, CollAUser receiver, String group, String taskName, CollATask result) {
+    private void retransmitTaskResult(String sender, CollAUser receiver, String group, String taskName, CollATask result) {
         //System.err.println(receiver.getName());
         Socket socket = server.connectionsMap.get(receiver.getName());
         ObjectOutputStream output;
@@ -791,7 +791,7 @@ public class SuperServerWorker {
      * @param groupName The group from which to get the hosts
      * @return a List containing the online hosts belonging to the group
      */
-    public List<CollAHost> getHostsFromGroup(String groupName) {
+    private List<CollAHost> getHostsFromGroup(String groupName) {
         CollAGroup cGroup = server.getGroup(groupName);
         List<String> userNames = cGroup.getMembers();
         //System.out.println("Users from group " + groupName + ": " + userNames);
@@ -820,7 +820,7 @@ public class SuperServerWorker {
      * Gets all hosts online.
      * @return a List containing the online hosts.
      */
-    public List<CollAHost> getHostsOnline() {
+    private List<CollAHost> getHostsOnline() {
         Set<String> userNames = server.getUsersSet();
 //        System.out.println("Users from group " + groupName + ": " + userNames);
         Iterator<String> userNamesIt = userNames.iterator();
@@ -849,7 +849,7 @@ public class SuperServerWorker {
      * @param user the client
      * @param group the group to which the user will send the request
      */
-    public void sendAvailableHostsToClient(CollAUser user, String group) {
+    private void sendAvailableHostsToClient(CollAUser user, String group) {
         Socket socket;
         SendAvailableHostsMsg outgoing = new SendAvailableHostsMsg(this.server.generateTaskID());
         try {
@@ -884,7 +884,7 @@ public class SuperServerWorker {
         }
     }
 
-    public long generateSeassionID(Long id) {
+    private long generateSeassionID(Long id) {
         return id;
     }
 
@@ -892,7 +892,7 @@ public class SuperServerWorker {
      *
      * @return a Set containing the names of the users
      */
-    public Set<String> getUsersSet() {
+    private Set<String> getUsersSet() {
         return server.getUsersSet();
     }
 
@@ -906,14 +906,14 @@ public class SuperServerWorker {
      * @param socket an socket from client.
      * @return a message to send to client to confirm login
      */
-    public CollAMessage clientLogin(CollAUser user, String password, String ipAsClientSeesIt, Socket socket) {
+    private CollAMessage clientLogin(CollAUser user, String password, String ipAsClientSeesIt, Socket socket) {
         DeveloperViewerLoginAnswerMsg answer = new DeveloperViewerLoginAnswerMsg();
         if (user == null || server.getUser(user.getName()) == null) {
             answer.confirmUserName(false);
         } else {
             answer.confirmUserName(true);
             /*
-             * checks if its both a valid and public IP address over Internet,
+             * checks if its both a valid and private IP address over Internet,
              * or behind some NAT
              */
              if (socket.getInetAddress().toString().substring(1).equals(ipAsClientSeesIt)) {
@@ -955,7 +955,7 @@ public class SuperServerWorker {
      * @param userName name of client asking to join
      * @param groupName name of the group
      */
-    public void requestToJoinGroup(String userName, String groupName) {
+    private void requestToJoinGroup(String userName, String groupName) {
         CollAGroup group = this.server.getGroup(groupName);
         group.addMemberToWaitingList(userName);
         this.server.updateGroup(groupName, group);
@@ -967,7 +967,7 @@ public class SuperServerWorker {
      * @param user User that comes from client that is disconnecting
      * @param temp User that was stored on users map
      */
-    public void clientDisconnect(CollAUser user, CollAUser temp) {
+    private void clientDisconnect(CollAUser user, CollAUser temp) {
         for (CollAHost host : temp.getHosts()) {
             user.addHost(host);
         }
@@ -986,7 +986,7 @@ public class SuperServerWorker {
      *
      * @param host host disconnecting from server
      */
-    public void hostDisconnect(CollAHost host) {
+    private void hostDisconnect(CollAHost host) {
         host.setPort(-1);
         host.setOffline();
         server.displayMessage("Host " + host.getName() + " has disconnected");
@@ -1002,7 +1002,7 @@ public class SuperServerWorker {
      *
      * @return response a message to send to the client
      */
-    public CollAMessage clientSignUp(CollAUser user, String pass) {
+    private CollAMessage clientSignUp(CollAUser user, String pass) {
 
         SignUpAnswerMsg response = new SignUpAnswerMsg();
         if (server.getUserPassword(user.getName()) != null) {
@@ -1024,7 +1024,7 @@ public class SuperServerWorker {
      * @param usr the client
      * @param groupName name of the group to create
      */
-    public void addGroup(CollAUser usr, String groupName) {
+    private void addGroup(CollAUser usr, String groupName) {
         Socket socket;
         ObjectOutputStream output;
         ObjectInputStream  input;
@@ -1063,7 +1063,7 @@ public class SuperServerWorker {
      * Envia os grupos que o cliente pertence para o cliente.
      * @param user user that will receive the groups
      */
-    public void sendGroupsToClient(CollAUser user) {
+    private void sendGroupsToClient(CollAUser user) {
         Set<String> groups = server.getAllGroups();
         TreeSet<String> groupsSet = new TreeSet<String>();
         GetGroupsAnswerMsg response = new GetGroupsAnswerMsg();
@@ -1101,7 +1101,7 @@ public class SuperServerWorker {
      * @param host o hot para ser vinculado.
      * @param userName o nome do usuário que terá o host vinculado.
      */
-    public void hostAdd(Host host, String userName) {
+    private void hostAdd(Host host, String userName) {
         CollAUser user = server.getUser(userName);
         CollAHost temp = user.getHost(host.getName());
         // If host is already in mapHosts
@@ -1117,7 +1117,7 @@ public class SuperServerWorker {
      * Envia um resultado guardado ao cliente.
      * @param userName o nome do cliente que receberá o resultado.
      */
-    public void sendStoredResults( String userName ){
+    private void sendStoredResults( String userName ){
         CollAUser user = server.getUser( userName );
         if( user.getPort() > 0 ){
             try{
@@ -1154,12 +1154,12 @@ public class SuperServerWorker {
      * @param groupName o nome do grupo a ser pesquisado
      * @return os usuários do grupo
      */
-    public HashMap<String, CollAUser> getUsersFromGroup(String groupName) {
+    private HashMap<String, CollAUser> getUsersFromGroup(String groupName) {
         HashMap<String, CollAUser> group = new HashMap<String, CollAUser>();
         return group;
     }
 
-    public void updateGroups(List<CollAGroup> groups) {
+    private void updateGroups(List<CollAGroup> groups) {
         for (CollAGroup group : groups) {
             server.updateGroup(group.getName(), group);
             this.sendGroupUpdateToMembers(group.getName(), "0");
@@ -1172,7 +1172,7 @@ public class SuperServerWorker {
      * @param host an host that has been registered to the server
      * @param userName name of the owner of the host
      */
-    public void sendHostUpdateToOwner(CollAHost host, String userName) {
+    private void sendHostUpdateToOwner(CollAHost host, String userName) {
         try {
             CollAUser user = this.getUser(userName);
             Socket socket;
@@ -1199,5 +1199,5 @@ public class SuperServerWorker {
         }
     }// end method
     //Variables
-    private volatile SuperServer server;
+    private volatile Server server;
 }

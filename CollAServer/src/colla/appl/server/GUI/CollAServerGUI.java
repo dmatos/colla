@@ -1,16 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /*
- * SuperServerGUI.java
+ * CollAServerGUI.java
  *
  * Created on 10/01/2012, 14:42:22
  */
 package colla.appl.server.GUI;
 
-import colla.appl.server.SuperServer;
+import colla.appl.server.Server;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAJob;
 import colla.kernel.api.CollAServer;
@@ -50,18 +46,17 @@ import javax.swing.tree.TreeSelectionModel;
  * de armazenar informações dos mesmos em memória. Como por exemplo as
  * activities de um usuário, pois chegará num ponto onde não haverá memória
  * suficiente. As atividades de um usuário devem ser salvas em disco e
- * recuperadas pelo server apenas para exibição. Penso em armazenar em XML para
- * que haja compatibilidade entre sistemas operacionais.
+ * recuperadas pelo server apenas para exibição. 
  */
 /**
  * @author dmatos
  */
-public class SuperServerGUI extends javax.swing.JFrame implements Observer {
+public class CollAServerGUI extends javax.swing.JFrame implements Observer {
 
     /**
-     * Creates new form SuperServerGUI
+     * Creates new form CollAServerGUI
      */
-    public SuperServerGUI(CollAServer server) {
+    public CollAServerGUI(CollAServer server) {
 
         initializeLookAndFeel();
 
@@ -88,7 +83,7 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
                 displayMessage("IP Address: " + ip);
             }
         } catch (SocketException ex) {
-            Logger.getLogger(SuperServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CollAServerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         addWindowListener(new WindowAdapter() {
@@ -107,7 +102,7 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
     }
 
     /**
-     * Shutdown the server closing connections and saving data
+     * Shutdown the server, closing its connections and saving its data to permanent memory.
      */
     public void shutdown() {
         try {
@@ -250,9 +245,8 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
                     .addComponent(jTextField_isOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField_group, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField_ipValido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel_userStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jTextField_country, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
-                        .addComponent(jTextField_email))
+                    .addComponent(jTextField_country, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
+                    .addComponent(jTextField_email)
                     .addComponent(jTextField_clientCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane5))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -277,8 +271,8 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTextField_clientCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         jPanel_userStatusLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jTextField_country, jTextField_email, jTextField_group, jTextField_ipValido, jTextField_isOnline, jTextField_nome});
@@ -373,7 +367,11 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
         }
     }//GEN-LAST:event_jComboBox_activitiesListActionPerformed
 
-    public final void displayMessage(String arg0) {
+    /**
+     * Exhibits a message. 
+     * @param msg message to exhibit.
+     */
+    public final void displayMessage(String msg) {
         StyledDocument doc = jTextPane_serverStatus.getStyledDocument();
         SimpleAttributeSet dateAttr = new SimpleAttributeSet();
         StyleConstants.setForeground(dateAttr, Color.BLUE);
@@ -387,7 +385,7 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
             doc.insertString(doc.getLength(), connectionTime.getSimpleDate()
                     + " " + connectionTime.getHour()
                     + "\n", dateAttr);
-            doc.insertString(doc.getLength(), arg0 + "\n", msgAttr);
+            doc.insertString(doc.getLength(), msg + "\n", msgAttr);
             jTextPane_serverStatus.setCaretPosition(doc.getLength());
         } catch (BadLocationException ble) {
 //            ble.printStackTrace();
@@ -395,6 +393,9 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
 
     }
 
+    /**
+     * Updates the Tree of clients on the GUI.
+     */
     public void updateClientsTree() {
         Set<String> clientsSet = superServer.getUsersSet();
         DefaultTreeModel model = (DefaultTreeModel) jTree_clients.getModel();
@@ -424,7 +425,12 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
         }
     }
 
-    public CollAServer getServer() {
+    /**
+     * 
+     * @return the CollAServer instance used by this GUI instance. 
+     * should it be singleton?
+     */
+    private CollAServer getServer() {
         return this.superServer;
     }
 
@@ -516,12 +522,11 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
     }
 
     /**
-     * Deals with jCombobox_activitiesList listened actions
-     *
-     *
+     * Deals with jCombobox_activitiesList actions.
+     * 
      * @param arg0 value get at jCombobox_activitiesList
      */
-    public void comboBoxActions(String arg0) {
+    private void comboBoxActions(String arg0) {
         int index = jComboBox_activitiesList.getSelectedIndex();
         jTextArea_activities.setText("");
         if (superServer.getUsersSet().contains(arg0)) {
@@ -560,13 +565,13 @@ public class SuperServerGUI extends javax.swing.JFrame implements Observer {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SuperServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CollAServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SuperServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CollAServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SuperServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CollAServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SuperServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CollAServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
     private CollAServer superServer;

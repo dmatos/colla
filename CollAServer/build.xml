@@ -107,4 +107,11 @@
         <delete file="${store.dir}/temp_final.jar"/>
 
     </target>
+    
+    <target depends="javadoc" description="build javadoc jar" name="package-docs">
+        <jar compress="true" destfile="store/colla-server-javadoc.jar" basedir="doc" />
+    </target>
+    
+    <target depends="package-for-store, package-docs"  name="make-dist">
+    </target> 
 </project>

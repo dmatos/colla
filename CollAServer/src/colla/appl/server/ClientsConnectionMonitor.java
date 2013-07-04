@@ -1,29 +1,21 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package colla.appl.server;
 
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollAUser;
-import colla.kernel.messages.toClient.Ping;
-import colla.kernel.messages.toServer.Pong;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.TimerTask;
 
 /**
- *
+ * Checks for client connection status (online/offline).
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
-public class ConnectionMonitor extends TimerTask {
+public class ClientsConnectionMonitor extends TimerTask {
 
-    public ConnectionMonitor(CollAServer server) {
+    public ClientsConnectionMonitor(CollAServer server) {
         this.server = server;
         this.timeout = 45000;
     }

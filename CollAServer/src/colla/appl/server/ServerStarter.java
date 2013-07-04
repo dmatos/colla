@@ -4,14 +4,14 @@
  */
 package colla.appl.server;
 
-import colla.appl.server.GUI.SuperServerGUI;
+import colla.appl.server.GUI.CollAServerGUI;
 
 /**
- * Classe principal que inicializa o servidor.
+ * Class containing a main method to initialize the Server.
  *
  * @author dmatos
  */
-public class SuperServerStarter {
+public class ServerStarter {
 
     /**
      * @todo
@@ -34,7 +34,7 @@ public class SuperServerStarter {
 
         int timeout = 300000;
         int portNumber = 9999;
-        SuperServer superServer;
+        Server superServer;
         boolean useGUI = true;
 
         for (int i = 0; i < args.length; i++) {
@@ -61,12 +61,12 @@ public class SuperServerStarter {
 
 
 
-        superServer = new SuperServer(portNumber, timeout);
+        superServer = new Server(portNumber, timeout);
         Thread thr = new Thread(superServer);
         thr.start();
 
         if (useGUI) {
-            SuperServerGUI serverGUI = new SuperServerGUI(superServer);            
+            CollAServerGUI serverGUI = new CollAServerGUI(superServer);            
             serverGUI.displayMessage("Listening port number: " + superServer.getPortNumber());            
             superServer.addObserver(serverGUI);            
             serverGUI.updateClientsTree();

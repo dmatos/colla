@@ -16,17 +16,16 @@ import java.net.*;
 import java.util.Observable;
 
 /**
- * Cria um servidor que deixa o cliente disponível para receber solicitações a
- * qualquer momento.
- *
+ * Initializes a micro server so the client will be available to receive
+ * messages at any time.
  * @author dmatos
  */
 class DevMicroServer extends Observable implements Runnable {
 
     /**
-     * Constroi um micro server com as informações necessárias para seu
-     * funcionamento.
      *
+     * Initializes a micro server so the client will be available to receive
+     * messages at any time.
      * @param developerViewer the developer viewer linked with this server.
      * @param usr user that owns the microserver.
      * @param ipAddress server ip adress.

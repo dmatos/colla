@@ -328,7 +328,7 @@ public class ChatWindow extends javax.swing.JInternalFrame {
     /**
      * removes a contact from contactsMap
      * 
-     * @param name contact to remove
+     * @param contactName contact to remove
      */
     public void removeContact(String contactName) {
         if (contactsMap.containsKey(contactName)) {
@@ -340,7 +340,7 @@ public class ChatWindow extends javax.swing.JInternalFrame {
      * put a contact in contactsMap
      * 
      * @param  userName name of the contact
-     * @parma group group of the contact
+     * @param group group of the contact
      */
     public void addContact(String userName, String group) {
         contactsMap.put(userName, group);

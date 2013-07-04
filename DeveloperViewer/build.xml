@@ -80,7 +80,7 @@
              minus the .jar extension. It should not have spaces.
              <property name="store.jar.name" value="MyJarName"/>
         -->
-        <property name="store.jar.name" value="developer_viewer"/>
+        <property name="store.jar.name" value="developer-viewer"/>
 
 
         <!-- don't edit below this line -->
@@ -109,11 +109,18 @@
 
         <delete file="${store.dir}/temp_final.jar"/>
         
-         <copy todir="${store.dir}" overwrite="true">
+        <copy todir="${store.dir}" overwrite="true">
             <fileset dir="${store.dir}/..">
                 <include name="**/server_conf.xml" />
             </fileset>
         </copy>
 
     </target>
+    
+    <target depends="javadoc" description="build javadoc jar" name="package-docs">
+        <jar compress="true" destfile="store/developer-viewer-javadoc.jar" basedir="doc" />
+    </target>
+    
+    <target depends="package-for-store, package-docs"  name="make-dist">
+    </target> 
 </project>

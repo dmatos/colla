@@ -2408,7 +2408,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      * Validate and set the datetime field on the screen given a datetime
      * string.
      *
-     * @param dateTime The datetime string
+     * @param dateTimeString The datetime string
      */
     public void setDateTime(String dateTimeString) {
         Date dateTime = null;

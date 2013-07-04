@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package colla.appl.developer_viewer;
 
 import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
@@ -31,7 +27,8 @@ import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 /**
- * Classe responsável pelo login do cliente no servidor
+ * This class deals with the communications between server and client
+ * during login.
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
 public class DevViewerLogin extends Observable{
@@ -55,7 +52,7 @@ public class DevViewerLogin extends Observable{
     }
 
     /**
-     * 
+     * Restores previously saved configurations data.
      * @return if data was successfully restored.
      * @throws Exception  
      */
@@ -76,8 +73,9 @@ public class DevViewerLogin extends Observable{
     }
 
     /**
-     *
-     * @return true if no exception has been caugth, false otherwise
+     * Retrieves the IP address for the established connection.
+     * 
+     * @return if it was able to retrieve the IP address from the network card.
      */
     private boolean retrieveIPaddress() {
         try {
@@ -105,7 +103,7 @@ public class DevViewerLogin extends Observable{
      * @param b bytecode for password
      * @return hexdecimal formated password
      */
-    public String byteArrayToHexString(byte[] b) {
+    private String byteArrayToHexString(byte[] b) {
         StringBuilder sb = new StringBuilder(b.length * 2);
         for (int i = 0; i < b.length; i++) {
             int v = b[i] & 0xff;
@@ -122,7 +120,7 @@ public class DevViewerLogin extends Observable{
      *
      * @return bytecode for password
      */
-    public byte[] computeHash(String x) throws Exception {
+    private byte[] computeHash(String x) throws Exception {
         java.security.MessageDigest d;
         d = java.security.MessageDigest.getInstance("SHA-1");
         d.reset();
@@ -131,10 +129,10 @@ public class DevViewerLogin extends Observable{
     }
 
     /**
-     * Connects to the server to sign up for him
+     * Connects to the server to sign up a client.
      *
      * @param password password as the client has typed it
-     * @return true if name is available, false otherwise
+     * @return true if username is available, false otherwise
      * @throws Exception
      */
     public boolean signUpForServer(String password) throws Exception {
@@ -157,10 +155,10 @@ public class DevViewerLogin extends Observable{
     }
     
     /**
-     * Envia solicitação para se logar no servidor.
-     * @param userName o nome do usuário que deseja se conectar
-     * @param password o password do usuário que deseja se conectar
-     * @return um DeveloperViewre se conseguiu logar, null caso contrário
+     * Connects to the server to execute a login request.
+     * @param userName 
+     * @param password
+     * @return a DeveloperViewerController instance if logged in, otherwise returns null.
      * @throws Exception 
      */
     public DeveloperViewerController logInServer(String userName, String password) throws Exception {
@@ -216,7 +214,7 @@ public class DevViewerLogin extends Observable{
     }// fim do método logInServer
 
     /**
-     * Reads IP address and port number from a xml file to connect with the server 
+     * Reads IP address and port number from a xml file to connect with the server.
      *
      * @return true if it was succesfully read, false otherwise
      */
@@ -231,27 +229,30 @@ public class DevViewerLogin extends Observable{
             this.debugInfo.setException(io);
             this.setChanged();
             this.notifyObservers(this.debugInfo);
-            io.printStackTrace();            
+//            io.printStackTrace();            
             return false;
         } catch (ParserConfigurationException pce) {
             this.debugInfo.clear();
             this.debugInfo.setException(pce);
             this.setChanged();
             this.notifyObservers(this.debugInfo);
-            pce.printStackTrace();
+//            pce.printStackTrace();
             return false;
         } catch (SAXException sax) {
              this.debugInfo.clear();
             this.debugInfo.setException(sax);
             this.setChanged();
             this.notifyObservers(this.debugInfo);
-            sax.printStackTrace();
+//            sax.printStackTrace();
             return false;
         }
         return true;
     }  
     
-    
+    /**
+     * Exhibits a message to the user.
+     * @param message message to exhibit.
+     */
     public void displayMessage(String message){
         this.setChanged();
         this.notifyObservers(message);
@@ -273,7 +274,7 @@ public class DevViewerLogin extends Observable{
     
     /**
      * 
-     * @param useUI This application will use some UI if true.
+     * @param useGUI This application will use some UI if true.
      */
     public void useGUI(boolean useGUI){
         this.useGUI = useGUI;

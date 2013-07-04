@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package colla.appl.developer_viewer;
 
 import colla.appl.developer_viewer.view.Client_Login;
 import javax.swing.JOptionPane;
 
 /**
- *
+ * Contains the main method to start the DeveloperViewer.
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
 public class DeveloperViewerStarter{

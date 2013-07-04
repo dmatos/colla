@@ -435,7 +435,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
      *
      * @param temp
      * @param directory
-     * @return
+     * @return file in its new path.
      */
     private File copyFile(File temp, String directory) {
         new File(directory).mkdir();

@@ -611,10 +611,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
    
    
 
-     /**
-     * @param args the command line arguments
-     */
-    public final void initializeLookAndFeel() {
+      public final void initializeLookAndFeel() {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default

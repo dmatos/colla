@@ -28,13 +28,11 @@ import org.openide.util.Exceptions;
 public class DeveloperViewerController extends Observable implements Runnable {
 
     /**
-     * Constrói um viewer para que o cliente possa usufruir das funcionalidades
-     * do CollA.
      *
      * @param usr the user
      * @param serverPort the server port
      * @param serverIP the server ip adress
-     * @param contacts the contacts of user
+     * @param contacts contacts of the user
      */
     public DeveloperViewerController(CollAUser usr, int serverPort, String serverIP, HashMap<String, CollAUser> contacts) {
         this.user = usr;
@@ -71,7 +69,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @param groupName name of the group
      * @param group a map representing the goup
      */
-    public void refresh_a_group(String groupName, Set<String> group) {
+    void refresh_a_group(String groupName, Set<String> group) {
         if (devUI != null) {
             devUI.refresh_a_group(groupName, group);
         }
@@ -97,15 +95,13 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
 
     /**
-     * Solicita ao servidor um conjunto de hosts disponíveis para executar uma
-     * task qualquer.
-     *
+     * Asks the server for a set of available hosts to execute a task.
      * @param taskFile the task file to be executed.
-     * @param attachFiles the atach files of task.
-     * @param args the arguments files of task.
-     * @param classToExecute the class name to be executed.
-     * @param methodToExecute the method name to be executed.
-     * @param group o grupo ao qual a tarefa pertence.
+     * @param attachFiles the attached files of the task.
+     * @param args the argument files of task.
+     * @param classToExecute  class to be executed.
+     * @param methodToExecute  method to be executed.
+     * @param group group to which this task results will be shared.
      */
     public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
         try {
@@ -164,7 +160,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }//fim do método getAvailableHostsOnServer
 
     /**
-     * Send a task to execute in any host
+     * Send a task to execute in any host.
      *
      * @param hosts a host sent by a server that is available to run tasks.
      * @param taskID a long representing a task ID which must unique to a
@@ -272,9 +268,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
     /**
      * Receive a result and update the GUI and task related variables
      *
-     * @param receiver the host who performed the task
+     * @param groupName group to which the result will be shared
      * @param taskName the name of task
-     * @param jclr the result of task
+     * @param task the result of task
      */
     public void receiveTaskResult(String groupName, String taskName, CollATask task) {
         //user must know by the Developer Viewer GUI that a result has arrived       
@@ -290,13 +286,13 @@ public class DeveloperViewerController extends Observable implements Runnable {
         //System.out.println("The result of task " + taskName + " is: " + task.getResult());
     }
 
-    public String generateUniqueTaskName(String taskName, Long taskID) {
+    private String generateUniqueTaskName(String taskName, Long taskID) {
         String tName = "[" + taskID + "]" + taskName;
         return tName;
     }
 
     /**
-     * Update hash for results
+     * Update map of task results.
      *
      * @param groupName name of the group sharing the task
      * @param taskName name of the task
@@ -580,8 +576,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * Send a message to a contact through server or directly to its address.
      *
      * @param contactName name of contact that will receive a message.
-     * @param message the message itself.
-     * @param groupName the group from wich the user belongs.
+     * @param message the message to send.
+     * @param groupName the group to which the user belongs.
      * @return true if message was sent, false otherwise.
      */
     public boolean sendChatMessage(String contactName, String message, String groupName) {
@@ -781,7 +777,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
     
     /**
-     * Cancels a scheduled task.
+     * Connects to a host to cancel a scheduled task.
      * @param groupName group selected for the scheduled task
      * @param taskName name of the scheduled task
      * @return true if the schedule has been canceled, false otherwise
@@ -800,7 +796,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
 
     /**
-     * Asks a host to cancel a scheduled task.
+     * Connects to a host to cancel a scheduled task.
      *
      * @param host a host to which a task has been scheduled
      * @param taskID id of the scheduled task

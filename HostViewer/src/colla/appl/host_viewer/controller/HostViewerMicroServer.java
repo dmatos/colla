@@ -4,6 +4,9 @@
  */
 package colla.appl.host_viewer.controller;
 
+import colla.kernel.util.ScheduledTask;
+import colla.kernel.api.GenericResource;
+import colla.kernel.api.GenericConsumer;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAMessage;
 import colla.kernel.messages.toClient.ACK;

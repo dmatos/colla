@@ -4,6 +4,7 @@
  */
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.distributed.DistributedTaskController;
 import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.kernel.api.*;
 import colla.kernel.impl.Task;
@@ -18,7 +19,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.openide.util.Exceptions;
 
 /**
  * Works as union point and controller of the all GUI's
@@ -49,6 +49,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.debugInfo = new DebugInfo();
         this.debugInfo.setDebuggedName(user.getName());
         this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
+        this.distController = new DistributedTaskController(this);
     }
 
     @Override
@@ -95,42 +96,58 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
 
     /**
+     * Prepares a task to be sent.
+     *
+     * @param taskFile
+     * @param attachFiles
+     * @param args
+     * @param classToExecute
+     * @param methodToExecute
+     * @param group
+     * @param schedule
+     */
+    private void prepareTaskToSend(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
+        try {
+            Task task = new Task();
+            task.setOwner(this.user.getName());
+            task.setGroup(group);
+            task.setTask(taskFile);
+            task.setTaskName(taskFile.getName());
+            task.setClassToExecute(classToExecute);
+            task.setMethodToExecute(methodToExecute);
+            task.setSchedule(schedule);
+            Iterator<File> dependencyIterator = attachFiles.iterator();
+            Iterator<File> parameterIterator = args.iterator();
+            while (dependencyIterator.hasNext()) {
+                task.addDependency(dependencyIterator.next());
+            }
+            while (parameterIterator.hasNext()) {
+                task.addArgument(parameterIterator.next());
+            }
+            tasksToRun.add(task);
+            debug("Task inserida na lista de tasks para ser executada");
+        } catch (Exception e) {
+            debugInfo.clear();
+            debugInfo.setException(e);
+            this.notifyObservers(debugInfo);
+            //e.printStackTrace();
+        }
+    }
+
+    /**
      * Asks the server for a set of available hosts to execute a task.
+     *
      * @param taskFile the task file to be executed.
      * @param attachFiles the attached files of the task.
      * @param args the argument files of task.
-     * @param classToExecute  class to be executed.
-     * @param methodToExecute  method to be executed.
+     * @param classToExecute class to be executed.
+     * @param methodToExecute method to be executed.
      * @param group group to which this task results will be shared.
      */
     public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
         try {
             //Insert the taskFile into queue to send when host is arrived.
-            try {
-                Task task = new Task();
-                task.setOwner(this.user.getName());
-                task.setGroup(group);
-                task.setTask(taskFile);
-                task.setTaskName(taskFile.getName());
-                task.setClassToExecute(classToExecute);
-                task.setMethodToExecute(methodToExecute);
-                task.setSchedule(schedule);
-                Iterator<File> dependencyIterator = attachFiles.iterator();
-                Iterator<File> parameterIterator = args.iterator();
-                while (dependencyIterator.hasNext()) {
-                    task.addDependency(dependencyIterator.next());
-                }
-                while (parameterIterator.hasNext()) {
-                    task.addArgument(parameterIterator.next());
-                }
-                tasksToRun.add(task);
-                debug("Task inserida na lista de tasks para ser executada");
-            } catch (Exception e) {
-                debugInfo.clear();
-                debugInfo.setException(e);
-                this.notifyObservers(debugInfo);
-                //e.printStackTrace();
-            }
+            this.prepareTaskToSend(taskFile, attachFiles, args, classToExecute, methodToExecute, group, schedule);
             // Creates a socket with server
             //socket.setSoTimeout(timeout);
 
@@ -217,11 +234,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     input = new ObjectInputStream(socket.getInputStream());
                     input.readObject();
                     socket.close();
-                    
+
                     this.hostsWithScheduledTasks.put(task.getTaskID(), host);
-                    
+
                     debug("task" + task.getTaskID() + " sent to host " + host.getName() + " (valid ip)");
-                    notifyObservers(task);                    
+                    notifyObservers(task);
                 }//fim do if(host.hasValidIP())
                 else {
                     //creating a message to send to a host
@@ -264,6 +281,30 @@ public class DeveloperViewerController extends Observable implements Runnable {
         //task.clean();
         //task = null;
     }// fim do método sendTaskToRun
+
+    public void sendTaskToRunDistributed(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
+        /*@todo conversar com joubert sobre caso em que não há hosts*/
+        this.prepareTaskToSend(taskFile, attachFiles, args, classToExecute, methodToExecute, group, schedule);
+        Task task = tasksToRun.remove();
+        TaskMessage taskMsg = new TaskMessage();
+        taskMsg.setUser(this.user);
+        taskMsg.setTask(task);
+        // grupo ao qual a task será enviada
+        HashMap<String, CollAUser> tempGroup = new HashMap<String, CollAUser>();
+        tempGroup.put(this.user.getName(), this.user);
+        if (user.getGroups().get(task.getGroup()) != null) {
+            for (String userName : user.getGroups().get(task.getGroup()).getMembers()) {
+                tempGroup.put(userName, contacts.get(userName));
+            }
+        }
+
+        taskMsg.setGroup(tempGroup);
+        taskMsg.setGroupName(task.getGroup());
+        
+        this.distController.executeTask(taskMsg);
+        
+        notifyObservers(task);        
+    }
 
     /**
      * Receive a result and update the GUI and task related variables
@@ -775,20 +816,21 @@ public class DeveloperViewerController extends Observable implements Runnable {
         //send updated groups to server
         this.uploadGroupsToServer(msg);
     }
-    
+
     /**
      * Connects to a host to cancel a scheduled task.
+     *
      * @param groupName group selected for the scheduled task
      * @param taskName name of the scheduled task
      * @return true if the schedule has been canceled, false otherwise
      */
-    public boolean cancelScheduledTask(String groupName, String taskName){
+    public boolean cancelScheduledTask(String groupName, String taskName) {
         boolean success = false;
         CollATask task = this.getTaskResult(groupName, taskName);
         Long taskID = task.getTaskID();
-        if(this.hostsWithScheduledTasks.containsKey(taskID)){
+        if (this.hostsWithScheduledTasks.containsKey(taskID)) {
             this.cancelScheduledTask(hostsWithScheduledTasks.get(taskID), taskID);
-            this.hostsWithScheduledTasks.remove(taskID);    
+            this.hostsWithScheduledTasks.remove(taskID);
             this.taskResults.get(groupName).remove(taskName);
             success = true;
         }
@@ -816,7 +858,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
             socket.close();
         } catch (IOException ex) {
             //Exceptions.printStackTrace(ex);
-        } catch (ClassNotFoundException ex){
+        } catch (ClassNotFoundException ex) {
             //ex.printStackTrace();
         }
     }
@@ -870,6 +912,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     /*
      * Sending a Task
      */
+    private DistributedTaskController distController;
     private Queue<Task> tasksToRun; //tarefas armazenadas e que serão enviadas assim que um host for recebido.
     private File taskFile;
     private List<File> taskDependencies;

@@ -4,12 +4,12 @@
  */
 package colla.appl.developer_viewer;
 
-import colla.appl.developer_viewer.distributed.DistributedTaskController;
 import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.kernel.api.*;
 import colla.kernel.impl.Task;
 import colla.kernel.messages.toClient.ChatDirectMessageMsg;
 import colla.kernel.messages.toHost.CancelTask;
+import colla.kernel.messages.toHost.DistributedTaskMsg;
 import colla.kernel.messages.toHost.DownloadResultMsg;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
@@ -49,7 +49,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.debugInfo = new DebugInfo();
         this.debugInfo.setDebuggedName(user.getName());
         this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
-        this.distController = new DistributedTaskController(this);
     }
 
     @Override
@@ -106,7 +105,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @param group
      * @param schedule
      */
-    private void prepareTaskToSend(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
+    private void prepareTaskToSend(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule, Boolean isDistributed) {
         try {
             Task task = new Task();
             task.setOwner(this.user.getName());
@@ -116,6 +115,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
             task.setClassToExecute(classToExecute);
             task.setMethodToExecute(methodToExecute);
             task.setSchedule(schedule);
+            task.setDistributedMode(isDistributed);
             Iterator<File> dependencyIterator = attachFiles.iterator();
             Iterator<File> parameterIterator = args.iterator();
             while (dependencyIterator.hasNext()) {
@@ -144,10 +144,10 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @param methodToExecute method to be executed.
      * @param group group to which this task results will be shared.
      */
-    public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
+    public void getAvailableHostsOnServer(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule, boolean isDistributed) {
         try {
             //Insert the taskFile into queue to send when host is arrived.
-            this.prepareTaskToSend(taskFile, attachFiles, args, classToExecute, methodToExecute, group, schedule);
+            this.prepareTaskToSend(taskFile, attachFiles, args, classToExecute, methodToExecute, group, schedule, isDistributed);
             // Creates a socket with server
             //socket.setSoTimeout(timeout);
 
@@ -207,61 +207,10 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 //For now, we just send a Task to one host.
                 CollAHost host = hosts.get(0);
                 if (host.hasValidIP()) {
-                    //creating a message to send to host
-                    TaskMessage outgoing = new TaskMessage();
-                    outgoing.setUser(this.user);
-                    outgoing.setTask(task);
-                    // grupo ao qual a task será enviada
-                    HashMap<String, CollAUser> tempGroup = new HashMap<String, CollAUser>();
-                    tempGroup.put(this.user.getName(), this.user);
-                    if (user.getGroups().get(task.getGroup()) != null) {
-                        for (String userName : user.getGroups().get(task.getGroup()).getMembers()) {
-                            tempGroup.put(userName, contacts.get(userName));
-                        }
-                    }
-
-                    outgoing.setGroup(tempGroup);
-                    outgoing.setGroupName(task.getGroup());
-
-                    // A host that has a valid IP address must receive a direct connection
-                    debug("abrindo comunicação para enviar tarefa...");
-                    socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
-                    //taskSocket.setSoTimeout(timeout);
-                    output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject(outgoing);
-                    output.flush();
-                    // receives ACK
-                    input = new ObjectInputStream(socket.getInputStream());
-                    input.readObject();
-                    socket.close();
-
-                    this.hostsWithScheduledTasks.put(task.getTaskID(), host);
-
-                    debug("task" + task.getTaskID() + " sent to host " + host.getName() + " (valid ip)");
-                    notifyObservers(task);
+                    this.sendTaskToValidIP(task, host);
                 }//fim do if(host.hasValidIP())
                 else {
-                    //creating a message to send to a host
-                    TransmitTaskMsg outgoing = new TransmitTaskMsg();
-                    outgoing.setUser(this.user);
-                    outgoing.setTask(task);
-
-                    outgoing.setGroup(task.getGroup());
-                    outgoing.setReceiver(host.getName());
-
-                    debug("abrindo comunicação para enviar tarefa...");
-                    socket = new Socket(serverIPaddress, serverPortNumber);
-                    socket.setSoTimeout(timeout);
-                    output = new ObjectOutputStream(socket.getOutputStream());
-                    //System.out.println("Sending task on port:" + taskSocket.getLocalPort());
-                    output.writeObject(outgoing);
-                    output.flush();
-                    // espera por ACK
-                    input = new ObjectInputStream(socket.getInputStream());
-                    input.readObject();
-                    socket.close();
-                    debug("task" + task.getTaskID() + " sent to host " + host.getName() + "(invalid ip)");
-                    notifyObservers(task);
+                    this.sendTaskToInvalidIP(task, host);
                 }// fim do else
                 //a result of a task will come by either TCPServer or KeepAliveClient depending on the validity of user's IP address
                 //put the sent task in the hashmap with a message
@@ -282,13 +231,27 @@ public class DeveloperViewerController extends Observable implements Runnable {
         //task = null;
     }// fim do método sendTaskToRun
 
-    public void sendTaskToRunDistributed(File taskFile, ArrayList<File> attachFiles, ArrayList<File> args, String classToExecute, String methodToExecute, String group, Date schedule) {
-        /*@todo conversar com joubert sobre caso em que não há hosts*/
-        this.prepareTaskToSend(taskFile, attachFiles, args, classToExecute, methodToExecute, group, schedule);
-        Task task = tasksToRun.remove();
-        TaskMessage taskMsg = new TaskMessage();
-        taskMsg.setUser(this.user);
-        taskMsg.setTask(task);
+    /**
+     * Sends a task to run in a CollAHost which has a valid IP.
+     *
+     * @param task task to execute
+     * @param host host to which a task will be sent
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void sendTaskToValidIP(Task task, CollAHost host) throws IOException, ClassNotFoundException {
+        Socket socket;
+        ObjectOutputStream output;
+        ObjectInputStream input;
+        TaskMessage outgoing;
+        //creating a message to send to host
+        if (task.isDistributed()) {
+            outgoing = new DistributedTaskMsg();
+        } else {
+            outgoing = new TaskMessage();
+        }
+        outgoing.setUser(this.user);
+        outgoing.setTask(task);
         // grupo ao qual a task será enviada
         HashMap<String, CollAUser> tempGroup = new HashMap<String, CollAUser>();
         tempGroup.put(this.user.getName(), this.user);
@@ -298,12 +261,60 @@ public class DeveloperViewerController extends Observable implements Runnable {
             }
         }
 
-        taskMsg.setGroup(tempGroup);
-        taskMsg.setGroupName(task.getGroup());
-        
-        this.distController.executeTask(taskMsg);
-        
-        notifyObservers(task);        
+        outgoing.setGroup(tempGroup);
+        outgoing.setGroupName(task.getGroup());
+
+        // A host that has a valid IP address must receive a direct connection
+        debug("abrindo comunicação para enviar tarefa...");
+        socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
+        //taskSocket.setSoTimeout(timeout);
+        output = new ObjectOutputStream(socket.getOutputStream());
+        output.writeObject(outgoing);
+        output.flush();
+        // receives ACK
+        input = new ObjectInputStream(socket.getInputStream());
+        input.readObject();
+        socket.close();
+
+        this.hostsWithScheduledTasks.put(task.getTaskID(), host);
+
+        debug("task" + task.getTaskID() + " sent to host " + host.getName() + " (valid ip)");
+        notifyObservers(task);
+    }
+
+    /**
+     * Sends a task to run in a CollAHost which has an invalid IP.
+     *
+     * @param task task to execute
+     * @param host host to which a task will be sent
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void sendTaskToInvalidIP(Task task, CollAHost host) throws IOException, ClassNotFoundException {
+        Socket socket;
+        ObjectOutputStream output;
+        ObjectInputStream input;
+        TransmitTaskMsg outgoing;
+        outgoing = new TransmitTaskMsg();
+        outgoing.setUser(this.user);
+        outgoing.setTask(task);
+
+        outgoing.setGroup(task.getGroup());
+        outgoing.setReceiver(host.getName());
+
+        debug("abrindo comunicação para enviar tarefa...");
+        socket = new Socket(serverIPaddress, serverPortNumber);
+        socket.setSoTimeout(timeout);
+        output = new ObjectOutputStream(socket.getOutputStream());
+        //System.out.println("Sending task on port:" + taskSocket.getLocalPort());
+        output.writeObject(outgoing);
+        output.flush();
+        // espera por ACK
+        input = new ObjectInputStream(socket.getInputStream());
+        input.readObject();
+        socket.close();
+        debug("task" + task.getTaskID() + " sent to host " + host.getName() + "(invalid ip)");
+        notifyObservers(task);
     }
 
     /**
@@ -912,7 +923,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
     /*
      * Sending a Task
      */
-    private DistributedTaskController distController;
     private Queue<Task> tasksToRun; //tarefas armazenadas e que serão enviadas assim que um host for recebido.
     private File taskFile;
     private List<File> taskDependencies;

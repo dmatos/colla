@@ -185,7 +185,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jButton_generalSettings.setVerticalTextPosition(SwingConstants.BOTTOM);
         jButton_generalSettings.setHorizontalTextPosition(SwingConstants.CENTER);
         jRadioButtonCollAHost.setSelected(true);
-        
+
         //saving results
         jFileChooser_resultDirectory = new JFileChooser();
         jFileChooser_resultDirectory.setDialogTitle("Select directory to save results");
@@ -1868,7 +1868,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     jComboBox_taskGroup.addItem(gs);
                 }
             }
-            jDialog_sendTask.pack();            
+            jDialog_sendTask.pack();
             jCalendarSendTask.setMinSelectableDate(new Date());
             jDialog_sendTask.setVisible(true);
         } else {
@@ -1967,14 +1967,17 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     } else {
                         this.selectedDate = null;
                     }
-
-                    //selecting type of host to execute task
-                    if(jRadioButtonCollAHost.isSelected()){
-                        this.devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate);
-                    } else {
-                        this.devViewer.sendTaskToRunDistributed(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate);
-                    }
                     
+                    //selecting mode to execute task (True to Distributed or False to Multicore)
+                    Boolean isDistributed;
+                    if (jRadioButtonCollAHost.isSelected()) {
+                        isDistributed = false;
+                    } else {
+                        isDistributed = true;
+                    }
+                    this.devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate, isDistributed);
+
+
                     /*
                      * Clear fields to send another task after that
                      */
@@ -2482,9 +2485,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         btnTime.setTargetDate(dateTime);
     }
-    
-    
-    
     private HashMap<String, java.util.List<String>> acceptedMembers;
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;

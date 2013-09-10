@@ -43,6 +43,7 @@ public class Task implements CollATask, Serializable {
     private CollATicket ticket;
     private Long taskID;
     private Date schedule;
+    private Boolean distributedTask;
 
     public Task() {
         this.methodToExecute = "";
@@ -345,5 +346,15 @@ public class Task implements CollATask, Serializable {
         if(this.schedule == null)
             return false;
         return true;
+    }
+    
+    @Override
+    public void setDistributedMode(Boolean isDisbributed){
+        this.distributedTask = isDisbributed;
+    }
+
+    @Override
+    public boolean isDistributed() {
+        return this.distributedTask;
     }
 }

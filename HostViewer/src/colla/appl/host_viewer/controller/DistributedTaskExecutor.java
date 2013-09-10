@@ -2,13 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.developer_viewer.distributed;
+package colla.appl.host_viewer.controller;
 
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollATask;
 import colla.kernel.api.CollAUser;
-import colla.kernel.api.GenericConsumer;
-import colla.kernel.api.GenericResource;
 import colla.kernel.impl.User;
 import colla.kernel.messages.toHost.TaskMessage;
 import implementations.dm_kernel.user.JCL_FacadeImpl;
@@ -19,54 +17,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import org.openide.util.Exceptions;
 
 /**
  *
  * @author dmatos
  */
-public class DeveloperCollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
+public class DistributedTaskExecutor {
 
-    public DeveloperCollAConsumer(GenericResource<S> re, DistributedTaskController controller) {
-        super(re);
-        this.controller = controller;
-    }
-
-    @Override
-    protected void doSomething(S collAMsg) {
+    protected JCL_result executeDistributedTask(CollAMessage collAMsg, CollAConsumer consumer) {
         TaskMessage taskMessage = (TaskMessage) collAMsg;
         CollATask task = taskMessage.getTask();
 
-        if (task.hasSchedule()) {
-            this.controller.scheduleTask(taskMessage);
-        } else {
-            User client = (User) taskMessage.getUser();
-            String taskName = task.getTaskName();
-            HashMap<String, CollAUser> group = taskMessage.getGroup();
-            String groupName = taskMessage.getGroupName();
+        User client = (User) taskMessage.getUser();
+        String taskName = task.getTaskName();
+        HashMap<String, CollAUser> group = taskMessage.getGroup();
+        String groupName = taskMessage.getGroupName();
 
-            //running task
-            JCL_result jclr = this.executeTask(task);
-            
-            //@todo conversar com joubert sobre jcl sem host e sem server
-            
-            if (jclr.getErrorResult() == null) {
-                System.err.println(jclr.getCorrectResult().toString());
-            } else {
-                //jclr.getErrorResult().printStackTrace();
-            }
-            try {
-                // Sending a result back
-                task.setResult(jclr);
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            this.controller.sendResultBack(groupName, group, task, taskName);
-            this.deleteDir(new File("../" + task.getTaskID()));
-        }
-    }
-
-    public JCL_result executeTask(CollATask task) {
         task.setStarted();
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
 
@@ -76,7 +42,6 @@ public class DeveloperCollAConsumer<S extends CollAMessage> extends GenericConsu
          * receive the buffer of file
          */
         byte[] taskBuffer = task.getTask();
-        String taskName = task.getTaskName();
         Map<String, byte[]> jars = task.getDependencies();
         String classToExecute = task.getClassToExecute();
         String methodToExecute = task.getMethodToExecute();
@@ -151,21 +116,4 @@ public class DeveloperCollAConsumer<S extends CollAMessage> extends GenericConsu
 
         return jclr;
     }
-
-    
-
-    public boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        return dir.delete();
-    }
-    
-    private DistributedTaskController controller;
 }

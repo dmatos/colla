@@ -711,9 +711,14 @@ public class ServerWorker {
         Socket socket = server.connectionsMap.get(receiver);
         ObjectOutputStream output;
         ObjectInputStream  input;
+        TaskMessage outgoing;
         try {
             if (socket != null) {
-                TaskMessage outgoing = new TaskMessage();
+                if(task.isDistributed()){
+                    outgoing = new DistributedTaskMsg();
+                } else {
+                   outgoing = new TaskMessage(); 
+                }                
                 outgoing.setUser(server.getUser(sender));
                 outgoing.setSender(sender);
                 outgoing.setGroupName(group);

@@ -213,6 +213,18 @@ public interface CollATask {
     public boolean hasSchedule();
     
     /**
+     * Sets the task is meant to run in a distributed enviroment if true,
+     * otherwise sets it to run in a multicore enviroment.
+     */
+    public void setDistributedMode(Boolean isDistributed);
+    
+    /**
+     * 
+     * @return true if the task is meant to run in a distributed enviroment, false otherwise.
+     */    
+    public boolean isDistributed();
+    
+    /**
      * Destructor
      */
     public void clean();

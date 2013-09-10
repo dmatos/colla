@@ -17,16 +17,18 @@ import java.util.Map;
 
 public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
 
-    CollAHost host;
+    private CollAHost host;
     private final int timeout = 0;
-    String serverIPaddress;
-    int serverPortNumber;
+    private String serverIPaddress;
+    private int serverPortNumber;
+    private DistributedTaskExecutor distributedExecutor;
 
     public CollAConsumer(GenericResource<S> re, HostViewerMicroServer hostMicroServer) {
         super(re);
         this.host = HostViewerController.getInstance().getHost();
         this.serverIPaddress = hostMicroServer.getServerIPaddress();
         this.serverPortNumber = hostMicroServer.getServerPortNumber();
+        this.distributedExecutor = new DistributedTaskExecutor();
     }
 
     @Override
@@ -68,6 +70,34 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                     }
                 }
                 break; // end case TASK_EXECUTE
+                case TASK_EXECUTE_DISTRIBUTED:{
+                    TaskMessage taskMessage = (TaskMessage) collAMessage;
+                    CollATask task = taskMessage.getTask();
+
+                    if (task.hasSchedule()) {
+                        HostViewerController.getInstance().scheduleTask(taskMessage);                        
+                    } else {
+                        User client = (User) taskMessage.getUser();
+                        String taskName = task.getTaskName();
+                        HashMap<String, CollAUser> group = taskMessage.getGroup();
+                        String groupName = taskMessage.getGroupName();
+
+                        //running task
+                        JCL_result jclr = this.distributedExecutor.executeDistributedTask(taskMessage, this);
+                        HostViewerController.getInstance().displayStatus("done!!! ");
+                        if (jclr.getErrorResult() == null) {
+                            System.err.println(jclr.getCorrectResult().toString());
+                        } else {
+                            //jclr.getErrorResult().printStackTrace();
+                        }
+                        // Sending a result to client
+                        HostViewerController.getInstance().displayStatus("Sending result back...");
+                        task.setResult(jclr);
+                        this.sendResultBack(groupName, group, task, taskName);
+                        this.deleteDir(new File("../" + task.getTaskID()));
+                    }
+                }
+                break; // end case TASK_EXECUTE-DISTRIBUTED
                 case TASK_CANCEL:{
                     CancelTask msg = (CancelTask) collAMessage;
                     long taskID = msg.getTaskID();

@@ -10,7 +10,6 @@
  */
 package colla.appl.developer_viewer.view;
 
-import colla.kernel.util.ImagePane;
 import colla.kernel.util.TimeAndDate;
 import colla.appl.developer_viewer.DeveloperViewerController;
 import java.awt.Color;

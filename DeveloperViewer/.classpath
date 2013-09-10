@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="lib" path="dist/lib/javaCaLaMulticore_release_19_05_2012.jar"/>
+	<classpathentry kind="lib" path="dist/lib/Kernel.jar"/>
+	<classpathentry kind="lib" path="dist/lib/org-openide-awt.jar"/>
+	<classpathentry kind="lib" path="dist/lib/org-openide-filesystems.jar"/>
+	<classpathentry kind="lib" path="dist/lib/org-openide-util-lookup.jar"/>
+	<classpathentry kind="lib" path="dist/lib/org-openide-util.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

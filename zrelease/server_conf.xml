@@ -1,6 +1,6 @@
 <server_configuration>
     <!--IP address of server-->
     <IPAddress ip="127.0.0.1"> </IPAddress>
-    <!--Port numbert to which server is listening-->
+    <!--port that server uses for this application-->
     <portNumber port="9999"> </portNumber>
 </server_configuration>

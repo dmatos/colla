@@ -37,11 +37,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
- * @todo há muitas mensagens sendo exibidas na tela de informações que acabam
- * por poluir demais e informar de menos. Temos que coloca um logger e analisar
- * bem cada tipo de informação
- */
-/**
  * @todo esta implementação não pode lidar diretamente com os users no sentido
  * de armazenar informações dos mesmos em memória. Como por exemplo as
  * activities de um usuário, pois chegará num ponto onde não haverá memória
@@ -547,7 +542,6 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
                 jTextArea_activities.repaint();
             }
         } else {
-            //TODO recuperar atividades do host
             jTextArea_activities.setText("");
             jComboBox_activitiesList.removeAllItems();
         }

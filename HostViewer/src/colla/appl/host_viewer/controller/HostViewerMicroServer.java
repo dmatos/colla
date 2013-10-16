@@ -50,7 +50,7 @@ class HostViewerMicroServer extends Thread {
                 this.serverSocket = new ServerSocket(8080);
                 CollAHost hostAux = HostViewerController.getInstance().getHost();
                 hostAux.setPort(serverSocket.getLocalPort());
-                HostViewerController.getInstance().setHost(hostAux);
+                HostViewerController.getInstance().updateHost(hostAux);
                 //System.err.println("ServerSocket criado!");
             } catch (IOException e) {
                 //e.printStackTrace();

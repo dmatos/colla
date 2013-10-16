@@ -743,7 +743,7 @@ public class ServerWorker {
                 /*
                  * TODO Fazer o caso do host estar offline. Retornar uma
                  * mensagem ao usuário, procurar outro host o servidor mesmo e
-                 * repassar a task. Sei lá!
+                 * repassar a task. 
                  */
             }
         } catch (Exception e) {

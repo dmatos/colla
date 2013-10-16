@@ -184,7 +184,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_members.setModel(new DefaultListModel<String>());
         jButton_generalSettings.setVerticalTextPosition(SwingConstants.BOTTOM);
         jButton_generalSettings.setHorizontalTextPosition(SwingConstants.CENTER);
-        jRadioButtonCollAHost.setSelected(true);
+        jRadioButtonMulticore.setSelected(true);
 
         //saving results
         jFileChooser_resultDirectory = new JFileChooser();
@@ -314,8 +314,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jButtonTime = new org.jbundle.thin.base.screen.jcalendarbutton.JTimeButton();
         jTextFieldSchedule = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
-        jRadioButtonCollAHost = new javax.swing.JRadioButton();
-        jRadioButtonPacuHost = new javax.swing.JRadioButton();
+        jRadioButtonMulticore = new javax.swing.JRadioButton();
+        jRadioButtonDistributed = new javax.swing.JRadioButton();
         jDialog_manageGroups = new javax.swing.JDialog();
         imagePane1 = new colla.kernel.util.ImagePane(BackGround.RADIAL_GREEN.getPath());
         jComboBox_grpManager = new javax.swing.JComboBox<String>();
@@ -621,7 +621,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jDialog_sendTask.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         jDialog_sendTask.setTitle(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jDialog_sendTask.title")); // NOI18N
         jDialog_sendTask.setLocationByPlatform(true);
-        jDialog_sendTask.setMaximumSize(new java.awt.Dimension(657, 674));
         jDialog_sendTask.setMinimumSize(new java.awt.Dimension(657, 200));
         jDialog_sendTask.setModal(true);
         jDialog_sendTask.setResizable(false);
@@ -752,11 +751,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jLabel12.setFont(new java.awt.Font("DejaVu Sans", 0, 15)); // NOI18N
         jLabel12.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jLabel12.text")); // NOI18N
 
-        buttonGroupHost.add(jRadioButtonCollAHost);
-        jRadioButtonCollAHost.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jRadioButtonCollAHost.text")); // NOI18N
+        buttonGroupHost.add(jRadioButtonMulticore);
+        jRadioButtonMulticore.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jRadioButtonMulticore.text")); // NOI18N
 
-        buttonGroupHost.add(jRadioButtonPacuHost);
-        jRadioButtonPacuHost.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jRadioButtonPacuHost.text")); // NOI18N
+        buttonGroupHost.add(jRadioButtonDistributed);
+        jRadioButtonDistributed.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jRadioButtonDistributed.text")); // NOI18N
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
@@ -775,9 +774,9 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel6Layout.createSequentialGroup()
-                                        .addComponent(jRadioButtonCollAHost)
+                                        .addComponent(jRadioButtonMulticore)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jRadioButtonPacuHost))
+                                        .addComponent(jRadioButtonDistributed))
                                     .addComponent(jComboBox_methodToExecute, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jComboBox_classToExecute, javax.swing.GroupLayout.PREFERRED_SIZE, 553, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel6Layout.createSequentialGroup()
@@ -864,8 +863,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel12)
                     .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jRadioButtonCollAHost)
-                        .addComponent(jRadioButtonPacuHost)))
+                        .addComponent(jRadioButtonMulticore)
+                        .addComponent(jRadioButtonDistributed)))
                 .addGap(25, 25, 25)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(jPanel6Layout.createSequentialGroup()
@@ -994,7 +993,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                             .addComponent(jButton_toRefused, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton_froRefuse2Wating, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane11, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE))
+                        .addComponent(jScrollPane11, javax.swing.GroupLayout.DEFAULT_SIZE, 194, Short.MAX_VALUE))
                     .addGroup(imagePane2Layout.createSequentialGroup()
                         .addGroup(imagePane2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(imagePane2Layout.createSequentialGroup()
@@ -1057,7 +1056,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             imagePane3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(imagePane3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
                 .addContainerGap())
         );
         imagePane3Layout.setVerticalGroup(
@@ -1479,7 +1478,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1601,7 +1600,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE)
         );
 
         pack();
@@ -1970,7 +1969,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     
                     //selecting mode to execute task (True to Distributed or False to Multicore)
                     Boolean isDistributed;
-                    if (jRadioButtonCollAHost.isSelected()) {
+                    if (jRadioButtonMulticore.isSelected()) {
                         isDistributed = false;
                     } else {
                         isDistributed = true;
@@ -2600,8 +2599,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JPanel jPanel_card2;
     private javax.swing.JPanel jPanel_myHosts;
     private javax.swing.JPanel jPanel_settingsMain;
-    private javax.swing.JRadioButton jRadioButtonCollAHost;
-    private javax.swing.JRadioButton jRadioButtonPacuHost;
+    private javax.swing.JRadioButton jRadioButtonDistributed;
+    private javax.swing.JRadioButton jRadioButtonMulticore;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane11;

@@ -61,7 +61,7 @@ public class HostViewerController {
      * Connects the host to the server.
      */
     public void login(CollAHost host) {
-        this.setHost(host);
+        this.updateHost(host);
         collAHost.setOnline();
         String hostName = collAHost.getName();
         try {
@@ -111,11 +111,11 @@ public class HostViewerController {
         }
     }
     
-    /*@todo este metodo deveria chamar-se updateHost e deveria checar se o host 
-     * a ser inserido possui o mesmo nome do host atual por questoes de 
-     * seguranca.
+    /**
+     * updates a host info when it logs to the server.
+     * @param host host connected to the server to update.
      */
-    public void setHost(CollAHost host) {
+    public void updateHost(CollAHost host) {
         this.collAHost = host;
         if (this.collAHost.hasValidIP()) {
             this.displayStatus("Ip: " + this.collAHost.getIp());

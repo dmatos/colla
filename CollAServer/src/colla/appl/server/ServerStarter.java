@@ -14,7 +14,7 @@ import colla.appl.server.GUI.CollAServerGUI;
 public class ServerStarter {
 
     /**
-     * @todo
+     * @todo um servidor que não necessite de GUI
      *
      */
     /**

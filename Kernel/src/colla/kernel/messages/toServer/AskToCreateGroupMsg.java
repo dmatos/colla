@@ -28,12 +28,10 @@ public class AskToCreateGroupMsg implements Serializable, CollAMessage {
     }
 
     public void setGroupName(String groupName) {
-        addMessageParameter(groupName, 2);
         this.groupName = groupName;
     }
 
     public void setAdmin(String adminName) {
-        addMessageParameter(adminName, 1);
         this.adminName = adminName;
     }
 
@@ -43,10 +41,6 @@ public class AskToCreateGroupMsg implements Serializable, CollAMessage {
 
     public String getGroupName() {
         return this.groupName;
-    }
-
-    public void addMessageParameter(Object obj, int index) {
-        throw new UnsupportedOperationException("Not supported anymore.");
     }
 
     public int getParametersCount() {

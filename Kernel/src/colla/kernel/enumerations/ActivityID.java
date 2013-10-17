@@ -22,7 +22,7 @@ public enum ActivityID {
     private final String activityID;
     private final String activityText;
     
-    ActivityID(String id, String activity){
+    private ActivityID(String id, String activity){
         activityID = id;
         activityText = activity;
     }   

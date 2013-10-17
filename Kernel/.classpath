@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="dist/Kernel.jar"/>
-	<classpathentry kind="lib" path="dist/lib/javaCaLaMulticore_release_19_05_2012.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/media/dmatos/DiscoSD/workspace/colla/libraries/jcl_lambari_june_2013.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

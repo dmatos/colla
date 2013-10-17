@@ -24,14 +24,14 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
      * Constructor without parameters
      */
     public Host() {
-        this.name = null;
-        this.nameUser = null;
-        this.ip = null;
+        this.name = "";
+        this.nameUser = "";
+        this.ip = "";
         this.port = -1;
         this.online = false;
         this.tempoConexao = new TimeAndDate();
         this.validIP = false;
-        this.country = null;
+        this.country = "";
         this.activities = new HashMap<String, String>();
         systemProperties = new SystemProperties().getSystemProperties();
     }
@@ -44,23 +44,21 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
      */
     public Host(String name, String ip, int port) {
         this.name = name;
-        this.nameUser = null;
+        this.nameUser = "";
         this.ip = ip;
         this.port = port;
         this.online = false;
         this.tempoConexao = new TimeAndDate();
         this.validIP = false;
-        this.country = null;
+        this.country = "";
         this.activities = new HashMap<String, String>();
         systemProperties = new SystemProperties().getSystemProperties();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     * Implementa o método de comparação necessário para
-     * se colocar objetos da classe dentro de um Set.
-     * A ordem é dada pelo nome dos usuários.
+    /**
+     * Useful method to order Hosts by name.
+     * @param host
+     * @return 
      */
     @Override
     public int compareTo(CollAHost host) {

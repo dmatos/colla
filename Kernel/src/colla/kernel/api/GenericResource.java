@@ -13,9 +13,13 @@ public class GenericResource<S>{
     }
 
     public void putRegister( S register ){
-
-        this.registers.offer( register );
-        wakeup();
+        if(register != null){
+            this.registers.offer( register );
+            wakeup();
+        }else{
+            return;
+            //@todo seria melhor lançar uma exceção
+        }
 
     }
 

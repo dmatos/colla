@@ -41,7 +41,8 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
      */
     @Override
     public int compareTo(CollAUser user) {
-
+        if (this.name == null)
+            return -1; //@todo lançar exceção        
         if (this.name.equals(user.getName())) {
             return 0;
         } else if (this.getName().compareTo(user.getName()) > 0) {
@@ -72,16 +73,16 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
     }
     
     public final void initializeUser(){
-        this.name = null;
-        this.ip = null;
+        this.name = "";
+        this.ip = "";
         this.port = -1;
         this.hosts = new HashMap<String, CollAHost>();
         this.groupsMap = new HashMap<String, CollAGroup >();
         this.online = false;
         this.time = new TimeAndDate();
         this.validIP = false;
-        this.email = "none@none.com";
-        this.country = null;
+        this.email = "";
+        this.country = "";
         this.activities = new HashMap<String, String>();
         this.sessions = new HashMap<String, CollASession>();
         this.orderedSessions = new ArrayList<String>();
@@ -343,6 +344,10 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
      */
     @Override
     public Session getLastSession() {
+        if(this.sessions.size() > 0)
+            return (Session) sessions.get(this.orderedSessions.get(this.orderedSessions.size()-1));
+        CollASession session = new Session();
+        this.addSession(session);
         return (Session) sessions.get(this.orderedSessions.get(this.orderedSessions.size()-1));
     }
 
@@ -353,7 +358,7 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
      */
     @Override
     public void addJob(CollAJob job) {
-        Session session = this.getLastSession();
+        Session session = this.getLastSession();        
         session.addJob(job);
         this.sessions.put(session.getSessionDateAndTime(), session);
     }

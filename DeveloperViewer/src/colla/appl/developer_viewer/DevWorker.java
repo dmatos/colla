@@ -5,16 +5,12 @@
 package colla.appl.developer_viewer;
 
 
-import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
 import colla.appl.developer_viewer.exceptions.DeveloperControllerInitializationException;
 import colla.kernel.api.*;
 import colla.kernel.enumerations.ClientOps;
 import colla.kernel.impl.Group;
 import colla.kernel.messages.toClient.*;
 import colla.kernel.util.Debugger.DebugInfo;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.*;
 import java.util.*;
 
 /**
@@ -148,12 +144,14 @@ public class DevWorker extends Observable{
      * @param ex   Exceprion
      */
     private void debug( String info, Exception ex ){
-        /*this.debugInfo.clear();
+        /*
+         this.debugInfo.clear();
         this.debugInfo.setInfo( info );
         this.debugInfo.setException( ex );
         this.notifyObservers( this.debugInfo );
-        System.out.println( info );
-        ex.printStackTrace();*/
+        System.out.println( info );        
+        ex.printStackTrace();
+        */
     }
 
     /**
@@ -162,10 +160,12 @@ public class DevWorker extends Observable{
      * @param info Informação
      */
     private void debug( String info ){
-        /*this.debugInfo.clear();
+        /*
+        this.debugInfo.clear();
         this.debugInfo.setInfo( info );
         this.notifyObservers( this.debugInfo );
-        System.out.println( info );*/
+        System.out.println( info );
+        //*/
     }
 
     /**
@@ -174,10 +174,12 @@ public class DevWorker extends Observable{
      * @param ex Exception
      */
     private void debug( Exception ex ){
-       /* this.debugInfo.clear();
+       /*
+         this.debugInfo.clear();
         this.debugInfo.setException( ex );
         this.notifyObservers( this.debugInfo );
-        ex.printStackTrace();*/
+        ex.printStackTrace();
+        //*/
     }
 
     @Override

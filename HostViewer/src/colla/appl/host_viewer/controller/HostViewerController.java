@@ -202,11 +202,15 @@ public class HostViewerController implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
-
-            HostViewerMicroServer.getInstance().shutdown();
+            
 
         } catch (Exception tout) {
             tout.printStackTrace();
+        }
+        try{
+            HostViewerMicroServer.getInstance().shutdown();
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
 
         this.deleteDir(new File("../temp_files/"));            

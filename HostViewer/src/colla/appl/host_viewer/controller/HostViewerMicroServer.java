@@ -125,14 +125,14 @@ class HostViewerMicroServer implements Runnable {
 
         try {
             hostControl = HostViewerController.getInstance();
-            if (hostControl.getHost().hasValidIP()) {
-                connection = serverSocket.accept();
-            } else {
-                connection = keepAlive;
-            }
 
             while (active) {
                 try {
+                    if (hostControl.getHost().hasValidIP()) {
+                        connection = serverSocket.accept();
+                    } else {
+                        connection = keepAlive;
+                    }
 
                     ObjectInputStream input = new ObjectInputStream(
                             connection.getInputStream());
@@ -174,10 +174,10 @@ class HostViewerMicroServer implements Runnable {
 
         this.serverR.setFinished();
         this.serverR = null;
-        
-        this.timer.cancel();        
+
+        this.timer.cancel();
         this.timer = null;
-        
+
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
         jcl.destroy();
 

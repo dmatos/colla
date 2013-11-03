@@ -11,10 +11,14 @@
 package colla.appl.developer_viewer.view;
 
 import colla.appl.developer_viewer.DevViewerLogin;
+import implementations.sm_kernel.JCL_FacadeImpl;
+import interfaces.kernel.JCL_facade;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.*;
@@ -44,6 +48,19 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         this.setLocation(400, 150);//       
         this.requestFocus();
         this.displayMessage("Welcome!");
+        
+        addWindowListener(new WindowAdapter() {
+            /*
+             * call the method shutdown to terminate all GUIs and connections
+             */
+            @Override
+            public void windowClosing(WindowEvent e) {
+                JCL_facade jcl = JCL_FacadeImpl.getInstance();
+                jcl.destroy();
+                e.getWindow().dispose();
+            }
+        });
+        
         this.setVisible(true);
     }
 

@@ -538,12 +538,15 @@
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="jComboBox_taskGroup" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="AddAtach" linkSize="7" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jScrollPane5" linkSize="23" alignment="0" min="-2" pref="101" max="-2" attributes="0"/>
-                                  <Component id="RemoveAtach" linkSize="7" alignment="0" min="-2" pref="29" max="-2" attributes="0"/>
+                                  <Component id="jScrollPane5" linkSize="23" min="-2" pref="101" max="-2" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="AddAtach" linkSize="7" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="RemoveAtach" linkSize="7" min="-2" pref="29" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -2068,7 +2071,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jSplitPane_desktopAndContacts" alignment="1" pref="650" max="32767" attributes="0"/>
+          <Component id="jSplitPane_desktopAndContacts" alignment="1" pref="658" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -2226,7 +2229,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jComboBox_hosts" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jScrollPane4" pref="282" max="32767" attributes="0"/>
+                          <Component id="jScrollPane4" pref="290" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>

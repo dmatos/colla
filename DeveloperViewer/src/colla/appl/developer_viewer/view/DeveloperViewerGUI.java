@@ -107,9 +107,9 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         this.setVisible(true);
     }
-    
-    public static synchronized DeveloperViewerGUI getInstance(String userName) throws DeveloperControllerInitializationException{
-        if(developerGUI == null){
+
+    public static synchronized DeveloperViewerGUI getInstance(String userName) throws DeveloperControllerInitializationException {
+        if (developerGUI == null) {
             developerGUI = new DeveloperViewerGUI(userName);
         }
         return developerGUI;
@@ -862,12 +862,14 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jComboBox_taskGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(AddAtach))
+                    .addComponent(jComboBox_taskGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(RemoveAtach, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(AddAtach)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(RemoveAtach, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel6Layout.createSequentialGroup()
@@ -1508,7 +1510,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1630,7 +1632,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE)
+            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 658, Short.MAX_VALUE)
         );
 
         pack();
@@ -2051,7 +2053,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     /*
                      * Clear fields to send another task after that
                      */
-                    this.dependencyModel.clear();
                     clearTaskFields();
                     jDialog_sendTask.dispose();
                 } else {
@@ -2448,6 +2449,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      */
     private void clearTaskFields() {
         this.jTextFieldTask.setText("");
+        this.dependencyModel.clear();
+        this.argumentsModel.clear();
         jComboBox_classToExecute.removeAllItems();
         jComboBox_methodToExecute.removeAllItems();
         jCheckBoxSchedule.setSelected(false);
@@ -2578,8 +2581,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         btnTime.setTargetDate(dateTime);
     }
-    
-    private static DeveloperViewerGUI developerGUI = null;             
+    private static DeveloperViewerGUI developerGUI = null;
     private HashMap<String, java.util.List<String>> acceptedMembers;
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;

@@ -16,8 +16,6 @@ import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
 import colla.kernel.util.Debugger.DebugInfo;
 import colla.kernel.util.TimeAndDate;
-import implementations.sm_kernel.JCL_FacadeImpl;
-import interfaces.kernel.JCL_facade;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -349,13 +347,14 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		outgoing.setGroupName(task.getGroup());
 
 		// A host that has a valid IP address must receive a direct connection
-		debug("abrindo comunicação para enviar tarefa...");
+		debug("abrindo comunicação para enviar tarefa para IP valido...");
 		socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
-		// taskSocket.setSoTimeout(timeout);
+		socket.setSoTimeout(timeout);
 		output = new ObjectOutputStream(socket.getOutputStream());
 		output.writeObject(outgoing);
 		output.flush();
 		// receives ACK
+                debug("esperando ACK IP valido...");
 		input = new ObjectInputStream(socket.getInputStream());
 		input.readObject();
 		socket.close();
@@ -390,7 +389,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		outgoing.setGroup(task.getGroup());
 		outgoing.setReceiver(host.getName());
 
-		debug("abrindo comunicação para enviar tarefa...");
+		debug("abrindo comunicação para enviar tarefa para IP invalido...");
 		socket = new Socket(serverIPaddress, serverPortNumber);
 		socket.setSoTimeout(timeout);
 		output = new ObjectOutputStream(socket.getOutputStream());
@@ -742,8 +741,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		} catch (ClassNotFoundException exception) {
 			// debug(exception);
 		}
-                JCL_facade jcl = JCL_FacadeImpl.getInstance();
-                jcl.destroy();
+                
 		if (microServer != null)
 			microServer.shutdown();
 		devController = null;
@@ -1075,25 +1073,25 @@ public class DeveloperViewerController extends Observable implements Runnable {
 
 	private void debug(String info, Exception ex) {
 		/*
-		 * this.debugInfo.clear(); this.debugInfo.setInfo(info);
-		 * this.debugInfo.setException(ex);
-		 * this.notifyObservers(this.debugInfo); System.out.println(info);
-		 * ex.printStackTrace();
-		 */
+		  this.debugInfo.clear(); this.debugInfo.setInfo(info);
+		  this.debugInfo.setException(ex);
+		  this.notifyObservers(this.debugInfo); System.out.println(info);
+		  ex.printStackTrace();
+		 //*/
 	}
 
 	private void debug(String info) {
 		/*
-		 * this.debugInfo.clear(); this.debugInfo.setInfo(info);
-		 * this.notifyObservers(this.debugInfo); System.out.println(info);
-		 */
+		  this.debugInfo.clear(); this.debugInfo.setInfo(info);
+		  this.notifyObservers(this.debugInfo); System.out.println(info);
+		 //*/
 	}
 
 	private void debug(Exception ex) {
 		/*
-		 * this.debugInfo.clear(); this.debugInfo.setException(ex);
-		 * this.notifyObservers(this.debugInfo); ex.printStackTrace();
-		 */
+		  this.debugInfo.clear(); this.debugInfo.setException(ex);
+		  this.notifyObservers(this.debugInfo); ex.printStackTrace();
+		 //*/
 	}
 
 	@Override
@@ -1123,7 +1121,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 	private static DeveloperViewerController devController = null;
 	private DebugInfo debugInfo;
 	private boolean isDown;
-	private final int timeout = 15000;
+	private final int timeout = 20000;
 	private DevMicroServer microServer;
 	private CollADeveloperViewerUI devUI;
 	private int serverPortNumber;

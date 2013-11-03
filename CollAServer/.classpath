@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="dist/lib/Kernel.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/media/dmatos/DiscoSD/workspace/colla/libraries/jcl_lambari_june_2013.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcl_lambari_june_2013.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Kernel"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

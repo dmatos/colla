@@ -1,19 +1,27 @@
 package colla.appl.host_viewer.controller;
 
+import colla.appl.host_viewer.exceptions.HostControllerInitializationException;
 import colla.kernel.api.*;
 import colla.kernel.enumerations.HostOps;
 import colla.kernel.impl.User;
 import colla.kernel.messages.toClient.TaskResultMsg;
 import colla.kernel.messages.toHost.CancelTask;
+import colla.kernel.messages.toHost.ListOnlineHostsMsg;
+import colla.kernel.messages.toHost.RegisterFileMsg;
 import colla.kernel.messages.toHost.TaskMessage;
+import colla.kernel.messages.toServer.RetrieveOnlineHostsMsg;
 import colla.kernel.messages.toServer.TransmitResultMsg;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
+
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
 
@@ -23,11 +31,20 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
     private int serverPortNumber;
     private DistributedTaskExecutor distributedExecutor;
 
-    public CollAConsumer(GenericResource<S> re, HostViewerMicroServer hostMicroServer) {
+    public CollAConsumer(GenericResource<S> re, String serverIP, Integer serverPortNumber) {
         super(re);
-        this.host = HostViewerController.getInstance().getHost();
-        this.serverIPaddress = hostMicroServer.getServerIPaddress();
-        this.serverPortNumber = hostMicroServer.getServerPortNumber();
+        try {
+            this.host = HostViewerController.getInstance().getHost();
+        } catch (HostControllerInitializationException ex) {
+            Logger.getLogger(CollAConsumer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            this.serverIPaddress = serverIP;
+            this.serverPortNumber = serverPortNumber;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         this.distributedExecutor = new DistributedTaskExecutor();
     }
 
@@ -47,7 +64,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                     CollATask task = taskMessage.getTask();
 
                     if (task.hasSchedule()) {
-                        HostViewerController.getInstance().scheduleTask(taskMessage);                        
+                        HostViewerController.getInstance().scheduleTask(taskMessage);
                     } else {
                         User client = (User) taskMessage.getUser();
                         String taskName = task.getTaskName();
@@ -66,16 +83,16 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                         HostViewerController.getInstance().displayStatus("Sending result back...");
                         task.setResult(jclr);
                         this.sendResultBack(groupName, group, task, taskName);
-                        this.deleteDir(new File("../" + task.getTaskID()));
+                        HostViewerController.getInstance().deleteDir(new File("../" + task.getTaskID()));
                     }
                 }
                 break; // end case TASK_EXECUTE
-                case TASK_EXECUTE_DISTRIBUTED:{
+                case TASK_EXECUTE_DISTRIBUTED: {
                     TaskMessage taskMessage = (TaskMessage) collAMessage;
                     CollATask task = taskMessage.getTask();
 
                     if (task.hasSchedule()) {
-                        HostViewerController.getInstance().scheduleTask(taskMessage);                        
+                        HostViewerController.getInstance().scheduleTask(taskMessage);
                     } else {
                         User client = (User) taskMessage.getUser();
                         String taskName = task.getTaskName();
@@ -94,14 +111,21 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                         HostViewerController.getInstance().displayStatus("Sending result back...");
                         task.setResult(jclr);
                         this.sendResultBack(groupName, group, task, taskName);
-                        this.deleteDir(new File("../" + task.getTaskID()));
+                        HostViewerController.getInstance().deleteDir(new File("../temp_files/" + task.getTaskID()));
                     }
                 }
                 break; // end case TASK_EXECUTE-DISTRIBUTED
-                case TASK_CANCEL:{
+                case TASK_CANCEL: {
                     CancelTask msg = (CancelTask) collAMessage;
                     long taskID = msg.getTaskID();
                     HostViewerController.getInstance().cancelScheduledTask(taskID);
+                }
+                break;
+                case REGISTER_FILE: {
+                    RegisterFileMsg registerFilesMsg = (RegisterFileMsg) collAMessage;
+                    TaskMessage taskMessage = registerFilesMsg.getTaskMsg();
+                    CollATask task = taskMessage.getTask();
+                    this.distributedExecutor.registerFiles(task);
                 }
                 break;
                 /*case DOWNLOAD_RESULT: {
@@ -121,7 +145,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         } catch (SocketException se) {
             //se.printStackTrace();
         } catch (ClassNotFoundException cnfe) {
-            //cnfe.printStackTrace();
+           // cnfe.printStackTrace();
         } catch (IOException io) {
             //io.printStackTrace();
         } catch (Exception e) {
@@ -140,11 +164,59 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         for (String userName : group.keySet()) {
             if (group.get(userName).hasValidIP()) {
                 sendResultBackToValidIPClient(groupName, group.get(userName), task);
-                HostViewerController.getInstance().displayStatus("Result was sent back to valid ip.");
+                try {
+                    HostViewerController.getInstance().displayStatus("Result sent back to valid ip.");
+                } catch (HostControllerInitializationException ex) {
+                    Logger.getLogger(CollAConsumer.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
+
             } else {
                 sendResultBackToInvalidIPClient(groupName, group.get(userName), task);
             }
         }
+    }
+
+    public void distributeTaskFiles(TaskMessage taskMsg) {
+        //ask for online hosts to server
+        RetrieveOnlineHostsMsg rOnlineMsg = new RetrieveOnlineHostsMsg(host.getName());
+        Socket socket;
+        try {
+            socket = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(rOnlineMsg);
+            output.flush();
+            //ACK
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+            ListOnlineHostsMsg incomingMsg = (ListOnlineHostsMsg) input.readObject();
+
+            RegisterFileMsg registerFileMsg = new RegisterFileMsg(taskMsg);
+            try {
+                for (CollAHost h : incomingMsg.getHosts()) {
+                    if (!h.getName().equals(host.getName())) {
+                        Socket s = new Socket(InetAddress.getByName(h.getIp()), h.getPort());
+                        ObjectOutputStream outp = new ObjectOutputStream(socket.getOutputStream());
+                        output.writeObject(registerFileMsg);
+                        output.flush();
+                        //ACK
+                        ObjectInputStream inp = new ObjectInputStream(socket.getInputStream());
+                        inp.readObject();
+                    }
+                }
+            } catch (Exception ex) {
+                //ex.printStackTrace();
+            }
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(CollAConsumer.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(CollAConsumer.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(CollAConsumer.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -170,7 +242,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                 input.readObject();
                 socket.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 //sendResultBackToInvalidIPClient(groupName, client, task);
             }
         }
@@ -197,7 +269,14 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                 input.readObject();
             } catch (Exception e) {
-                HostViewerController.getInstance().displayStatus("Error: couldn't send result back!");
+                try {
+                    HostViewerController.getInstance().displayStatus("Error: couldn't send result back!");
+
+                } catch (HostControllerInitializationException ex) {
+                    Logger.getLogger(CollAConsumer.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
         }
     }
@@ -227,8 +306,9 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         //gathering files into array
         try {
             //write temp file for task
-            new File("../" + cTask.getTaskID() + "/").mkdir();
-            File file = new File("../" + cTask.getTaskID() + "/" + taskName);
+            new File("../temp_files/").mkdir();
+            new File("../temp_files/" + cTask.getTaskID() + "/").mkdir();
+            File file = new File("../temp_files/" + cTask.getTaskID() + "/" + taskName);
             FileOutputStream fout = new FileOutputStream(file);
             DataOutputStream dout = new DataOutputStream(fout);
             dout.write(taskBuffer);
@@ -242,7 +322,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             int jarCounter = 1;
             for (String fileName : jars.keySet()) {
                 //write temp file for dependencies
-                file = new File("../" + cTask.getTaskID() + "/" + fileName);
+                file = new File("../temp_files/" + cTask.getTaskID() + "/" + fileName);
                 byte[] jar = jars.get(fileName);
                 fout = new FileOutputStream(file);
                 dout = new DataOutputStream(fout);
@@ -294,17 +374,4 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         return jclr;
 
     }// end of method executeTask
-
-    public boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        return dir.delete();
-    }
 }

@@ -1,5 +1,7 @@
 package colla.kernel.api;
 
+import colla.kernel.exceptions.server.NonExistentUser;
+import colla.kernel.exceptions.server.UserAlreadyExists;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +32,7 @@ public interface CollAServer {
      *
      * @return an user, if any, with the given name, or null if there is none.
      */
-    public CollAUser getUser(String userName);
+    public CollAUser getUser(String userName) throws NonExistentUser;
 
     /**
      *
@@ -43,16 +45,21 @@ public interface CollAServer {
      *
      * @param host CollAHost to update
      */
-    public void updateHost(CollAHost host);
+    public void updateHost(CollAHost host) throws NonExistentUser;
+    
+    /**
+     * Registers a new client to the server.
+     * @param usr Instance of client to register.
+     * @throws UserAlreadyExists 
+     */
+    public void addUser(CollAUser usr) throws UserAlreadyExists;
 
     /**
-     * 
-     * Inserts data from an user on the server, updating data for an existing 
-     * client or entering data for a new one.
+     * Updaties data for an existing client.
      * 
      * @param usr client to update
      */
-    public void updateUser(CollAUser usr);
+    public void updateUser(CollAUser usr) throws NonExistentUser;
     
     /**
      * Performs server data persistence.
@@ -115,5 +122,10 @@ public interface CollAServer {
      * These connections must be kept alive in order to comunicate to those clients.
      */
     public Map<String, Socket> getMappedConnections();
+    
+    /**
+     * Disables the Server.
+     */
+    public void shutdown();
     
 }

@@ -1,5 +1,6 @@
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
 import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.appl.developer_viewer.view.DeveloperViewerGUI;
 import colla.kernel.api.CollAUser;
@@ -33,22 +34,22 @@ import org.xml.sax.SAXException;
  */
 public class DevViewerLogin extends Observable{
    
-    public DevViewerLogin() throws ConfigException{
+    public DevViewerLogin() throws DeveloperConfigurationException{
         this.user = new User();
         this.user.setOffline();
-        this.connected = false;
+        this.connected = false;        
         this.devViewerObservers = new LinkedList<Observer>();
         this.useGUI = false;
+        this.debugInfo = new DebugInfo();
+        this.debugInfo.setDebuggedName("DevviewerLogin");
         if (!readServerConfigurations()) {
-            throw new ConfigException();
+            throw new DeveloperConfigurationException();
         }
         try {
             this.restoredData();
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
-        }
-        this.debugInfo = new DebugInfo();
-        this.debugInfo.setDebuggedName("DevviewerLogin");
+        }        
     }
 
     /**
@@ -189,12 +190,12 @@ public class DevViewerLogin extends Observable{
                 groupMembers = incoming.getContacts();
                 this.user = incoming.getUser();
                 this.user.setIp(this.machineIP);
-                DeveloperViewerController devViewer = new DeveloperViewerController(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
+                DeveloperViewerController devViewer = DeveloperViewerController.setupDeveloperController(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
                 for(Observer observer : this.devViewerObservers){
                     devViewer.addObserver(observer);
                 }
                 if(this.useGUI){
-                    DeveloperViewerGUI gui = new DeveloperViewerGUI(devViewer, this.user.getName());
+                    DeveloperViewerGUI gui = DeveloperViewerGUI.getInstance(this.user.getName());
                     this.setDeveloperViewerUI(gui);
                     devViewer.addObserver(gui);
                 }

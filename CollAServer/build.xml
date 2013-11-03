@@ -105,6 +105,12 @@
         </zip>
 
         <delete file="${store.dir}/temp_final.jar"/>
+        
+        <copy todir="${store.dir}" overwrite="true">
+            <fileset dir="${store.dir}/..">
+                <include name="**/JCLServer.jar" />
+            </fileset>
+        </copy>
 
     </target>
     

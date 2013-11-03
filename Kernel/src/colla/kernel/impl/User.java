@@ -74,8 +74,8 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
     
     public final void initializeUser(){
         this.name = "";
-        this.ip = "";
-        this.port = -1;
+        this.ip = "127.0.0.1";
+        this.port = 0;
         this.hosts = new HashMap<String, CollAHost>();
         this.groupsMap = new HashMap<String, CollAGroup >();
         this.online = false;

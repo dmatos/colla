@@ -7,27 +7,33 @@ package colla.appl.server;
 import colla.kernel.api.*;
 import colla.kernel.enumerations.ActivityID;
 import colla.kernel.enumerations.ServerOps;
+import colla.kernel.exceptions.server.NonExistentUser;
+import colla.kernel.exceptions.server.ServerInitializationException;
+import colla.kernel.exceptions.server.UserAlreadyExists;
 import colla.kernel.impl.*;
 import colla.kernel.messages.toClient.*;
 import colla.kernel.messages.toHost.*;
 import colla.kernel.messages.toServer.*;
+import colla.kernel.util.TimeAndDate;
 import static colla.kernel.util.Treater.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Consumer of sockets provided by Server.
  *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
-public class ServerWorker {        
+public class ServerWorker {
 
-    public void execute(Socket s, Server srvr) {
-        this.server = srvr;
+    public void execute(Socket s) throws ServerInitializationException {
         Socket socket = s;
         ServerOps operation = ServerOps.PING;
         CollAMessage collAMessage;
+        Server server = Server.getInstance();
         try {
             socket.setSoTimeout(server.getTimeoutValue());
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
@@ -35,74 +41,93 @@ public class ServerWorker {
             operation = (ServerOps) collAMessage.getOperation();
             //System.err.println(operation.toString());
             switch (operation) {
+                case GET_LIST_OF_ONLINE_HOSTS:{
+                    RetrieveOnlineHostsMsg incomingMsg = (RetrieveOnlineHostsMsg) collAMessage;
+                    ListOnlineHostsMsg outgoingMsg = this.listOnlineHosts();
+                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                    output.writeObject(outgoingMsg);
+                    output.flush();                    
+                }
+                break;
                 case HOST_LOGIN: {
                     // reading messages
-                    HostLoginMsg msg = (HostLoginMsg) collAMessage;  
+                    HostLoginMsg msg = (HostLoginMsg) collAMessage;
                     String hostName = msg.getHostName();
                     String hostIp = msg.getIPAddress();
                     String sender = msg.getSender();
-                    CollAHost host = server.getUser(sender).getHost(hostName);
-                    
-                    /* checks if the host is valid ip on the internet or if you
-                     * are behind a NAT
-                     */
-                    if (socket.getInetAddress().toString().substring(1).equals(hostIp)) {
-                        host.validateIP();
-                    } else {
-                        host.setIp(socket.getInetAddress().toString().substring(1));
-                        host.invalidateIP();
+
+                    try {
+                        CollAHost host = server.getUser(sender).getHost(hostName);
+                        /* checks if the host is valid ip on the internet or if you
+                         * are behind a NAT
+                         */
+                        if (socket.getInetAddress().toString().substring(1).equals(hostIp)) {
+                            host.validateIP();
+                        } else {
+                            host.setIp(socket.getInetAddress().toString().substring(1));
+                            host.invalidateIP();
+                        }
+                        /*@debug
+                         host.validateIP();
+                         host.setIp("127.0.0.1");
+                         /**/
+
+                        host.setOnline();
+                        host.setInicioConexao();
+                        server.updateHost(host);
+                        //server.displayMessage("Host " + hostName + " is connected");
+                        treat("Host " + hostName + " is connected");
+
+                        // Send true to host if connected
+                        ServerHostLoginAnswer outgoing = new ServerHostLoginAnswer(host.IsOnline(), host.hasValidIP(), host.getIp());
+                        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                        output.writeObject(outgoing);
+                        output.flush();
+                        this.sendHostUpdateToOwner(host, host.getNameUser());
+                    } catch (NonExistentUser nExUsr) {
+                        // TODO Bruno: fazer caso em que houve falha na conexão
                     }
-                    /*@debug
-                    host.validateIP();
-                    host.setIp("127.0.0.1");
-                    /**/
-
-                    host.setOnline();
-                    host.setInicioConexao();
-                    server.updateHost(host);
-                    server.displayMessage("Host " + hostName + " is connected");
-                    treat("Host " + hostName + " is connected");
-
-                    // Send true to host if connected
-                    ServerHostLoginAnswer outgoing = new ServerHostLoginAnswer(host.IsOnline(), host.hasValidIP(), host.getIp());
-                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject(outgoing);
-                    output.flush();
-                    this.sendHostUpdateToOwner(host, host.getNameUser());
-                    // TODO Bruno: fazer caso em que houve falha na conexão
                 }// end of case HOST_LOGIN
                 break;
                 case HOST_REGISTER: {
                     // reading messages
-                    HostRegisterMsg msg = ( HostRegisterMsg ) collAMessage;
+                    HostRegisterMsg msg = (HostRegisterMsg) collAMessage;
                     String userName = msg.getSender();
                     String pass = msg.getUserPass();
-                    CollAHost host = msg.getHost();                    
+                    CollAHost host = msg.getHost();
 
                     // mensagem que será enviada como resposta ao host
                     ServerHostRegisterAnswerMsg outgoing = new ServerHostRegisterAnswerMsg();
-                    
+
                     //check passwords
                     String pass2 = server.getUserPassword(userName);
                     if (pass.equals(pass2)) {
-                        // gera nome do host e o envia de volta
-                        CollAUser user = server.getUser(userName);
-                        String hostName = Integer.toString(user.getHosts().size());
-                        hostName = userName + "_" + hostName;
-                        outgoing.setHostName(hostName);
-                        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                        output.writeObject(outgoing);
-                        output.flush();
-                        
-                        //Adiciona o host nos dados do servidor
-                        host.setName(hostName);
-                        host.setNameUser(userName);
-                        this.recordActivities(host, ActivityID.SIGNUP, "");
-                        server.updateHost(host);
-                        server.notifyObservers();
-                        server.displayMessage("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
-                        treat("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
-                        this.sendHostUpdateToOwner(host, userName);
+                        try {
+                            // gera nome do host e o envia de volta
+                            CollAUser user = server.getUser(userName);
+                            String hostName = Integer.toString(user.getHosts().size());
+                            hostName = userName + "_" + hostName;
+                            outgoing.setHostName(hostName);
+                            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                            output.writeObject(outgoing);
+                            output.flush();
+
+                            //Adiciona o host nos dados do servidor
+                            host.setName(hostName);
+                            host.setNameUser(userName);
+                            this.recordActivities(host, ActivityID.SIGNUP, "");
+                            server.updateHost(host);
+                            server.notifyObservers();
+                            //server.displayMessage("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
+                            treat("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
+                            this.sendHostUpdateToOwner(host, userName);
+                        } catch (NonExistentUser nExUsr) {
+                            outgoing.setHostName(null);
+                            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                            output.writeObject(outgoing);
+                            output.flush();
+                            treat("password inserido pelo host é inválido");
+                        }
                     } else {
                         outgoing.setHostName(null);
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -113,20 +138,24 @@ public class ServerWorker {
                 }// end of case HOST_REGISTER
                 break;
                 case CREATE_GROUP: {
-                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
-                    output.flush();
-                    //try to create a new group for an user
-                    AskToCreateGroupMsg msg = (AskToCreateGroupMsg) collAMessage;
-                    String adminName = msg.getAdmin();
-                    String groupName = msg.getGroupName();
-                    CollAUser usr = server.getUser(adminName);
-                    this.addGroup(usr, groupName);
+                    try {
+                        ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                        output.writeObject(new colla.kernel.messages.toClient.ACK());
+                        output.flush();
+                        //try to create a new group for an user
+                        AskToCreateGroupMsg msg = (AskToCreateGroupMsg) collAMessage;
+                        String adminName = msg.getAdmin();
+                        String groupName = msg.getGroupName();
+                        CollAUser usr = server.getUser(adminName);
+                        this.addGroup(usr, groupName);
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                 }// fim so case CREATE_GROUP
                 break;
                 case CONFIRM_ADD_GROUP: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     CreateGroupMsg msg = (CreateGroupMsg) collAMessage;
                     String groupName = msg.getGroupName();
@@ -136,11 +165,11 @@ public class ServerWorker {
                 break;
                 case UPDATE_GROUPS: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     UpdateGroupsMsg msg = (UpdateGroupsMsg) collAMessage;
                     List<CollAGroup> groups = msg.getGroups();
-                    this.updateGroups(groups);                    
+                    this.updateGroups(groups);
                 }
                 break;
                 case LOGIN: {
@@ -149,28 +178,33 @@ public class ServerWorker {
                     String userName = msg.getSender();
                     String password = msg.getPassword();
                     String ipAsClientSeesIt = msg.getIP();
-                    CollAUser user = server.getUser(userName);
                     CollAMessage response;
-                    response = this.clientLogin(user, password, ipAsClientSeesIt, socket);
+                    //System.out.println(userName + " for login");
+                    response = this.clientLogin(userName, password, ipAsClientSeesIt, socket);
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                     output.writeObject(response);
                     output.flush();
-                    this.updateUser(user);
-                    this.sendMemberUpdateToGroups(user.getName());
+                    try {
+                        CollAUser user = server.getUser(userName);
+                        this.updateUser(user);
+                        this.sendMemberUpdateToGroups(userName);
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                     // System.out.println(socketAccept.getInetAddress().toString());
                     // System.out.println(socketAccept.getPort());
                 }
                 break; //finishes LOGIN
                 case MAP_THE_CONNECTION: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     /* working put the socket of some client/host into a map of
                      * sockets for invalid IP's
                      */
                     MapConnection msg = (MapConnection) collAMessage;
                     String nome = msg.getSender();
-                    server.connectionsMap.put(nome, socket);
+                    server.mapConnection(nome, socket);
                 }
                 ;
                 break; //finishes map the connection
@@ -184,46 +218,58 @@ public class ServerWorker {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                     output.writeObject(answer);
                     output.flush();
-                    //this.closeSocket(socketAccept);
-                    //records user activity
+                    /*try {                        
+                        //records user activity                                                              
+                        System.out.println(server.getUsersSet().size() + "usuarios");
+                        System.out.println(server.getUser(user.getName()).getName() + " registrado com sucesso");
+                    } catch (NonExistentUser ex) {
+                        ex.printStackTrace();
+                    }*/
                     this.recordActivities(user, ActivityID.SIGNUP, null);
                 }
                 break;//finishes SIGN_UP
                 case GET_GROUPS: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     GetGroupsMsg msg = (GetGroupsMsg) collAMessage;
                     String userName = msg.getSender();
-                    CollAUser user = server.getUser(userName);
-                    this.sendGroupsToClient(user);
+                    try {
+                        CollAUser user = server.getUser(userName);
+                        this.sendGroupsToClient(user);
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                 }
                 break;//finishes GET_GROUPS
                 case DISCONNECT: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     DeveloperViewerDisconnectMsg msg = (DeveloperViewerDisconnectMsg) collAMessage;
                     CollAUser user = msg.getUser();
-                    CollAUser tempUser = server.getUser(user.getName());
-                    this.clientDisconnect(user, tempUser);
+                    try {
+                        CollAUser tempUser = server.getUser(user.getName());
+                        this.clientDisconnect(user, tempUser);
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                 }
                 break;//finishes DISCONNECT
                 case JOIN_A_GROUP: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     JoinAGroupMsg msg = (JoinAGroupMsg) collAMessage;
                     String userName = msg.getSender();
                     String groupName = msg.getGroupName();
-                    CollAUser user = server.getUser(userName);
-                    this.requestToJoinGroup(user.getName(), groupName);
-                    this.sendGroupUpdateToAdmins(groupName, user);
+                    this.requestToJoinGroup(userName, groupName);
+                    this.sendGroupUpdateToAdmins(groupName, userName);
                 }//finishes JOIN_A_GROUP
                 break;
                 case TRANSMIT_MESSAGE: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     TransmitChatMsg msg = (TransmitChatMsg) collAMessage;
                     String sender = msg.getSender();
@@ -234,7 +280,7 @@ public class ServerWorker {
                 break;
                 case TRANSMIT_TASK: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     TransmitTaskMsg msg = (TransmitTaskMsg) collAMessage;
                     String sender = msg.getSender();
@@ -248,7 +294,7 @@ public class ServerWorker {
                 break;
                 case TRANSMIT_TASK_RESULT: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     TransmitResultMsg msg = (TransmitResultMsg) collAMessage;
                     String sender = msg.getSender();
@@ -261,43 +307,50 @@ public class ServerWorker {
                 break;
                 case UPDATE_USER: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     UpdateUserMsg msg = (UpdateUserMsg) collAMessage;
                     CollAUser usr = msg.getUser();
-                    this.updateUser(usr);                    
-                    this.sendMemberUpdateToGroups(usr.getName());
+                    try {
+                        this.updateUser(usr);
+                        this.sendMemberUpdateToGroups(usr.getName());
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                 }
                 break;
                 case UPDATE_HOST: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     HostUpdateMsg msg = (HostUpdateMsg) collAMessage;
                     //System.out.println("Host update");
                     CollAHost host = msg.getHost();
-                    this.updateHost(host);
+                    try {
+                        this.updateHost(host);
+                    } catch (NonExistentUser nExUsr) {
+                        nExUsr.printStackTrace();
+                    }
                 }
                 break;
                 case GET_AVAILABLE_HOSTS: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     GetAvailableHostsMsg msg = (GetAvailableHostsMsg) collAMessage;
-                    CollAUser user = server.getUser(msg.getSender());
                     String group = msg.getGroup();
-                    this.sendAvailableHostsToClient(user, group);
+                    this.sendAvailableHostsToClient(msg.getSender(), group);
                 }
                 break;
                 case PING: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                 }
                 break;
                 case HOST_DISCONNECT: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toHost.ACK() );
+                    output.writeObject(new colla.kernel.messages.toHost.ACK());
                     output.flush();
                     HostDisconnectMsg msg = (HostDisconnectMsg) collAMessage;
                     CollAHost host = msg.getHost();
@@ -306,7 +359,7 @@ public class ServerWorker {
                 break;
                 case GET_STORED_RESULTS: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toHost.ACK() );
+                    output.writeObject(new colla.kernel.messages.toHost.ACK());
                     output.flush();
                     RetrieveStoredResultsMsg msg = (RetrieveStoredResultsMsg) collAMessage;
                     String userName = msg.getSender();
@@ -315,7 +368,7 @@ public class ServerWorker {
                 break;
                 case TRANSMIT_START_NOTIFICATION: {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     TransmitStartNotification msg = (TransmitStartNotification) collAMessage;
                     this.transmitStartNotification(msg.getGroupName(), msg.getTaskName(), msg.getTask());
@@ -323,7 +376,7 @@ public class ServerWorker {
                 break;
                 default:
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject( new colla.kernel.messages.toClient.ACK() );
+                    output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     server.displayMessage("Operation not supported yet: " + operation.toString());
                     treat("Operation not supported yet: " + operation.toString());
@@ -332,60 +385,76 @@ public class ServerWorker {
         catch (SocketTimeoutException se) {
             server.displayMessage("Connection timeout from IP" + socket.getInetAddress().toString());
             server.displayMessage("Operation: " + operation.toString());
-            treat( se );
+            treat(se);
         } catch (SocketException se) {
             if (socket != null) {
                 server.displayMessage("Some problem has occured in the connection with " + socket.getInetAddress().toString().substring(1)
-                                            +" on port "+socket.getPort());
+                        + " on port " + socket.getPort());
                 treat("Some problem has occured in the connection with " + socket.getInetAddress().toString().substring(1)
-                      + " on port "+socket.getPort(),  se );
+                        + " on port " + socket.getPort(), se);
             } else {
                 server.displayMessage("Some problem has occured in the connections");
                 treat("Some problem has occured in the connections", se);
             }
         } catch (IOException ioe) {
             server.displayMessage("Some problem has occured in the connections");
-            treat( "Some problem has occured in the connections", ioe );
+            treat("Some problem has occured in the connections", ioe);
         } catch (ClassNotFoundException cnfe) {
             server.displayMessage("Some problem has occured in the connections");
-            treat( "Some problem has occured in the connections", cnfe );
-        } catch (Exception e) {
-            try {
-                treat( e );
-                this.server.displayMessage("An unexpected behavior ocurred with the server. Storing data...");
-                //this.server.disconnectAllClients();
-                this.server.storeAllServerData();
-                this.server.displayMessage("Done! Now the server can be closed for repairs");
-            } catch (Exception storeException) {
-                this.server.displayMessage("Couldn't store all data");
-               treat( storeException );
-            }
+            treat("Some problem has occured in the connections", cnfe);
         }
+
+        /* catch (Exception e) {
+         try {
+         treat(e);
+         this.server.displayMessage("An unexpected behavior ocurred with the server. Storing data...");
+         //this.server.disconnectAllClients();
+         this.server.storeAllServerData();
+         this.server.displayMessage("Done! Now the server can be closed for repairs");
+         } catch (Exception storeException) {
+         this.server.displayMessage("Couldn't store all data");
+         treat(storeException);
+         }
+         }*/
     }// end method execute
 
     /**
      * Record activities on the server for a client
+     *
      * @param user an CollAUser
      * @param activity the activity id that will be recorded
      * @param outro an optional activity description
      */
     private void recordActivities(CollAUser user, ActivityID activity, String outro) {
-        HashMap<String, String> record;
-        String pastActivities;
-        if (outro == null) {
-            outro = "";
-        }
-        record = user.getActivities();
-        pastActivities = record.get(server.dateAndTime.getSimpleDate());
-        if (pastActivities == null) {
-            pastActivities = server.dateAndTime.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + " " + outro + "\n";
-            user.recordActivities(server.dateAndTime.getSimpleDate(), pastActivities);
+        try {
+            Server server = Server.getInstance();
 
-        } else {
-            pastActivities = server.dateAndTime.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + " " + outro + "\n";
-            user.recordActivities(server.dateAndTime.getSimpleDate(), pastActivities);
+            HashMap<String, String> record;
+            String pastActivities;
+            if (outro == null) {
+                outro = "";
+            }
+            record = user.getActivities();
+            TimeAndDate timeDate = server.getTimeAndDateInstance();
+            pastActivities = record.get(timeDate.getSimpleDate());
+            if (pastActivities == null) {
+                pastActivities = timeDate.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + " " + outro + "\n";
+                user.recordActivities(timeDate.getSimpleDate(), pastActivities);
+
+            } else {
+                pastActivities = timeDate.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + " " + outro + "\n";
+                user.recordActivities(timeDate.getSimpleDate(), pastActivities);
+            }
+
+            try {
+                updateUser(user);
+            } catch (NonExistentUser nExUsr) {
+                nExUsr.printStackTrace();
+            }
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
         }
-        updateUser(user);
+
     }
 
     /**
@@ -394,42 +463,55 @@ public class ServerWorker {
      * @param userName name of the user
      * @return a map of name to user
      */
-    private HashMap<String, CollAUser> getUserContacts(String userName) {
+    private HashMap<String, CollAUser> getUserContacts(String userName) throws NonExistentUser {
         HashMap<String, CollAUser> contacts = new HashMap<String, CollAUser>();
-        CollAUser tmp = this.server.getUser(userName);
-        for (String groupName : tmp.getGroups().keySet()) {
-            for (String name : tmp.getGroups().get(groupName).getMembers()) {
-                contacts.put(name, this.server.getUser(name));
+        try {
+            Server server = Server.getInstance();
+            CollAUser tmp = server.getUser(userName);
+            for (String groupName : tmp.getGroups().keySet()) {
+                for (String name : tmp.getGroups().get(groupName).getMembers()) {
+                    contacts.put(name, server.getUser(name));
+                }
             }
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
         }
         return contacts;
     }
 
     /**
      * Record activities on the server for a host
+     *
      * @param host an CollAHost
      * @param activity the activity id that will be recorded
      * @param outro an optional activity description
      */
-     
-    private void recordActivities(CollAHost host, ActivityID activity, String outro) {
-        HashMap<String, String> record;
-        String pastActivities;
-        if (outro == null) {
-            outro = "";
+    private void recordActivities(CollAHost host, ActivityID activity, String outro) throws NonExistentUser {
+        try {
+            Server server = Server.getInstance();
+            CollAUser usr = server.getUser(host.getNameUser());
+            HashMap<String, String> record;
+            String pastActivities;
+            if (outro == null) {
+                outro = "";
+            }
+            record = host.getActivities();
+
+            TimeAndDate timeDate = server.getTimeAndDateInstance();
+
+            pastActivities = record.get(timeDate.getSimpleDate());
+            if (pastActivities == null) {
+                pastActivities = timeDate.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + outro + "\n";
+                host.recordActivities(timeDate.getSimpleDate(), pastActivities);
+            } else {
+                pastActivities = timeDate.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + outro + "\n";
+                host.recordActivities(timeDate.getSimpleDate(), pastActivities);
+            }
+            usr.addHost(host);
+            server.updateUser(usr);
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
         }
-        record = host.getActivities();
-        pastActivities = record.get(server.dateAndTime.getSimpleDate());
-        if (pastActivities == null) {
-            pastActivities = server.dateAndTime.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + outro + "\n";
-            host.recordActivities(server.dateAndTime.getSimpleDate(), pastActivities);
-        } else {
-            pastActivities = server.dateAndTime.getHour() + ": " + activity.getID() + ": " + activity.getActivity() + outro + "\n";
-            host.recordActivities(server.dateAndTime.getSimpleDate(), pastActivities);
-        }
-        CollAUser usr = server.getUser(host.getNameUser());
-        usr.addHost(host);
-        server.updateUser(usr);
 
     }
 
@@ -442,29 +524,38 @@ public class ServerWorker {
      * @param task the task.
      */
     private void transmitStartNotification(String groupName, String taskName, CollATask task) {
-        CollAGroup group = server.getGroup(groupName);
-        for (String userName : group.getMembers()) {
-            CollAUser user = server.getUser(userName);
-            // Somente usuários que estão online e não possuem IP válido.
-            if (!user.getName().equals(task.getOwner()) && user.isOnline() && !user.hasValidIP()) {
+        try {
+            Server server = Server.getInstance();
+            CollAGroup group = server.getGroup(groupName);
+            for (String userName : group.getMembers()) {
                 try {
-                    Socket s = server.connectionsMap.get(user.getName());
-                    if (s != null) {
-                        NotifyTaskStarted msg = new NotifyTaskStarted(task);
-                        msg.setGroupName(groupName);
-                        msg.setTaskName(taskName);
-                        ObjectOutputStream output = new ObjectOutputStream(s.getOutputStream());
-                        output.writeObject(msg);
-                        output.flush();
-                        //espera pelo ACK
-                        ObjectInputStream  input  = new ObjectInputStream (s.getInputStream() );
-                        input.readObject();
-                    }
-                } catch (Exception e) {
-                   treat( e );
+                    CollAUser user = server.getUser(userName);
+                    // Somente usuários que estão online e não possuem IP válido.
+                    if (!user.getName().equals(task.getOwner()) && user.isOnline() && !user.hasValidIP()) {
+                        try {
+                            Socket s = server.getAMapedConnection(user.getName());
+                            if (s != null) {
+                                NotifyTaskStarted msg = new NotifyTaskStarted(task);
+                                msg.setGroupName(groupName);
+                                msg.setTaskName(taskName);
+                                ObjectOutputStream output = new ObjectOutputStream(s.getOutputStream());
+                                output.writeObject(msg);
+                                output.flush();
+                                //espera pelo ACK
+                                ObjectInputStream input = new ObjectInputStream(s.getInputStream());
+                                input.readObject();
+                            }
+                        } catch (Exception e) {
+                            treat(e);
+                        }
+                    }// end if
+                } catch (NonExistentUser nExUser) {
+                    treat(nExUser);
                 }
-            }// end if
-        }// end for
+            }// end for
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
+        }
     }// end method 
 
     /**
@@ -472,8 +563,13 @@ public class ServerWorker {
      *
      * @param usr
      */
-    private void updateUser(CollAUser usr) {
-        server.updateUser(usr);
+    private void updateUser(CollAUser usr) throws NonExistentUser {
+        try {
+            Server server = Server.getInstance();
+            server.updateUser(usr);
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
+        }
     }
 
     /**
@@ -481,18 +577,25 @@ public class ServerWorker {
      *
      * @param host
      */
-    private void updateHost(CollAHost host) {
-        server.updateHost(host);
+    private void updateHost(CollAHost host) throws NonExistentUser {
+        try {
+            Server server = Server.getInstance();
+            server.updateHost(host);
+        } catch (ServerInitializationException serEx) {
+            serEx.printStackTrace();
+        }
     }
 
     /**
      * Sends a update of the user to all its groups.
      *
-     * @param userName  user name to be updated.
+     * @param userName user name to be updated.
      */
     private void sendMemberUpdateToGroups(String userName) {
-        CollAUser usr = this.server.getUser(userName);
         try {
+            Server server = Server.getInstance();
+
+            CollAUser usr = server.getUser(userName);
             if (usr.getGroups() != null) {
                 Set<String> groupsSet = usr.getGroups().keySet();
                 for (String groupName : groupsSet) {
@@ -500,7 +603,7 @@ public class ServerWorker {
                 }
             }
         } catch (Exception e) {
-            treat( e );
+            treat(e);
         }
     }
 
@@ -511,123 +614,152 @@ public class ServerWorker {
      * @param userName name of the user
      */
     private void sendGroupUpdateToMembers(String groupName, String userName) {
-        CollAGroup groupUpdated = server.getGroup(groupName);
-        HashMap<String, CollAUser> usersMap = new HashMap<String, CollAUser>();
-        for (String memberName : groupUpdated.getMembers()) {
-            usersMap.put(memberName, this.server.getUser(memberName));
-        }
-        for (String memberName : usersMap.keySet()) {
-            CollAUser tempUser = usersMap.get(memberName);
-            if (!userName.equals(memberName)) {
-                if (tempUser.isOnline()) {
-                    //se usuário possui um ip válido
-                    if (tempUser.hasValidIP() && tempUser.getPort() > 0) {
-                        try {
-                            Socket aux = new Socket(InetAddress.getByName(tempUser.getIp()), tempUser.getPort());
-                            aux.setSoTimeout(40000);
-                            JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
-                            sendGroup.setUsersMap(usersMap);
-                            ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
-                            outputAux.writeObject(sendGroup);
-                            outputAux.flush();
-                            //wait for ACK
-                            ObjectInputStream  inputAux  = new ObjectInputStream (aux.getInputStream ());
-                            inputAux.readObject();
-                            aux.close();
-                        } catch (Exception ex) {
-                            treat( ex );
-                        }
-                    }
-                    // se usuário não possui ip válido
-                    else if (!tempUser.hasValidIP() && server.connectionsMap.containsKey(memberName)) {
-                        try {
-                            Socket aux = server.connectionsMap.get(memberName);                                                        
-                            JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
-                            sendGroup.setUsersMap(usersMap);
-                            ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
-                            outputAux.writeObject(sendGroup);
-                            outputAux.flush();
-                            //wait for ACK
-                            ObjectInputStream  inputAux  = new ObjectInputStream (aux.getInputStream ());
-                            inputAux.readObject();
-                        } catch (Exception io) {
-                            treat( io );
-                        }
-                    }
-                } else if (!tempUser.isOnline()) {
-                    tempUser.addGroup(groupName, groupUpdated);
-                    server.updateUser(tempUser);
+        try {
+            Server server = Server.getInstance();
+            CollAGroup groupUpdated = server.getGroup(groupName);
+            HashMap<String, CollAUser> usersMap = new HashMap<String, CollAUser>();
+            for (String memberName : groupUpdated.getMembers()) {
+                try {
+                    usersMap.put(memberName, server.getUser(memberName));
+                } catch (NonExistentUser nExUsr) {
+                    nExUsr.printStackTrace();
                 }
-            }// end if
+            }
+            for (String memberName : usersMap.keySet()) {
+                CollAUser tempUser = usersMap.get(memberName);
+                if (!userName.equals(memberName)) {
+                    if (tempUser.isOnline()) {
+                        //se usuário possui um ip válido
+                        if (tempUser.hasValidIP() && tempUser.getPort() > 0) {
+                            try {
+                                Socket aux = new Socket(InetAddress.getByName(tempUser.getIp()), tempUser.getPort());
+                                aux.setSoTimeout(40000);
+                                JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
+                                sendGroup.setUsersMap(usersMap);
+                                ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
+                                outputAux.writeObject(sendGroup);
+                                outputAux.flush();
+                                //wait for ACK
+                                ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
+                                inputAux.readObject();
+                                aux.close();
+                            } catch (Exception ex) {
+                                treat(ex);
+                            }
+                        } // se usuário não possui ip válido
+                        else if (!tempUser.hasValidIP() && server.getAMapedConnection(memberName) != null) {
+                            try {
+                                Socket aux = server.getAMapedConnection(memberName);
+                                JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
+                                sendGroup.setUsersMap(usersMap);
+                                ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
+                                outputAux.writeObject(sendGroup);
+                                outputAux.flush();
+                                //wait for ACK
+                                ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
+                                inputAux.readObject();
+                            } catch (Exception io) {
+                                treat(io);
+                            }
+                        }
+                    } else if (!tempUser.isOnline()) {
+                        tempUser.addGroup(groupName, groupUpdated);
+                        try {
+                            server.updateUser(tempUser);
+                        } catch (NonExistentUser ex) {
+                            Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }// end if
 
-        }// end for
+            }// end for
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
     }// end method
 
     /**
      * Sends a update of the group to all its admins
      *
      * @param groupName name of the group
-     * @param user an CollAUser
+     * @param username an CollAUser
      */
-    private void sendGroupUpdateToAdmins(String groupName, CollAUser user) {
-        CollAGroup groupUpdated = server.getGroup(groupName);
-        HashMap<String, CollAUser> adminsMap = new HashMap<String, CollAUser>();
-        HashMap<String, CollAUser> membersMap = new HashMap<String, CollAUser>();
-        for (String adminName : groupUpdated.getAdminsList()) {
-            adminsMap.put(adminName, this.server.getUser(adminName));
-        }
-        for (String usrName : groupUpdated.getMembers()) {
-            membersMap.put(usrName, this.server.getUser(usrName));
-        }
-        for (String userName : adminsMap.keySet()) {
-            CollAUser temp = adminsMap.get(userName);
-            if (!user.getName().equals(temp.getName())) {
-                // se administrador está online
-                if (temp.isOnline()) {
-                    // se administrador possui IP válido
-                    if (temp.hasValidIP() && temp.getPort() > 0) {
-                        try {
-                            Socket aux = new Socket(InetAddress.getByName(temp.getIp()), temp.getPort());
-                            aux.setSoTimeout(40000);
-                            JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
-                            sendGroup.setUsersMap(membersMap);
-                            ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
-                            outputAux.writeObject(sendGroup);
-                            outputAux.flush();
-                            // espera por ACK
-                            ObjectInputStream  inputAux  = new ObjectInputStream (aux.getInputStream ());
-                            inputAux.readObject();
-                            aux.close();
-                           
-                        } catch (Exception ex) {
-                            treat("An error ocurred while sending group " + groupName + " to its admins", ex);
-                            this.server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
-                        }
-                    }//end if
-                    // se administrador não possui IP válido
-                    else if (!temp.hasValidIP() && server.connectionsMap.containsKey(userName)) {
-                        try {
-                            Socket aux = server.connectionsMap.get(userName);
-                            JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
-                            sendGroup.setUsersMap(membersMap);
-                            ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
-                            outputAux.writeObject(sendGroup);
-                            outputAux.flush();
-                            // espera por ACK
-                            ObjectInputStream  inputAux  = new ObjectInputStream (aux.getInputStream ());
-                            inputAux.readObject();
-                        } catch (Exception io) {
-                            treat("An error ocurred while sending group " + groupName + " to its admins", io);
-                            this.server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
-                        }
-                    }// end if
-                }// end if
-                else if (!temp.isOnline()) {
-                    temp.addGroup(groupName, groupUpdated);
-                    server.updateUser(temp);
+    private void sendGroupUpdateToAdmins(String groupName, String username) {
+        try {
+            Server server = Server.getInstance();
+            CollAGroup groupUpdated = server.getGroup(groupName);
+            HashMap<String, CollAUser> adminsMap = new HashMap<String, CollAUser>();
+            HashMap<String, CollAUser> membersMap = new HashMap<String, CollAUser>();
+            for (String adminName : groupUpdated.getAdminsList()) {
+                try {
+                    adminsMap.put(adminName, server.getUser(adminName));
+                } catch (NonExistentUser ex) {
+                    Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }// end if
-        }// end for
+            }
+            for (String usrName : groupUpdated.getMembers()) {
+                try {
+                    membersMap.put(usrName, server.getUser(usrName));
+                } catch (NonExistentUser ex) {
+                    Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            for (String adminName : adminsMap.keySet()) {
+                CollAUser temp = adminsMap.get(adminName);
+                if (username.equals(temp.getName())) {
+                    // se administrador está online
+                    if (temp.isOnline()) {
+                        // se administrador possui IP válido
+                        if (temp.hasValidIP() && temp.getPort() > 0) {
+                            try {
+                                Socket aux = new Socket(InetAddress.getByName(temp.getIp()), temp.getPort());
+                                aux.setSoTimeout(40000);
+                                JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
+                                sendGroup.setUsersMap(membersMap);
+                                ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
+                                outputAux.writeObject(sendGroup);
+                                outputAux.flush();
+                                // espera por ACK
+                                ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
+                                inputAux.readObject();
+                                aux.close();
+
+                            } catch (Exception ex) {
+                                treat("An error ocurred while sending group " + groupName + " to its admins", ex);
+                                server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
+                            }
+                        }//end if
+                        // se administrador não possui IP válido
+                        else if (!temp.hasValidIP() && server.getAMapedConnection(adminName) != null) {
+                            try {
+                                Socket aux = server.getAMapedConnection(adminName);
+                                JoinAGroupAnswerMsg sendGroup = new JoinAGroupAnswerMsg(groupUpdated);
+                                sendGroup.setUsersMap(membersMap);
+                                ObjectOutputStream outputAux = new ObjectOutputStream(aux.getOutputStream());
+                                outputAux.writeObject(sendGroup);
+                                outputAux.flush();
+                                // espera por ACK
+                                ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
+                                inputAux.readObject();
+                            } catch (Exception io) {
+                                treat("An error ocurred while sending group " + groupName + " to its admins", io);
+                                server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
+                            }
+                        }// end if
+                    }// end if
+                    else if (!temp.isOnline()) {
+                        temp.addGroup(groupName, groupUpdated);
+                        try {
+                            server.updateUser(temp);
+                        } catch (NonExistentUser ex) {
+                            Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }// end if
+            }// end for
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
     }// end method
 
     /**
@@ -635,7 +767,14 @@ public class ServerWorker {
      * @return the port in which the ServerSocket is listening
      */
     private int getPortNumber() {
-        return server.portNumber;
+        int portNumber = 0;
+        try {
+            Server server = Server.getInstance();
+            portNumber = server.getPortNumber();
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
+        return portNumber;
     }
 
     /**
@@ -644,8 +783,15 @@ public class ServerWorker {
      *
      * @return an object of User
      */
-    private CollAUser getUser(String userName) {
-        return server.getUser(userName);
+    private CollAUser getUser(String userName) throws NonExistentUser {
+        CollAUser user = null;
+        try {
+            Server server = Server.getInstance();
+            user = server.getUser(userName);
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
+        return user;
 
     }
 
@@ -658,40 +804,46 @@ public class ServerWorker {
      * @param message the message itself
      */
     private void retransmitMessage(String sender, String receiver, String message) {
-        Socket socket = server.connectionsMap.get(receiver);
-        ObjectOutputStream output;
-        ObjectInputStream  input;
         try {
-            // se destinatário está online
-            if (socket != null && server.getUser(receiver).isOnline()) {
-                ChatDirectMessageMsg msg = new ChatDirectMessageMsg(sender, message);
-                output = new ObjectOutputStream(socket.getOutputStream());
-                output.writeObject(msg);
-                output.flush();
-                //espera por ACK
-                input  = new ObjectInputStream (socket.getInputStream ());
-                input.readObject();
+            Server server = Server.getInstance();
+            Socket socket = server.getAMapedConnection(receiver);
+            ObjectOutputStream output;
+            ObjectInputStream input;
+            try {
+                // se destinatário está online
+                if (socket != null && server.getUser(receiver).isOnline()) {
+                    ChatDirectMessageMsg msg = new ChatDirectMessageMsg(sender, message);
+                    output = new ObjectOutputStream(socket.getOutputStream());
+                    output.writeObject(msg);
+                    output.flush();
+                    //espera por ACK
+                    input = new ObjectInputStream(socket.getInputStream());
+                    input.readObject();
+                } // se destinatário não está online enviamos uma mensagem para quem enviou a mensagem.
+                else {
+                    CollAUser user = getUser(sender);
+                    if (user.hasValidIP()) {
+                        socket = new Socket(user.getIp(), user.getPort());
+                    } else {
+                        socket = server.getAMapedConnection(sender);
+                    }
+                    ChatDirectMessageMsg msg = new ChatDirectMessageMsg("From Server:", receiver + " is offline");
+                    output = new ObjectOutputStream(socket.getOutputStream());
+                    output.writeObject(msg);
+                    output.flush();
+                    //espera por ACK
+                    input = new ObjectInputStream(socket.getInputStream());
+                    input.readObject();
+                    if (user.hasValidIP()) {
+                        socket.close();
+                    }
+                }
+            } catch (Exception io) {
+                treat("Error: could not transmit message from " + sender + " to " + receiver, io);
+                server.displayMessage("Error: could not transmit message from " + sender + " to " + receiver);
             }
-            // se destinatário não está online enviamos uma mensagem para quem enviou a mensagem.
-            else {
-                CollAUser user = getUser( sender );
-                if(user.hasValidIP())
-                    socket = new Socket( user.getIp(), user.getPort() );    
-                else
-                    socket = server.connectionsMap.get(sender);
-                ChatDirectMessageMsg msg = new ChatDirectMessageMsg("From Server:", receiver + " is offline");
-                output = new ObjectOutputStream(socket.getOutputStream());
-                output.writeObject(msg);
-                output.flush();
-                //espera por ACK
-                input  = new ObjectInputStream (socket.getInputStream ());
-                input.readObject();
-                if(user.hasValidIP())
-                    socket.close();
-            }
-        } catch (Exception io) {
-            treat("Error: could not transmit message from " + sender + " to " + receiver, io);
-            server.displayMessage("Error: could not transmit message from " + sender + " to " + receiver);
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
         }
     }// end of method
 
@@ -706,19 +858,20 @@ public class ServerWorker {
      * @param attachNames name of the attaches
      */
     private void retransmitTask(String group, String sender, String receiver, CollATask task, ArrayList<byte[]> attachBuffers, ArrayList<String> attachNames) {
-        treat("Retransmit with group "+group);
+        treat("Retransmit with group " + group);
         treat("Sender = " + sender + " Receiver = " + receiver);
-        Socket socket = server.connectionsMap.get(receiver);
         ObjectOutputStream output;
-        ObjectInputStream  input;
+        ObjectInputStream input;
         TaskMessage outgoing;
         try {
+            Server server = Server.getInstance();
+            Socket socket = server.getAMapedConnection(receiver);
             if (socket != null) {
-                if(task.isDistributed()){
+                if (task.isDistributed()) {
                     outgoing = new DistributedTaskMsg();
                 } else {
-                   outgoing = new TaskMessage(); 
-                }                
+                    outgoing = new TaskMessage();
+                }
                 outgoing.setUser(server.getUser(sender));
                 outgoing.setSender(sender);
                 outgoing.setGroupName(group);
@@ -736,8 +889,8 @@ public class ServerWorker {
                 output.writeObject(outgoing);
                 output.flush();
                 //espera por ACK                
-                input  = new ObjectInputStream (socket.getInputStream ());
-                input.readObject();                 
+                input = new ObjectInputStream(socket.getInputStream());
+                input.readObject();
             } else {
                 treat("Socket null");
                 /*
@@ -760,13 +913,14 @@ public class ServerWorker {
      * @param jclr the result of the task
      */
     private void retransmitTaskResult(String sender, CollAUser receiver, String group, String taskName, CollATask result) {
-        //System.err.println(receiver.getName());
-        Socket socket = server.connectionsMap.get(receiver.getName());
+        //System.err.println(receiver.getName());        
         ObjectOutputStream output;
-        ObjectInputStream  input;
+        ObjectInputStream input;
         TaskResultMsg outgoing = new TaskResultMsg(sender, taskName, result);
         outgoing.setGroupName(group);
         try {
+            Server server = Server.getInstance();
+            Socket socket = server.getAMapedConnection(receiver.getName());
             // se usuário está online
             if (socket != null && server.getUser(receiver.getName()).isOnline()) {
                 treat("Sending a task_result to " + receiver.getName());
@@ -774,90 +928,114 @@ public class ServerWorker {
                 output.writeObject(outgoing);
                 output.flush();
                 // espera por ACK
-                input  = new ObjectInputStream (socket.getInputStream ());
+                input = new ObjectInputStream(socket.getInputStream());
                 input.readObject();
             } else {
                 //store result in server until client come back online
-                ArrayList<TaskResultMsg> resultsArray = server.resultsMap.get(receiver.getName());
+                ArrayList<TaskResultMsg> resultsArray = server.getMapedResults(receiver.getName());
                 if (resultsArray == null) {
                     resultsArray = new ArrayList<TaskResultMsg>();
                 }
                 resultsArray.add(outgoing);
-                server.resultsMap.put(receiver.getName(), resultsArray);
+                server.updateResultsMap(receiver.getName(), resultsArray);
             }
         } catch (Exception io) {
             treat("Error: could not transmit message from " + sender + " to " + receiver, io);
-            server.displayMessage("Error: could not transmit message from " + sender + " to " + receiver);
         }
     }// end method
 
     /**
      * Gets all hosts from an determined group.
+     *
      * @param groupName The group from which to get the hosts
      * @return a List containing the online hosts belonging to the group
      */
     private List<CollAHost> getHostsFromGroup(String groupName) {
-        CollAGroup cGroup = server.getGroup(groupName);
-        List<String> userNames = cGroup.getMembers();
-        //System.out.println("Users from group " + groupName + ": " + userNames);
-        Iterator<String> userNamesIt = userNames.iterator();
         List<CollAHost> HostsFromGroup = new ArrayList<CollAHost>();
-        /*
-         * For each user I get your hosts and add in the list of hosts
-         */
-        while (userNamesIt.hasNext()) {
-            CollAUser auxUser = server.getUser(userNamesIt.next());
-            Set<CollAHost> hostNames = auxUser.getHosts();
-            //System.out.println("Hosts from user " + auxUser.getName() + ": " + hostNames);
-            Iterator<CollAHost> hostNamesIt = hostNames.iterator();
-            while (hostNamesIt.hasNext()) {
-                CollAHost auxHost = hostNamesIt.next();
-                //System.out.println("Host " + auxHost.getName() + " is Online? " + auxHost.IsOnline());
-                if (auxHost.IsOnline()) {
-                    HostsFromGroup.add(auxHost);
+        try {
+            Server server = Server.getInstance();
+            CollAGroup cGroup = server.getGroup(groupName);
+            List<String> userNames = cGroup.getMembers();
+            //System.out.println("Users from group " + groupName + ": " + userNames);
+            Iterator<String> userNamesIt = userNames.iterator();
+            /*
+             * For each user I get your hosts and add in the list of hosts
+             */
+            while (userNamesIt.hasNext()) {
+                try {
+                    CollAUser auxUser = server.getUser(userNamesIt.next());
+
+                    Set<CollAHost> hostNames = auxUser.getHosts();
+                    //System.out.println("Hosts from user " + auxUser.getName() + ": " + hostNames);
+                    Iterator<CollAHost> hostNamesIt = hostNames.iterator();
+                    while (hostNamesIt.hasNext()) {
+                        CollAHost auxHost = hostNamesIt.next();
+                        //System.out.println("Host " + auxHost.getName() + " is Online? " + auxHost.IsOnline());
+                        if (auxHost.IsOnline()) {
+                            HostsFromGroup.add(auxHost);
+                        }
+                    }// end while
+                } catch (NonExistentUser ex) {
+                    Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }// end while
-        }// end while
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
         return HostsFromGroup;
     }// end method
 
     /**
      * Gets all hosts online.
+     *
      * @return a List containing the online hosts.
      */
     private List<CollAHost> getHostsOnline() {
-        Set<String> userNames = server.getUsersSet();
-//        System.out.println("Users from group " + groupName + ": " + userNames);
-        Iterator<String> userNamesIt = userNames.iterator();
         List<CollAHost> hostsOnline = new ArrayList<CollAHost>();
-        /*
-         * For each user I get your hosts and add in the list of hosts
-         */
-        while (userNamesIt.hasNext()) {
-            CollAUser auxUser = server.getUser(userNamesIt.next());
-            Set<CollAHost> hostNames = auxUser.getHosts();
+        try {
+            Server server = Server.getInstance();
+            Set<String> userNames = server.getUsersSet();
+//        System.out.println("Users from group " + groupName + ": " + userNames);
+            Iterator<String> userNamesIt = userNames.iterator();
+            /*
+             * For each user I get your hosts and add in the list of hosts
+             */
+            while (userNamesIt.hasNext()) {
+                try {
+                    CollAUser auxUser = server.getUser(userNamesIt.next());
+                    Set<CollAHost> hostNames = auxUser.getHosts();
 //            System.out.println("Hosts from user " + auxUser.getName() + ": " + hostNames);
-            Iterator<CollAHost> hostNamesIt = hostNames.iterator();
-            while (hostNamesIt.hasNext()) {
-                CollAHost auxHost = hostNamesIt.next();
+                    Iterator<CollAHost> hostNamesIt = hostNames.iterator();
+                    while (hostNamesIt.hasNext()) {
+                        CollAHost auxHost = hostNamesIt.next();
 //                System.out.println("Host " + auxHost.getName() + " is Online? " + auxHost.IsOnline());
-                if (auxHost.IsOnline()) {
-                    hostsOnline.add(auxHost);
+                        if (auxHost.IsOnline()) {
+                            hostsOnline.add(auxHost);
+                        }
+                    }//end while
+                } catch (NonExistentUser nExUsr) {
+                    treat(nExUsr);
                 }
-            }//end while
-        }// end while
+
+            }// end while
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
         return hostsOnline;
     }// end method
+
     /**
-     * Send an host to a client for execution of tasks
+     * Send a host to a client for execution of tasks.
      *
      * @param user the client
      * @param group the group to which the user will send the request
      */
-    private void sendAvailableHostsToClient(CollAUser user, String group) {
+    private void sendAvailableHostsToClient(String name, String group) {
         Socket socket;
-        SendAvailableHostsMsg outgoing = new SendAvailableHostsMsg(this.server.generateTaskID());
         try {
+            Server server = Server.getInstance();
+            SendAvailableHostsMsg outgoing = new SendAvailableHostsMsg(server.generateTaskID());
+            CollAUser user = server.getUser(name);
             // Get a random host
             CollAHost h = null;
             List<CollAHost> hostsOnline = getHostsOnline();
@@ -868,27 +1046,40 @@ public class ServerWorker {
             outgoing.addHost(h);
             // If user don't have a valid IP we use the socket in connectionsMap
             if (!user.hasValidIP()) {
-                socket = server.connectionsMap.get(user.getName());
+                socket = server.getAMapedConnection(user.getName());
 
             } else {
                 socket = new Socket(InetAddress.getByName(user.getIp()), user.getPort());
-                socket.setSoTimeout(server.timeout);
+                socket.setSoTimeout(server.getTimeoutValue());
             }
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
             output.writeObject(outgoing);
             output.flush();
             //espera por ACK
-            ObjectInputStream  input  = new ObjectInputStream (socket.getInputStream() );
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             input.readObject();
-            if(user.hasValidIP())
+            if (user.hasValidIP()) {
                 socket.close();
-            treat("Host " + h.getName() + " is sended to user " + user.getName());
+            }
+            treat("Host " + h.getName() + " has been sent to user " + user.getName());
         } catch (Exception ex) {
-            server.displayMessage("Error: could not retrive hosts to " + user.getName() + " at " + user.getIp());
-            treat("Error: could not retrive hosts to " + user.getName() + " at " + user.getIp(), ex);
+            treat("Error: could not retrive hosts to " + name, ex);
         }
     }
-
+    
+    /**
+     * 
+     * @return a CollAMsg listing all online hosts
+     */
+    public ListOnlineHostsMsg listOnlineHosts(){
+        ListOnlineHostsMsg msg = new ListOnlineHostsMsg();
+        
+        for(CollAHost host : this.getHostsOnline()){
+            msg.addHost(host);
+        }
+        return msg;
+    }
+    
     private long generateSeassionID(Long id) {
         return id;
     }
@@ -898,7 +1089,14 @@ public class ServerWorker {
      * @return a Set containing the names of the users
      */
     private Set<String> getUsersSet() {
-        return server.getUsersSet();
+        Set<String> userSet = new TreeSet<String>();
+        try {
+            Server server = Server.getInstance();
+            userSet.addAll(server.getUsersSet());
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
+        return userSet;
     }
 
     /**
@@ -911,46 +1109,51 @@ public class ServerWorker {
      * @param socket an socket from client.
      * @return a message to send to client to confirm login
      */
-    private CollAMessage clientLogin(CollAUser user, String password, String ipAsClientSeesIt, Socket socket) {
+    private CollAMessage clientLogin(String userName, String password, String ipAsClientSeesIt, Socket socket) {
         DeveloperViewerLoginAnswerMsg answer = new DeveloperViewerLoginAnswerMsg();
-        if (user == null || server.getUser(user.getName()) == null) {
-            answer.confirmUserName(false);
-        } else {
+        try {
+            Server server = Server.getInstance();
+            CollAUser user = server.getUser(userName);
             answer.confirmUserName(true);
             /*
              * checks if its both a valid and private IP address over Internet,
              * or behind some NAT
              */
-             if (socket.getInetAddress().toString().substring(1).equals(ipAsClientSeesIt)) {
+            if (socket.getInetAddress().toString().substring(1).equals(ipAsClientSeesIt)) {
                 user.validateIP();
             } else {
                 user.setIp(socket.getInetAddress().toString().substring(1));
                 user.invalidateIP();
             }
-            /**@debug
-              user.validateIP();
-              user.setIp("127.0.0.1");
-             /**/
+            /**
+             * @debug user.validateIP(); user.setIp("127.0.0.1"); /*
+             */
             // verifies the passwords send true if the password is corretct
-            if( server.getUserPassword( user.getName() ) != null
-                && password.equals( server.getUserPassword( user.getName() ) ) ){
+            if (server.getUserPassword(user.getName()) != null
+                    && password.equals(server.getUserPassword(user.getName()))) {
                 user.setOnline();
                 user.setConnectionInitialized();
                 //invalidate port to avoid connections while login is not complete
                 user.setPort(-1);
                 Session newSession = new Session();
-                newSession.setSessionID(this.server.generateSessionID());
-                user.addSession(newSession);                
-                server.displayMessage("User " + user.getName() + " has connected");
+                newSession.setSessionID(server.generateSessionID());
+                user.addSession(newSession);
+                //server.displayMessage("User " + user.getName() + " has connected");
                 treat("User " + user.getName() + " has connected");
                 answer.confirmPassword(true);
                 answer.setUser(server.getUser(user.getName()));
                 recordActivities(user, ActivityID.LOGIN, null);
-                answer.setContacts(this.getUserContacts(user.getName()));                
+                answer.setContacts(this.getUserContacts(user.getName()));
             } else {
                 answer.confirmPassword(false);
             }
-        }// end else
+        } catch (NonExistentUser nExUsr) {
+            nExUsr.printStackTrace();
+            answer.confirmUserName(false);
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
+        }
+
         return answer;
     }// end method
 
@@ -961,9 +1164,14 @@ public class ServerWorker {
      * @param groupName name of the group
      */
     private void requestToJoinGroup(String userName, String groupName) {
-        CollAGroup group = this.server.getGroup(groupName);
-        group.addMemberToWaitingList(userName);
-        this.server.updateGroup(groupName, group);
+        try {
+            Server server = Server.getInstance();
+            CollAGroup group = server.getGroup(groupName);
+            group.addMemberToWaitingList(userName);
+            server.updateGroup(groupName, group);
+        } catch (ServerInitializationException servInit) {
+            treat(servInit);
+        }
     }
 
     /**
@@ -973,17 +1181,26 @@ public class ServerWorker {
      * @param temp User that was stored on users map
      */
     private void clientDisconnect(CollAUser user, CollAUser temp) {
-        for (CollAHost host : temp.getHosts()) {
-            user.addHost(host);
+        try {
+            Server server = Server.getInstance();
+            for (CollAHost host : temp.getHosts()) {
+                user.addHost(host);
+            }
+            user.setPort(-1);
+            user.setOffline();
+            //server.displayMessage("User " + user.getName() + " has disconnected");
+            treat("User " + user.getName() + " has disconnected");
+            try {
+                updateUser(user);
+                sendMemberUpdateToGroups(user.getName());
+                recordActivities(user, ActivityID.DISCONNECT, "\nConnection total time: " + user.getConnectionTotalTime());
+            } catch (NonExistentUser nExUsr) {
+                treat(nExUsr);
+            }
+            server.removeAMappedConnection(user.getName());
+        } catch (ServerInitializationException servInit) {
+            treat(servInit);
         }
-        user.setPort(-1);
-        user.setOffline();
-        server.displayMessage("User " + user.getName() + " has disconnected");
-        treat("User " + user.getName() + " has disconnected");
-        updateUser(user);
-        sendMemberUpdateToGroups(user.getName());
-        recordActivities(user, ActivityID.DISCONNECT, "\nConnection total time: " + user.getConnectionTotalTime());
-        server.connectionsMap.remove(user.getName());
     }
 
     /**
@@ -992,11 +1209,20 @@ public class ServerWorker {
      * @param host host disconnecting from server
      */
     private void hostDisconnect(CollAHost host) {
-        host.setPort(-1);
-        host.setOffline();
-        server.displayMessage("Host " + host.getName() + " has disconnected");
-        treat("Host " + host.getName() + " has disconnected");
-        updateHost(host);
+        try {
+            Server server = Server.getInstance();
+            host.setPort(-1);
+            host.setOffline();
+            //server.displayMessage("Host " + host.getName() + " has disconnected");
+            treat("Host " + host.getName() + " has disconnected");
+            try {
+                updateHost(host);
+            } catch (NonExistentUser nExUsr) {
+                treat(nExUsr);
+            }
+        } catch (ServerInitializationException servInit) {
+            treat(servInit);
+        }
     }
 
     /**
@@ -1008,17 +1234,27 @@ public class ServerWorker {
      * @return response a message to send to the client
      */
     private CollAMessage clientSignUp(CollAUser user, String pass) {
-
         SignUpAnswerMsg response = new SignUpAnswerMsg();
-        if (server.getUserPassword(user.getName()) != null) {
-            //true if the name is not available
-            response.confirmUserName(Boolean.TRUE);
-        } else {
-            //false if the name is available
-            response.confirmUserName(Boolean.FALSE);
-            updateUser(user);
-            //reads crypted passaword
-            server.setUserPassword(user.getName(), pass);
+        try {
+            Server server = Server.getInstance();
+            if (server.getUserPassword(user.getName()) != null) {
+                //true if the name is not available
+                response.nameAlreadyInUse(Boolean.TRUE);
+            } else {
+                //false if the name is available
+                response.nameAlreadyInUse(Boolean.FALSE);
+                try {
+                    server.addUser(user);
+                } catch (UserAlreadyExists usrAEx) {
+                    //true if the name is not available
+                    response.nameAlreadyInUse(Boolean.TRUE);
+                    usrAEx.printStackTrace();
+                }
+                //reads crypted passaword
+                server.setUserPassword(user.getName(), pass);
+            }
+        } catch (ServerInitializationException servInit) {
+            treat(servInit);
         }
         return response;
     }
@@ -1032,13 +1268,14 @@ public class ServerWorker {
     private void addGroup(CollAUser usr, String groupName) {
         Socket socket;
         ObjectOutputStream output;
-        ObjectInputStream  input;
+        ObjectInputStream input;
         try {
+            Server server = Server.getInstance();
             if (usr.hasValidIP()) {
                 socket = new Socket(InetAddress.getByName(usr.getIp()), usr.getPort());
-                socket.setSoTimeout(server.timeout);
+                socket.setSoTimeout(server.getTimeoutValue());
             } else {
-                socket = server.connectionsMap.get(usr.getName());
+                socket = server.getAMapedConnection(usr.getName());
             }
             CreateGroupAnswerMsg response;
             if (server.getGroup(groupName) != null) {
@@ -1052,13 +1289,12 @@ public class ServerWorker {
             output.writeObject(response);
             output.flush();
             // espera por ACK
-            input  = new ObjectInputStream (socket.getInputStream() );
+            input = new ObjectInputStream(socket.getInputStream());
             input.readObject();
-            if(usr.hasValidIP())
+            if (usr.hasValidIP()) {
                 socket.close();
+            }
         } catch (Exception io) {
-            server.displayMessage("Error while creating new group.\n Client: " + usr.getName() + "\n"
-                    + "Client IP Address: " + usr.getIp());
             treat("Error while creating new group. Client: " + usr.getName() + "\n"
                     + "Client IP Address: " + usr.getIp(), io);
         }
@@ -1066,36 +1302,37 @@ public class ServerWorker {
 
     /**
      * Envia os grupos que o cliente pertence para o cliente.
+     *
      * @param user user that will receive the groups
      */
     private void sendGroupsToClient(CollAUser user) {
-        Set<String> groups = server.getAllGroups();
         TreeSet<String> groupsSet = new TreeSet<String>();
         GetGroupsAnswerMsg response = new GetGroupsAnswerMsg();
         Socket socketAux;
         try {
+            Server server = Server.getInstance();
+            Set<String> groups = server.getAllGroups();
             for (String i : groups) {
                 groupsSet.add(i);
             }
             if (user.hasValidIP()) {
                 socketAux = new Socket(InetAddress.getByName(user.getIp()), user.getPort());
-                socketAux.setSoTimeout(server.timeout);
+                socketAux.setSoTimeout(server.getTimeoutValue());
 
             } else {
-                socketAux = server.connectionsMap.get(user.getName());
+                socketAux = server.getAMapedConnection(user.getName());
             }
             response.setGroupsSet(groupsSet);
             ObjectOutputStream output = new ObjectOutputStream(socketAux.getOutputStream());
             output.writeObject(response);
             output.flush();
             // espera por ACK
-            ObjectInputStream  input  = new ObjectInputStream (socketAux.getInputStream() );
+            ObjectInputStream input = new ObjectInputStream(socketAux.getInputStream());
             input.readObject();
-            if(user.hasValidIP())
-                socketAux.close();            
+            if (user.hasValidIP()) {
+                socketAux.close();
+            }
         } catch (Exception ex) {
-            server.displayMessage("Error: couldn't send list of groups to client " + user.getName()
-                    + " at " + user.getIp());
             treat("Error: couldn't send list of groups to client " + user.getName()
                     + " at " + user.getIp(), ex);
         }
@@ -1103,59 +1340,75 @@ public class ServerWorker {
 
     /**
      * Vincula um host a um cliente.
+     *
      * @param host o hot para ser vinculado.
      * @param userName o nome do usuário que terá o host vinculado.
      */
-    private void hostAdd(Host host, String userName) {
-        CollAUser user = server.getUser(userName);
-        CollAHost temp = user.getHost(host.getName());
-        // If host is already in mapHosts
-        if (temp != null) {
-            host.setActivities(temp.getActivities());
+    private void hostAdd(Host host, String userName) throws NonExistentUser {
+        try {
+            Server server = Server.getInstance();
+            CollAUser user = server.getUser(userName);
+            CollAHost temp = user.getHost(host.getName());
+            // If host is already in mapHosts
+            if (temp != null) {
+                host.setActivities(temp.getActivities());
+            }
+            //Find User and add his host        
+            user.addHost(host);
+            this.updateUser(user);
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
         }
-        //Find User and add his host        
-        user.addHost(host);
-        this.updateUser(user);
     }
 
     /**
      * Envia um resultado guardado ao cliente.
+     *
      * @param userName o nome do cliente que receberá o resultado.
      */
-    private void sendStoredResults( String userName ){
-        CollAUser user = server.getUser( userName );
-        if( user.getPort() > 0 ){
-            try{
-                SendStoredResultsMsg outgoing = new SendStoredResultsMsg( server.resultsMap.get( userName ) );
-                if( outgoing.getResults() != null ){
-                    Socket socket;
-                    ObjectOutputStream output;
-                    ObjectInputStream input;
-                    if( user.hasValidIP() ){
-                        socket = new Socket( InetAddress.getByName( user.getIp() ), user.getPort() );
-                    }else{
-                        socket = server.connectionsMap.get( userName );
-                    }
-                    output = new ObjectOutputStream( socket.getOutputStream() );
-                    output.writeObject( outgoing );
-                    output.flush();
-                    // espera por ACK
-                    input = new ObjectInputStream( socket.getInputStream() );
-                    input.readObject();
-                    if( user.hasValidIP() )
-                        socket.close();
-                    //discards stored result
-                    server.resultsMap.remove( userName );
-                } // otherwise there is nothing to send to client
-            }catch( Exception ex ){
-                this.server.displayMessage( "Couldn't send stored results to " + userName );
-                treat( "Couldn't send stored results to " + userName, ex );
-            }
-        }// end if
+    private void sendStoredResults(String userName) {
+        try {
+            Server server = Server.getInstance();
+            CollAUser user = server.getUser(userName);
+            if (user.getPort() > 0) {
+                try {
+                    SendStoredResultsMsg outgoing = new SendStoredResultsMsg(server.getMapedResults(userName));
+                    if (outgoing.getResults() != null) {
+                        Socket socket;
+                        ObjectOutputStream output;
+                        ObjectInputStream input;
+                        if (user.hasValidIP()) {
+                            socket = new Socket(InetAddress.getByName(user.getIp()), user.getPort());
+                        } else {
+                            socket = server.getAMapedConnection(userName);
+                        }
+                        output = new ObjectOutputStream(socket.getOutputStream());
+                        output.writeObject(outgoing);
+                        output.flush();
+                        // espera por ACK
+                        input = new ObjectInputStream(socket.getInputStream());
+                        input.readObject();
+                        if (user.hasValidIP()) {
+                            socket.close();
+                        }
+                        //discards stored result                        
+                        server.removeMapedResults(userName);
+                    } // otherwise there is nothing to send to client
+                } catch (Exception ex) {
+                    server.displayMessage("Couldn't send stored results to " + userName);
+                    treat("Couldn't send stored results to " + userName, ex);
+                }
+            }// end if
+        } catch (NonExistentUser nExUsr) {
+            treat(nExUsr);
+        } catch (ServerInitializationException servInit) {
+            treat(servInit);
+        }
     }// end method
 
     /**
      * Busca os usuários cadastrados em um grupo determinado.
+     *
      * @param groupName o nome do grupo a ser pesquisado
      * @return os usuários do grupo
      */
@@ -1165,9 +1418,14 @@ public class ServerWorker {
     }
 
     private void updateGroups(List<CollAGroup> groups) {
-        for (CollAGroup group : groups) {
-            server.updateGroup(group.getName(), group);
-            this.sendGroupUpdateToMembers(group.getName(), "0");
+        try {
+            Server server = Server.getInstance();
+            for (CollAGroup group : groups) {
+                server.updateGroup(group.getName(), group);
+                this.sendGroupUpdateToMembers(group.getName(), "0");
+            }
+        } catch (ServerInitializationException servEx) {
+            treat(servEx);
         }
     }
 
@@ -1183,26 +1441,27 @@ public class ServerWorker {
             Socket socket;
             ObjectOutputStream output;
             ObjectInputStream input;
+            Server server = Server.getInstance();
             if (user.isOnline()) {
-                if (user.hasValidIP())
+                if (user.hasValidIP()) {
                     socket = new Socket(InetAddress.getByName(user.getIp()), user.getPort());
-                else
-                    socket = this.server.connectionsMap.get(userName);
+                } else {
+                    socket = server.getAMapedConnection(userName);
+                }
                 SendOwnedHostsMsg msg = new SendOwnedHostsMsg();
-                msg.addHost( host );
+                msg.addHost(host);
                 output = new ObjectOutputStream(socket.getOutputStream());
-                output.writeObject( msg );
+                output.writeObject(msg);
                 output.flush();
                 // espera por ACK
                 input = new ObjectInputStream(socket.getInputStream());
                 input.readObject();
-                if(user.hasValidIP())
+                if (user.hasValidIP()) {
                     socket.close();
+                }
             }
         } catch (Exception io) {
             treat("Problema com o envio do Host Update to Owner", io);
         }
-    }// end method
-    //Variables
-    private volatile Server server;
+    }// end method    
 }

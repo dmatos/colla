@@ -4,6 +4,8 @@
  */
 package colla.appl.server;
 
+import java.io.IOException;
+
 import colla.appl.server.GUI.CollAServerGUI;
 
 /**
@@ -14,19 +16,15 @@ import colla.appl.server.GUI.CollAServerGUI;
 public class ServerStarter {
 
     /**
-     * @todo um servidor que não necessite de GUI
-     *
-     */
-    /**
      *
      * @param args
      *
      * server options
      *
-     * -t 'timeout' set timeout value to a given 'timeout' 
-     * 
+     * -t 'timeout' set timeout value to a given 'timeout'
+     *
      * -p 'number' set port number to a given 'number'
-     * 
+     *
      * -noX set use of CLI instead of GUI
      *
      */
@@ -59,18 +57,20 @@ public class ServerStarter {
             }
         }
 
+        try {
+            superServer = Server.setupServer(portNumber, timeout);
+            Thread thr = new Thread(superServer);
+            thr.start();
 
-
-        superServer = new Server(portNumber, timeout);
-        Thread thr = new Thread(superServer);
-        thr.start();
-
-        if (useGUI) {
-            CollAServerGUI serverGUI = new CollAServerGUI(superServer);            
-            serverGUI.displayMessage("Listening port number: " + superServer.getPortNumber());            
-            superServer.addObserver(serverGUI);            
-            serverGUI.updateClientsTree();
+            if (useGUI) {
+                CollAServerGUI serverGUI = new CollAServerGUI();
+                serverGUI.displayMessage("Listening port number: " + superServer.getPortNumber());
+                superServer.addObserver(serverGUI);
+                serverGUI.updateClientsTree();
+            }
+        } catch (IOException io) {
+            io.printStackTrace();
+            System.exit(1);
         }
-
     }
 }

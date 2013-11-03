@@ -24,6 +24,10 @@ import java.util.Map;
  */
 public class DistributedTaskExecutor {
 
+    public DistributedTaskExecutor(){
+        
+    }
+    
     protected JCL_result executeDistributedTask(CollAMessage collAMsg, CollAConsumer consumer) {
         TaskMessage taskMessage = (TaskMessage) collAMsg;
         CollATask task = taskMessage.getTask();
@@ -34,61 +38,9 @@ public class DistributedTaskExecutor {
         String groupName = taskMessage.getGroupName();
 
         task.setStarted();
-        JCL_facade jcl = JCL_FacadeImpl.getInstance();
+        JCL_facade jcl = JCL_FacadeImpl.getInstance();                
 
-        File[] jarsToRegister = new File[task.getDependencies().size() + 1];
-
-        /*
-         * receive the buffer of file
-         */
-        byte[] taskBuffer = task.getTask();
-        Map<String, byte[]> jars = task.getDependencies();
-        String classToExecute = task.getClassToExecute();
-        String methodToExecute = task.getMethodToExecute();
-
-
-        //gathering files into array
-        try {
-            //write temp file for task
-            new File("../" + task.getTaskID() + "/").mkdir();
-            File file = new File("../" + task.getTaskID() + "/" + taskName);
-            FileOutputStream fout = new FileOutputStream(file);
-            DataOutputStream dout = new DataOutputStream(fout);
-            dout.write(taskBuffer);
-            dout.flush();
-
-            //first element of the array of files must be the task
-            //File file = new File(taskName);
-            jarsToRegister[0] = file;
-
-            //and then dependencies
-            int jarCounter = 1;
-            for (String fileName : jars.keySet()) {
-                //write temp file for dependencies
-                file = new File("../" + task.getTaskID() + "/" + fileName);
-                byte[] jar = jars.get(fileName);
-                fout = new FileOutputStream(file);
-                dout = new DataOutputStream(fout);
-                dout.write(jar);
-                dout.flush();
-                //add dependencie to array of files
-                jarsToRegister[jarCounter++] = file;
-            }
-
-            //close file streams
-            dout.close();
-            fout.close();
-
-            //registering task in javaCaLa
-            if (jcl.register(jarsToRegister, classToExecute)) {
-                //System.err.println("jar registrado com sucesso");
-            } else {
-                //System.err.println("jar nao foi registrado com sucesso");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.registerFiles(task);
 
         String ticket = "";
 
@@ -115,5 +67,64 @@ public class DistributedTaskExecutor {
         jcl.removeResult(ticket);
 
         return jclr;
+    }   
+
+    public void registerFiles(CollATask task) {
+
+        JCL_facade jcl = JCL_FacadeImpl.getInstance();
+        String taskName = task.getTaskName();
+
+        File[] jarsToRegister = new File[task.getDependencies().size() + 1];
+        /*
+         * receive the buffer of file
+         */
+        byte[] taskBuffer = task.getTask();
+        Map<String, byte[]> jars = task.getDependencies();
+        String classToExecute = task.getClassToExecute();
+        String methodToExecute = task.getMethodToExecute();        
+
+        //gathering files into array
+        try {
+            //write temp file for task
+            new File("../temp_files/").mkdir();
+            new File("../temp_files/" + task.getTaskID() + "/").mkdir();
+            File file = new File("../temp_files/" + task.getTaskID() + "/" + taskName);
+            FileOutputStream fout = new FileOutputStream(file);
+            DataOutputStream dout = new DataOutputStream(fout);
+            dout.write(taskBuffer);
+            dout.flush();
+
+            //first element of the array of files must be the task
+            //File file = new File(taskName);
+            jarsToRegister[0] = file;
+
+            //and then dependencies
+            int jarCounter = 1;
+            for (String fileName : jars.keySet()) {
+                //write temp file for dependencies
+                file = new File("../temp_files/" + task.getTaskID() + "/" + fileName);
+                byte[] jar = jars.get(fileName);
+                fout = new FileOutputStream(file);
+                dout = new DataOutputStream(fout);
+                dout.write(jar);
+                dout.flush();
+                //add dependencie to array of files
+                jarsToRegister[jarCounter++] = file;
+            }
+
+            //close file streams
+            dout.close();
+            fout.close();
+
+            //registering task in javaCaLa
+            if (jcl.register(jarsToRegister, classToExecute)) {
+                //System.err.println("jar registrado com sucesso");
+            } else {
+                //System.err.println("jar nao foi registrado com sucesso");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

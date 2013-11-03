@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="dist/HostViewer.jar"/>
-	<classpathentry kind="lib" path="dist/lib/javaCaLaMulticore_release_19_05_2012.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcl_lambari_june_2013.jar"/>
 	<classpathentry kind="lib" path="dist/lib/Kernel.jar"/>
 	<classpathentry kind="lib" path="store/host_viewer.jar"/>
 	<classpathentry kind="lib" path="user_jars/ahostDetect.jar"/>

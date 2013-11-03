@@ -110,6 +110,7 @@
         <copy todir="${store.dir}" overwrite="true">
             <fileset dir="${store.dir}/..">
                 <include name="**/server_conf.xml" />
+                <include name="**/JCLHost.jar" />
             </fileset>
         </copy>
 

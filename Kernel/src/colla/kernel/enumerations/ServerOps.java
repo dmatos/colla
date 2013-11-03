@@ -32,6 +32,7 @@ public enum ServerOps{
         HOST_REGISTER, 
         GET_HOSTS,
         GET_AVAILABLE_HOSTS,
+        GET_LIST_OF_ONLINE_HOSTS,
         HOST_DISCONNECT,
         GET_STORED_RESULTS,
         ACK;

@@ -4,6 +4,7 @@
  */
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.exceptions.DeveloperControllerInitializationException;
 import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollAUser;
 import colla.kernel.messages.toClient.ACK;
@@ -18,6 +19,7 @@ import java.util.Observable;
 /**
  * Initializes a micro server so the client will be available to receive
  * messages at any time.
+ *
  * @author dmatos
  */
 class DevMicroServer extends Observable implements Runnable {
@@ -26,19 +28,23 @@ class DevMicroServer extends Observable implements Runnable {
      *
      * Initializes a micro server so the client will be available to receive
      * messages at any time.
+     *
      * @param developerViewer the developer viewer linked with this server.
      * @param usr user that owns the microserver.
      * @param ipAddress server ip adress.
      * @param portNumber the server port number.
      */
-    public DevMicroServer(DeveloperViewerController developerViewer, CollAUser usr, String ipAddress, int portNumber) {
+    public DevMicroServer(String ipAddress, int portNumber) throws DeveloperControllerInitializationException {
+
+        DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+
         this.timeout = 90000;
         this.serverIPaddress = ipAddress;
         this.serverPortNumber = portNumber;
-        this.devViewer = developerViewer;
         this.active = true;
         this.shutdownCounter = 0;
         this.debugInfo = new DebugInfo();
+        CollAUser usr = devViewer.getUser();
         this.debugInfo.setDebuggedName(usr.getName());
         this.serverSocket = null;
         this.keepAlive = null;
@@ -67,16 +73,22 @@ class DevMicroServer extends Observable implements Runnable {
                  */
                 MapConnection mapCon = new MapConnection(usr.getName());
                 this.keepAlive = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
-                ObjectOutputStream output = new ObjectOutputStream(keepAlive.getOutputStream());               
+                ObjectOutputStream output = new ObjectOutputStream(keepAlive.getOutputStream());
                 output.writeObject(mapCon);
                 output.flush();
                 // espera por ACK
                 ObjectInputStream input = new ObjectInputStream(keepAlive.getInputStream());
                 input.readObject();
-            } catch (Exception e) {
+            } catch (IOException ioEx) {
                 //debug("Problema com criação do server socket do micro server", e);
                 this.notifyObservers("Error: DevMicroServer could not be initilized");
-                System.exit(1);
+                //System.exit(1);
+                devViewer.shutdown();
+            } catch (ClassNotFoundException cnfEx) {
+                //debug("Problema com criação do server socket do micro server", e);
+                this.notifyObservers("Error: DevMicroServer could not be initilized");
+                //System.exit(1);
+                devViewer.shutdown();
             }
         }// end else
 
@@ -91,17 +103,21 @@ class DevMicroServer extends Observable implements Runnable {
         Socket connection = null;
         while (active) {
             try {
-                debug( "microserver waiting connection..." );
+                debug("microserver waiting connection...");
                 //if host IP is valid the socketServer is working, else the connection must keep alive
-                if (devViewer.getUser().hasValidIP()) {
-                    connection = serverSocket.accept();
-                }else{
-                    connection = keepAlive;
+                try {
+                    DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                    if (devViewer.getUser().hasValidIP()) {
+                        connection = serverSocket.accept();
+                    } else {
+                        connection = keepAlive;
+                    }
+                } catch (DeveloperControllerInitializationException devEx) {
                 }
-                ObjectInputStream input   = new ObjectInputStream( connection.getInputStream()  );
-                CollAMessage collAMessage = ( CollAMessage )input.readObject();
-                ObjectOutputStream output = new ObjectOutputStream( connection.getOutputStream() );
-                output.writeObject( new ACK() );
+                ObjectInputStream input = new ObjectInputStream(connection.getInputStream());
+                CollAMessage collAMessage = (CollAMessage) input.readObject();
+                ObjectOutputStream output = new ObjectOutputStream(connection.getOutputStream());
+                output.writeObject(new ACK());
                 output.flush();
                 Object[] args = {collAMessage, this};
                 jcl.execute(DevWorker.class.getName(), args);
@@ -110,7 +126,7 @@ class DevMicroServer extends Observable implements Runnable {
             }
         }// end while
     }// end method run
-    
+
     /**
      * Shutdown the micro server.
      */
@@ -128,57 +144,50 @@ class DevMicroServer extends Observable implements Runnable {
         }
     }
 
-private void debug(String info, Exception ex){
-       /* this.debugInfo.clear();
-        this.debugInfo.setInfo( info );
-        this.debugInfo.setException( ex );
-        this.notifyObservers( this.debugInfo );
-        System.out.println(info);
-        ex.printStackTrace();*/
+    private void debug(String info, Exception ex) {
+        /* this.debugInfo.clear();
+         this.debugInfo.setInfo( info );
+         this.debugInfo.setException( ex );
+         this.notifyObservers( this.debugInfo );
+         System.out.println(info);
+         ex.printStackTrace();*/
     }
+
     /**
      * Método para debugar o programa e notificar os Observers.
+     *
      * @param info Informação
      */
-    private void debug(String info){
-       /* this.debugInfo.clear();
-        this.debugInfo.setInfo( info );
-        this.notifyObservers( this.debugInfo );
-        System.out.println(info); */
+    private void debug(String info) {
+        /* this.debugInfo.clear();
+         this.debugInfo.setInfo( info );
+         this.notifyObservers( this.debugInfo );
+         System.out.println(info); */
     }
-    
+
     /**
      * Método para debugar o programa e notificar os Observers.
+     *
      * @param ex Exception
      */
-    private void debug(Exception ex){
+    private void debug(Exception ex) {
         /*this.debugInfo.clear();
-        this.debugInfo.setException( ex );
-        this.notifyObservers( this.debugInfo );
-        ex.printStackTrace();*/
-    }
+         this.debugInfo.setException( ex );
+         this.notifyObservers( this.debugInfo );
+         ex.printStackTrace();*/
+    }    
 
-    public DeveloperViewerController getDevViewer(){
-        return devViewer;
-    }
-
-    public String getServerIPaddress(){
+    public String getServerIPaddress() {
         return serverIPaddress;
     }
 
-    public Integer getServerPortNumber(){
+    public Integer getServerPortNumber() {
         return serverPortNumber;
     }
-    
-    public CollAUser getUser(){
-        return devViewer.getUser();
-    }
-    
     
     private Socket keepAlive;
     private String serverIPaddress;
     private Integer serverPortNumber;
-    private DeveloperViewerController devViewer;
     private boolean active;
     private final boolean validIP;
     private ServerSocket serverSocket;

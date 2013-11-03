@@ -19,15 +19,16 @@ import org.xml.sax.SAXException;
 
 /**
  * Classe responsável por efetuar o registro do host no servidor.
+ *
  * @author Bruno
  */
-public class HostViewerRegister{
+public class HostViewerRegister implements Runnable {
 
-    public HostViewerRegister(){
-        try{
+    public HostViewerRegister() {
+        try {
             this.collAHost = new Host();
             SAXReader reader = new SAXReader();
-            reader.parse( "server_conf.xml" );
+            reader.parse("server_conf.xml");
             serverIP = reader.getIPfromXML();
             serverPort = reader.getPortNumberFromXML();
 
@@ -36,90 +37,93 @@ public class HostViewerRegister{
              * vasculhando as interfaces de rede
              */
             Enumeration<NetworkInterface> nets =
-                                          NetworkInterface.getNetworkInterfaces();
+                    NetworkInterface.getNetworkInterfaces();
 
-            for( NetworkInterface netint : Collections.list( nets ) ){
+            for (NetworkInterface netint : Collections.list(nets)) {
                 Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for( InetAddress inetAddress : Collections.list( inetAddresses ) ){
-                    if( !inetAddress.isLoopbackAddress()
-                        && !inetAddress.toString().substring( 1 ).startsWith( "127" )
-                        && inetAddress.toString().substring( 1 ).contains( "." ) ){
-                        collAHost.setIp( inetAddress.toString().substring( 1 ) );
+                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                    if (!inetAddress.isLoopbackAddress()
+                            && !inetAddress.toString().substring(1).startsWith("127")
+                            && inetAddress.toString().substring(1).contains(".")) {
+                        collAHost.setIp(inetAddress.toString().substring(1));
                     }
                 }
             }
-            hostRegisterGUI = new HostViewRegisterGUI( this );
-            hostRegisterGUI.setVisible( true );            
-        }catch( ParserConfigurationException ex ){
-            //ex.printStackTrace();
-        }catch( SAXException ex ){
-            //ex.printStackTrace();
-        }catch( IOException ex ){
-            //ex.printStackTrace();
+        } catch (ParserConfigurationException ex) {
+            ex.printStackTrace();
+        } catch (SAXException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
     /**
      * Registers the host on server.
+     *
      * @param userName the name of the user who owns the host
      * @param pass the password of the user who owns the host
      * @param port the port for register
      */
-    public boolean register( String userName, String pass, int port ){
-        try{
-            String crypt = this.byteArrayToHexString( this.computeHash( pass ) );
+    public boolean register(String userName, String pass, int port) {
+        try {
+            String crypt = this.byteArrayToHexString(this.computeHash(pass));
 
             HostRegisterMsg outgoing = new HostRegisterMsg();
 
             //enviar user
-            outgoing.setUserName( userName );
+            outgoing.setUserName(userName);
 
             //enviar senha encriptada
-            outgoing.setUserPass( crypt );
+            outgoing.setUserPass(crypt);
 
-            collAHost.setPort( port );
+            collAHost.setPort(port);
             //enviar host
-            outgoing.setHost( collAHost );
+            outgoing.setHost(collAHost);
 
-            Socket connect = new Socket( InetAddress.getByName( serverIP ), serverPort );
-            connect.setSoTimeout( 0 );
-            ObjectOutputStream output = new ObjectOutputStream( connect.getOutputStream() );
-            output.writeObject( outgoing );
-            output.flush();                      
-            
+            Socket connect = new Socket(InetAddress.getByName(serverIP), serverPort);
+            connect.setSoTimeout(0);
+            ObjectOutputStream output = new ObjectOutputStream(connect.getOutputStream());
+            output.writeObject(outgoing);
+            output.flush();
+
             //receive the host name
-            ObjectInputStream input = new ObjectInputStream( connect.getInputStream() );
-            ServerHostRegisterAnswerMsg incoming = ( ServerHostRegisterAnswerMsg ) input.readObject();
+            ObjectInputStream input = new ObjectInputStream(connect.getInputStream());
+            ServerHostRegisterAnswerMsg incoming = (ServerHostRegisterAnswerMsg) input.readObject();
             connect.close();
-            
-            if(incoming.getHostName() == null){
+
+            if (incoming.getHostName() == null) {
                 //System.err.println("Invalid username or password");
                 return false;
             } else {
-                collAHost.setName( incoming.getHostName() );
-                collAHost.setNameUser( userName );
+                collAHost.setName(incoming.getHostName());
+                collAHost.setNameUser(userName);
+                HostViewerController hostViewer = HostViewerController.setup();
+                hostViewer.login(collAHost);
+                Thread thr = new Thread(hostViewer);
+                thr.start();
+                this.shutdown();
                 this.hostRegisterGUI.dispose();
-                HostViewerController.getInstance().login(collAHost);
             }
-           // System.err.println("register");
-           // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
-            
-        }catch( Exception ex ){
-            //ex.printStackTrace();
+            // System.err.println("register");
+            // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
         return true;
     }
 
     //calcular o hexadecimal da senha
-    private String byteArrayToHexString( byte[] b ){
-        StringBuffer sb = new StringBuffer( b.length * 2 );
-        for( int i = 0; i < b.length; i++ ){
+    private String byteArrayToHexString(byte[] b) {
+        StringBuffer sb = new StringBuffer(b.length * 2);
+        for (int i = 0; i < b.length; i++) {
             int v = b[i] & 0xff;
-            if( v < 16 ){
-                sb.append( '0' );
+            if (v < 16) {
+                sb.append('0');
             }
-            sb.append( Integer.toHexString( v ) );
+            sb.append(Integer.toHexString(v));
         }
         return sb.toString().toUpperCase();
     }
@@ -127,11 +131,11 @@ public class HostViewerRegister{
     /* método para computar o hash da senha
      * retirado do site http://www.rgagnon.com/javadetails/java-0400.html
      */
-    private byte[] computeHash( String x ) throws Exception{
+    private byte[] computeHash(String x) throws Exception {
         java.security.MessageDigest d;
-        d = java.security.MessageDigest.getInstance( "SHA-1" );
+        d = java.security.MessageDigest.getInstance("SHA-1");
         d.reset();
-        d.update( x.getBytes() );
+        d.update(x.getBytes());
         return d.digest();
 
         /* para usar onde for pegar a senha:
@@ -139,8 +143,21 @@ public class HostViewerRegister{
          */
     }
 
+    public void shutdown() {
+        if (this.hostRegisterGUI != null) {
+            this.hostRegisterGUI.dispose();
+        }
+    }
+    
+    
     private CollAHost collAHost; //usuario que irá logar
     private String serverIP;
     private int serverPort;
     private HostViewRegisterGUI hostRegisterGUI;
+
+    @Override
+    public void run() {
+        hostRegisterGUI = new HostViewRegisterGUI(this);
+        hostRegisterGUI.setVisible(true);
+    }
 }

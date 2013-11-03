@@ -12,9 +12,10 @@
 package colla.appl.developer_viewer.view;
 
 import colla.appl.developer_viewer.ClientConfigurations;
-import colla.appl.developer_viewer.ConfigException;
+import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
 import colla.appl.developer_viewer.DevViewerLogin;
 import colla.appl.developer_viewer.DeveloperViewerController;
+import colla.appl.developer_viewer.exceptions.DeveloperControllerInitializationException;
 import colla.kernel.api.CollAGroup;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollATask;
@@ -54,12 +55,12 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     /**
      * Creates new form DeveloperViewerGUI
      */
-    public DeveloperViewerGUI(DeveloperViewerController dev, String userName) {
+    private DeveloperViewerGUI(String userName) throws DeveloperControllerInitializationException {
         super("CollA Client - " + userName);
+        DeveloperViewerController dev = DeveloperViewerController.getInstance();
         this.setIconImage(new ImageIcon(getClass().getResource(BackGround.COLLA_LOGO_ICON.getPath())).getImage());
         UIManager.put("DesktopPaneUI", "javax.swing.plaf.basic.BasicDesktopPaneUI");
-        this.devViewer = dev;
-        this.chatWindow = new ChatWindow(dev.serverIPaddress, dev.serverPortNumber, userName, dev);
+        this.chatWindow = new ChatWindow();
         this.thisUserName = userName;
         this.taskFile = null;
         this.dependencyFiles = new ArrayList<File>();
@@ -106,6 +107,13 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         this.setVisible(true);
     }
+    
+    public static synchronized DeveloperViewerGUI getInstance(String userName) throws DeveloperControllerInitializationException{
+        if(developerGUI == null){
+            developerGUI = new DeveloperViewerGUI(userName);
+        }
+        return developerGUI;
+    }
 
     public void shutdown() {
         try {
@@ -114,16 +122,25 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             Exceptions.printStackTrace(ex);
         }
         this.chatWindow.dispose();
-        devViewer.shutdown();
         try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            devViewer.shutdown();
             DevViewerLogin devViewerLogin = new DevViewerLogin();
             devViewerLogin.useGUI(true);
             Client_Login loginGUI = new Client_Login(devViewerLogin);
             devViewerLogin.addObserver(loginGUI);
-        } catch (ConfigException cex) {
-            JOptionPane.showMessageDialog(null, "Could not read file server_conf.xml.", "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (DeveloperConfigurationException cex) {
+            JOptionPane.showMessageDialog(null, "Could not read file server_conf.xml.", "Error", JOptionPane.ERROR_MESSAGE);
+            this.dispose();
+            developerGUI = null;
+            System.exit(1);
+        } catch (DeveloperControllerInitializationException devEx) {
+            JOptionPane.showMessageDialog(null, "Could not initialize DeveloperController.", "Error", JOptionPane.ERROR_MESSAGE);
+            this.dispose();
+            developerGUI = null;
             System.exit(1);
         }
+        developerGUI = null;
         this.dispose();
     }
 
@@ -165,7 +182,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      */
     private void initCustomComponents() {
         this.config = new ClientConfigurations();
-        this.resultsWindow = new ResultsWindow(this.devViewer);
+        try {
+            this.resultsWindow = new ResultsWindow();
+        } catch (DeveloperControllerInitializationException ex) {
+            //Exceptions.printStackTrace(ex);
+        }
         this.dependencyModel = new DefaultListModel<File>();
         this.argumentsModel = new DefaultListModel<File>();
         this.AtachsList.setModel(dependencyModel);
@@ -199,24 +220,33 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      */
     @Override
     public void updateAllGroups(final HashMap<String, CollAGroup> groups) {
-//        this.groupsMap = groups;
-        jComboBox_groups.removeAllItems();
-        Set<String> keys = devViewer.getUser().getGroups().keySet();
-        if (keys.isEmpty()) {
-            jComboBox_groups.addItem("My Groups");
-        } else {
-            for (String groupName : keys) {
-                jComboBox_groups.addItem(groupName);
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            jComboBox_groups.removeAllItems();
+            Set<String> keys = devViewer.getUser().getGroups().keySet();
+            if (keys.isEmpty()) {
+                jComboBox_groups.addItem("My Groups");
+            } else {
+                for (String groupName : keys) {
+                    jComboBox_groups.addItem(groupName);
+                }
             }
+            this.jComboBox_groupsActions();
+        } catch (DeveloperControllerInitializationException ex) {
+            Exceptions.printStackTrace(ex);
         }
-        this.jComboBox_groupsActions();
     }
 
     public void createGroup(String groupName) {
         if (groupName.length() > 0) {
-            devViewer.createGroup(groupName);
-            jTextField_groupName.setText("");
-            jDialog_creatGroup.dispose();
+            try {
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                devViewer.createGroup(groupName);
+                jTextField_groupName.setText("");
+                jDialog_creatGroup.dispose();
+            } catch (DeveloperControllerInitializationException ex) {
+                //Exceptions.printStackTrace(ex);
+            }
         }
     }
 
@@ -1640,17 +1670,22 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     }//GEN-LAST:event_jButton_createGroupKeyReleased
 
     public void updatejComboBox_hosts(String contactName) {
-        if (devViewer.getContact(contactName) != null) {
-            this.jComboBox_hosts.removeAllItems();
-            this.jTextArea_hostProp.setText("");
-            for (CollAHost host : devViewer.getContact(contactName).getHosts()) {
-                jComboBox_hosts.addItem(host.getName());
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            if (devViewer.getContact(contactName) != null) {
+                this.jComboBox_hosts.removeAllItems();
+                this.jTextArea_hostProp.setText("");
+                for (CollAHost host : devViewer.getContact(contactName).getHosts()) {
+                    jComboBox_hosts.addItem(host.getName());
+                }
+            } else if (devViewer.getUser().getName().equals(contactName)) {
+                this.jComboBox_hosts.removeAllItems();
+                for (CollAHost host : devViewer.getUser().getHosts()) {
+                    jComboBox_hosts.addItem(host.getName());
+                }
             }
-        } else if (devViewer.getUser().getName().equals(contactName)) {
-            this.jComboBox_hosts.removeAllItems();
-            for (CollAHost host : devViewer.getUser().getHosts()) {
-                jComboBox_hosts.addItem(host.getName());
-            }
+        } catch (DeveloperControllerInitializationException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
@@ -1659,42 +1694,47 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      */
     private void jComboBox_groupsActions() {
         if (jComboBox_groups.getSelectedItem() != null) {
-            String groupName = (String) jComboBox_groups.getSelectedItem();
-            if ((groupName != null) && (devViewer.getUser().getGroups().get(groupName) != null)) {
-                java.util.List<String> userSet = devViewer.getUser().getGroups().get(groupName).getMembers();
-                Set<String> online = new TreeSet<String>();
-                Set<String> offline = new TreeSet<String>();
-                // refresh contacts list for the selected group
+            try {
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                String groupName = (String) jComboBox_groups.getSelectedItem();
+                if ((groupName != null) && (devViewer.getUser().getGroups().get(groupName) != null)) {
+                    java.util.List<String> userSet = devViewer.getUser().getGroups().get(groupName).getMembers();
+                    Set<String> online = new TreeSet<String>();
+                    Set<String> offline = new TreeSet<String>();
+                    // refresh contacts list for the selected group
 
-                //first this client itself
-                online.add(this.thisUserName);
-                if (userSet != null) {
-                    for (String name : userSet) {
-                        if (this.devViewer.getContact(name) != null) {
-                            if (this.devViewer.getContact(name).isOnline()) {
-                                online.add(name);
-                                chatWindow.addContact(name, groupName);
-                            } else {
-                                offline.add(name);
-                                chatWindow.removeContact(name);
+                    //first this client itself
+                    online.add(this.thisUserName);
+                    if (userSet != null) {
+                        for (String name : userSet) {
+                            if (devViewer.getContact(name) != null) {
+                                if (devViewer.getContact(name).isOnline()) {
+                                    online.add(name);
+                                    chatWindow.addContact(name, groupName);
+                                } else {
+                                    offline.add(name);
+                                    chatWindow.removeContact(name);
+                                }
                             }
                         }
+                        DefaultListModel<String> listModel;
+                        listModel = (DefaultListModel<String>) jList_contacts.getModel();
+                        listModel.clear();
+                        listModel.addElement("---Online---");
+                        for (String name : online) {
+                            listModel.addElement(name);
+                        }
+                        listModel.addElement("---Offline---");
+                        for (String name : offline) {
+                            listModel.addElement(name);
+                        }
+                        jList_contacts.repaint();
                     }
-                    DefaultListModel<String> listModel;
-                    listModel = (DefaultListModel<String>) jList_contacts.getModel();
-                    listModel.clear();
-                    listModel.addElement("---Online---");
-                    for (String name : online) {
-                        listModel.addElement(name);
-                    }
-                    listModel.addElement("---Offline---");
-                    for (String name : offline) {
-                        listModel.addElement(name);
-                    }
-                    jList_contacts.repaint();
                 }
+                jComboBox_groups.repaint();
+            } catch (DeveloperControllerInitializationException ex) {
+                Exceptions.printStackTrace(ex);
             }
-            jComboBox_groups.repaint();
         }
     }
 
@@ -1703,13 +1743,18 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     }//GEN-LAST:event_jMenuItem_quitMouseReleased
 
     private void jMenuItem_joinGroupMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem_joinGroupMouseReleased
-        Point point = this.getLocation();
-        Dimension parentSize = this.getSize();
-        jDialog_joinGroup.setLocation(point.x + parentSize.width / 4, point.y + parentSize.height / 10);
-        devViewer.getGroupsListFromServer();
-        jTextField_groupSearch.setText("[Search]");
-        jDialog_joinGroup.pack();
-        jDialog_joinGroup.setVisible(true);
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            Point point = this.getLocation();
+            Dimension parentSize = this.getSize();
+            jDialog_joinGroup.setLocation(point.x + parentSize.width / 4, point.y + parentSize.height / 10);
+            devViewer.getGroupsListFromServer();
+            jTextField_groupSearch.setText("[Search]");
+            jDialog_joinGroup.pack();
+            jDialog_joinGroup.setVisible(true);
+        } catch (DeveloperControllerInitializationException ex) {
+            //Exceptions.printStackTrace(ex);
+        }
     }//GEN-LAST:event_jMenuItem_joinGroupMouseReleased
 
     private void jButton_clearSearchMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton_clearSearchMouseClicked
@@ -1747,9 +1792,14 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         if (jList_listJoinGroup.getSelectedIndex() >= 0) {
             String groupName = (String) jList_listJoinGroup.getSelectedValue();
             if (groupName != null) {
-                this.closeJoinGroupDialog();
-                this.displayMessage("Sending request to join group " + groupName + " ...");
-                devViewer.joinGroup(groupName);
+                try {
+                    this.closeJoinGroupDialog();
+                    this.displayMessage("Sending request to join group " + groupName + " ...");
+                    DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                    devViewer.joinGroup(groupName);
+                } catch (DeveloperControllerInitializationException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         }
     }//GEN-LAST:event_jButton_joinMouseClicked
@@ -1762,12 +1812,17 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 if (evt.getClickCount() == 1) {
                     updatejComboBox_hosts(contactName);
                 } else if (!contactName.equals(this.thisUserName) && evt.getClickCount() == 2) {
-                    comboIndex = jComboBox_groups.getSelectedIndex();
-                    String groupname = (String) jComboBox_groups.getItemAt(comboIndex);
-                    java.util.List<String> groupMembers = this.devViewer.getUser().getGroups().get(groupname).getMembers();
-                    CollAUser usr = this.devViewer.getContact(contactName);
-                    chatWindow.addContact(usr.getName(), groupname);
-                    chatWindow.showMessage(contactName, "");
+                    try {
+                        DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                        comboIndex = jComboBox_groups.getSelectedIndex();
+                        String groupname = (String) jComboBox_groups.getItemAt(comboIndex);
+                        java.util.List<String> groupMembers = devViewer.getUser().getGroups().get(groupname).getMembers();
+                        CollAUser usr = devViewer.getContact(contactName);
+                        chatWindow.addContact(usr.getName(), groupname);
+                        chatWindow.showMessage(contactName, "");
+                    } catch (DeveloperControllerInitializationException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                 }
             }
         }
@@ -1779,16 +1834,21 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
     private void jComboBox_hostsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox_hostsActionPerformed
         if (jList_contacts.getSelectedValue() != null) {
-            String contactName = (String) jList_contacts.getSelectedValue();
-            if (jComboBox_hosts.getSelectedItem() != null) {
-                String hostName = (String) jComboBox_hosts.getSelectedItem();
-                if (devViewer.getUser().getName().equals(contactName)) {
-                    String properties = devViewer.getUser().getHost(hostName).getSystemProperties();
-                    jTextArea_hostProp.setText(properties);
-                } else if (devViewer.getContact(contactName) != null) {
-                    String properties = devViewer.getContact(contactName).getHost(hostName).getSystemProperties();
-                    jTextArea_hostProp.setText(properties);
+            try {
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                String contactName = (String) jList_contacts.getSelectedValue();
+                if (jComboBox_hosts.getSelectedItem() != null) {
+                    String hostName = (String) jComboBox_hosts.getSelectedItem();
+                    if (devViewer.getUser().getName().equals(contactName)) {
+                        String properties = devViewer.getUser().getHost(hostName).getSystemProperties();
+                        jTextArea_hostProp.setText(properties);
+                    } else if (devViewer.getContact(contactName) != null) {
+                        String properties = devViewer.getContact(contactName).getHost(hostName).getSystemProperties();
+                        jTextArea_hostProp.setText(properties);
+                    }
                 }
+            } catch (DeveloperControllerInitializationException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
     }//GEN-LAST:event_jComboBox_hostsActionPerformed
@@ -1857,21 +1917,26 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     }
 
     private void jMenuItem_SendTaskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem_SendTaskActionPerformed
-        if (devViewer.getUser().getGroups().size() > 0) {
-            Point point = this.getLocation();
-            Dimension parentSize = this.getSize();
-            jDialog_sendTask.setLocation(point.x, point.y);
-            jComboBox_taskGroup.removeAllItems();
-            for (String gs : devViewer.getUser().getGroups().keySet()) {
-                if (gs.length() > 2) {
-                    jComboBox_taskGroup.addItem(gs);
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            if (devViewer.getUser().getGroups().size() > 0) {
+                Point point = this.getLocation();
+                Dimension parentSize = this.getSize();
+                jDialog_sendTask.setLocation(point.x, point.y);
+                jComboBox_taskGroup.removeAllItems();
+                for (String gs : devViewer.getUser().getGroups().keySet()) {
+                    if (gs.length() > 2) {
+                        jComboBox_taskGroup.addItem(gs);
+                    }
                 }
+                jDialog_sendTask.pack();
+                jCalendarSendTask.setMinSelectableDate(new Date());
+                jDialog_sendTask.setVisible(true);
+            } else {
+                this.displayMessage("To send a task you must be part of a group.");
             }
-            jDialog_sendTask.pack();
-            jCalendarSendTask.setMinSelectableDate(new Date());
-            jDialog_sendTask.setVisible(true);
-        } else {
-            this.displayMessage("To send a task you must be part of a group.");
+        } catch (DeveloperControllerInitializationException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }//GEN-LAST:event_jMenuItem_SendTaskActionPerformed
 
@@ -1966,7 +2031,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     } else {
                         this.selectedDate = null;
                     }
-                    
+
                     //selecting mode to execute task (True to Distributed or False to Multicore)
                     Boolean isDistributed;
                     if (jRadioButtonMulticore.isSelected()) {
@@ -1974,7 +2039,13 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                     } else {
                         isDistributed = true;
                     }
-                    this.devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate, isDistributed);
+                    DeveloperViewerController devViewer;
+                    try {
+                        devViewer = DeveloperViewerController.getInstance();
+                        devViewer.getAvailableHostsOnServer(taskFile, dependencyFiles, argumentsFiles, classToExecute, methodToExecute, chosenGroup, selectedDate, isDistributed);
+                    } catch (DeveloperControllerInitializationException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
 
 
                     /*
@@ -2015,24 +2086,29 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
      * redo lists at jDialog_manageGroups
      */
     private void redo_jDialog_manageGroups() {
-        this.jTextPane_memberInfo.setText("");
-        jComboBox_grpManager.removeAllItems();
-        ((DefaultListModel) jList_acceptMembers.getModel()).removeAllElements();
-        ((DefaultListModel) jList_groupRequests.getModel()).removeAllElements();
-        ((DefaultListModel) jList_refuse.getModel()).removeAllElements();
-        for (String groupName : devViewer.getUser().getGroups().keySet()) {
-            CollAGroup group = devViewer.getUser().getGroups().get(groupName);
-            this.waitingMembers.put(groupName, group.getWaitingList());
-        }
+        try {
+            this.jTextPane_memberInfo.setText("");
+            jComboBox_grpManager.removeAllItems();
+            ((DefaultListModel) jList_acceptMembers.getModel()).removeAllElements();
+            ((DefaultListModel) jList_groupRequests.getModel()).removeAllElements();
+            ((DefaultListModel) jList_refuse.getModel()).removeAllElements();
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            for (String groupName : devViewer.getUser().getGroups().keySet()) {
+                CollAGroup group = devViewer.getUser().getGroups().get(groupName);
+                this.waitingMembers.put(groupName, group.getWaitingList());
+            }
 
-        ((DefaultListModel) jList_groupRequests.getModel()).removeAllElements();
-        for (String groupName : devViewer.getUser().getGroups().keySet()) {
-            this.jComboBox_grpManager.addItem(groupName);
+            ((DefaultListModel) jList_groupRequests.getModel()).removeAllElements();
+            for (String groupName : devViewer.getUser().getGroups().keySet()) {
+                this.jComboBox_grpManager.addItem(groupName);
+            }
+            if (this.jComboBox_grpManager.getItemCount() > 0) {
+                this.jComboBox_grpManager.setSelectedIndex(0);
+            }
+            jDialog_manageGroups.repaint();
+        } catch (DeveloperControllerInitializationException ex) {
+            //Exceptions.printStackTrace(ex);
         }
-        if (this.jComboBox_grpManager.getItemCount() > 0) {
-            this.jComboBox_grpManager.setSelectedIndex(0);
-        }
-        jDialog_manageGroups.repaint();
     }
 
     private void jButton_cancelMngGrpMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton_cancelMngGrpMouseClicked
@@ -2048,30 +2124,35 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         ((DefaultListModel<String>) jList_refuse.getModel()).removeAllElements();
         ((DefaultListModel<String>) jList_members.getModel()).removeAllElements();
         if (this.jComboBox_grpManager.getSelectedItem() != null) {
-            groupName = (String) jComboBox_grpManager.getSelectedItem();
-            if (devViewer.getUser().getGroups().get(groupName).getAdminsList().contains(devViewer.getUser().getName())) {
-                if (this.waitingMembers.size() > 0) {
-                    for (String waitingName : this.waitingMembers.get(groupName)) {
-                        mod.addElement(waitingName);
+            try {
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                groupName = (String) jComboBox_grpManager.getSelectedItem();
+                if (devViewer.getUser().getGroups().get(groupName).getAdminsList().contains(devViewer.getUser().getName())) {
+                    if (this.waitingMembers.size() > 0) {
+                        for (String waitingName : this.waitingMembers.get(groupName)) {
+                            mod.addElement(waitingName);
+                        }
                     }
-                }
-                if (this.acceptedMembers.size() > 0) {
-                    for (String acptMember : acceptedMembers.get(groupName)) {
-                        ((DefaultListModel<String>) jList_acceptMembers.getModel()).addElement(acptMember);
+                    if (this.acceptedMembers.size() > 0) {
+                        for (String acptMember : acceptedMembers.get(groupName)) {
+                            ((DefaultListModel<String>) jList_acceptMembers.getModel()).addElement(acptMember);
+                        }
                     }
-                }
-                if (this.refusedMembers.size() > 0) {
-                    for (String refuseMember : refusedMembers.get(groupName)) {
-                        ((DefaultListModel<String>) jList_refuse.getModel()).addElement(refuseMember);
+                    if (this.refusedMembers.size() > 0) {
+                        for (String refuseMember : refusedMembers.get(groupName)) {
+                            ((DefaultListModel<String>) jList_refuse.getModel()).addElement(refuseMember);
+                        }
                     }
+                    jTabbedPane_manageGroups.setEnabledAt(0, true);
+                } else {
+                    jTabbedPane_manageGroups.setEnabledAt(0, false);
+                    jTabbedPane_manageGroups.setSelectedIndex(1);
                 }
-                jTabbedPane_manageGroups.setEnabledAt(0, true);
-            } else {
-                jTabbedPane_manageGroups.setEnabledAt(0, false);
-                jTabbedPane_manageGroups.setSelectedIndex(1);
-            }
-            for (String memberName : this.devViewer.getUser().getGroups().get(groupName).getMembers()) {
-                ((DefaultListModel<String>) jList_members.getModel()).addElement(memberName);
+                for (String memberName : devViewer.getUser().getGroups().get(groupName).getMembers()) {
+                    ((DefaultListModel<String>) jList_members.getModel()).addElement(memberName);
+                }
+            } catch (DeveloperControllerInitializationException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
         jList_groupRequests.repaint();
@@ -2140,60 +2221,68 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
     private void applyChangeToGroup() {
         if (jComboBox_grpManager.getSelectedIndex() >= 0) {
+            try {
+                String groupName = (String) jComboBox_grpManager.getSelectedItem();
 
-            String groupName = (String) jComboBox_grpManager.getSelectedItem();
+                this.acceptedMembers.clear();
+                this.refusedMembers.clear();
 
-            this.acceptedMembers.clear();
-            this.refusedMembers.clear();
-
-            java.util.List<String> acceptList = new java.util.LinkedList<String>();
-            java.util.List<String> declineList = new java.util.LinkedList<String>();
+                java.util.List<String> acceptList = new java.util.LinkedList<String>();
+                java.util.List<String> declineList = new java.util.LinkedList<String>();
 
 
-            DefaultListModel<String> acceptMod = (DefaultListModel<String>) jList_acceptMembers.getModel();
-            DefaultListModel<String> declineMod = (DefaultListModel<String>) jList_refuse.getModel();
+                DefaultListModel<String> acceptMod = (DefaultListModel<String>) jList_acceptMembers.getModel();
+                DefaultListModel<String> declineMod = (DefaultListModel<String>) jList_refuse.getModel();
 
-            for (Object i : acceptMod.toArray()) {
-                acceptList.add((String) i);
+                for (Object i : acceptMod.toArray()) {
+                    acceptList.add((String) i);
+                }
+
+                for (Object i : declineMod.toArray()) {
+                    declineList.add((String) i);
+                }
+
+                acceptedMembers.put(groupName, acceptList);
+                refusedMembers.put(groupName, declineList);
+
+                acceptMod.removeAllElements();
+                declineMod.removeAllElements();
+
+                jDialog_manageGroups.repaint();
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                devViewer.manageGroups(acceptedMembers, refusedMembers);
+
+                this.acceptedMembers.clear();
+                this.refusedMembers.clear();
+
+                this.redo_jDialog_manageGroups();
+            } catch (DeveloperControllerInitializationException ex) {
+                Exceptions.printStackTrace(ex);
             }
-
-            for (Object i : declineMod.toArray()) {
-                declineList.add((String) i);
-            }
-
-            acceptedMembers.put(groupName, acceptList);
-            refusedMembers.put(groupName, declineList);
-
-            acceptMod.removeAllElements();
-            declineMod.removeAllElements();
-
-            jDialog_manageGroups.repaint();
-
-            devViewer.manageGroups(acceptedMembers, refusedMembers);
-
-            this.acceptedMembers.clear();
-            this.refusedMembers.clear();
-
-            this.redo_jDialog_manageGroups();
         }
 
     }
 
     private void jList_membersValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList_membersValueChanged
         if (jList_members.getSelectedValue() != null) {
-            String memberName = (String) jList_members.getSelectedValue();
-            CollAUser user;
-            if (memberName.equals(this.devViewer.getUser().getName())) {
-                user = this.devViewer.getUser();
-            } else {
-                user = this.devViewer.getContact(memberName);
+            try {
+                String memberName = (String) jList_members.getSelectedValue();
+                CollAUser user;
+                DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                if (memberName.equals(devViewer.getUser().getName())) {
+                    user = devViewer.getUser();
+                } else {
+                    user = devViewer.getContact(memberName);
+                }
+                //mount string with member informations
+                String memberInfo = "username: " + user.getName() + "\n";
+                memberInfo = memberInfo + "e-mail: " + user.getEmail() + "\n";
+                memberInfo = memberInfo + "Country: " + user.getCountry() + "\n";
+                memberInfo = memberInfo + "Offering " + user.getHosts().size() + " hosts\n";
+                jTextPane_memberInfo.setText(memberInfo);
+            } catch (DeveloperControllerInitializationException ex) {
+                Exceptions.printStackTrace(ex);
             }
-            //mount string with member informations
-            String memberInfo = "username: " + user.getName() + "\n";
-            memberInfo = memberInfo + "e-mail: " + user.getEmail() + "\n";
-            memberInfo = memberInfo + "Country: " + user.getCountry() + "\n";
-            memberInfo = memberInfo + "Offering " + user.getHosts().size() + " hosts\n";
-            jTextPane_memberInfo.setText(memberInfo);
         }
     }//GEN-LAST:event_jList_membersValueChanged
 
@@ -2278,14 +2367,19 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     }//GEN-LAST:event_jButton_cancelSettingsMouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
-        if (devViewer.getUser().hasValidIP()) {
-            jSpinner_portNumber.setEnabled(true);
-            jSpinner_portNumber.setValue(this.devViewer.getUser().getPort());
-        } else {
-            jSpinner_portNumber.setEnabled(false);
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            if (devViewer.getUser().hasValidIP()) {
+                jSpinner_portNumber.setEnabled(true);
+                jSpinner_portNumber.setValue(devViewer.getUser().getPort());
+            } else {
+                jSpinner_portNumber.setEnabled(false);
+            }
+            CardLayout cl = (CardLayout) (jPanel_settingsMain.getLayout());
+            cl.show(jPanel_settingsMain, "card2");
+        } catch (DeveloperControllerInitializationException ex) {
+            //Exceptions.printStackTrace(ex);
         }
-        CardLayout cl = (CardLayout) (jPanel_settingsMain.getLayout());
-        cl.show(jPanel_settingsMain, "card2");
     }//GEN-LAST:event_jButton2MouseClicked
 
     private void jButton_resultsDirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton_resultsDirMouseClicked
@@ -2484,6 +2578,8 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         btnTime.setTargetDate(dateTime);
     }
+    
+    private static DeveloperViewerGUI developerGUI = null;             
     private HashMap<String, java.util.List<String>> acceptedMembers;
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;
@@ -2491,7 +2587,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private ResultsWindow resultsWindow;
     private Set<String> groupsName;
     private String thisUserName;
-    private DeveloperViewerController devViewer;
     //Variables used to send a task
     private HashMap<String, ArrayList<Method>> methods; //key: classToExecute, value: methods of the class
     private File taskFile;

@@ -19,7 +19,7 @@ public enum BackGround {
     
     private final String bg_path;
 
-    BackGround(String path) {
+    private BackGround(String path) {
         this.bg_path = path;
     }
 

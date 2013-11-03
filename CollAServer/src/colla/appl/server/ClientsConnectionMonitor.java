@@ -3,6 +3,7 @@ package colla.appl.server;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollAUser;
+import colla.kernel.exceptions.server.NonExistentUser;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -11,6 +12,7 @@ import java.util.TimerTask;
 
 /**
  * Checks for client connection status (online/offline).
+ *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
 public class ClientsConnectionMonitor extends TimerTask {
@@ -30,8 +32,8 @@ public class ClientsConnectionMonitor extends TimerTask {
         colla.kernel.messages.toClient.Ping pingUser = new colla.kernel.messages.toClient.Ping(1);
         colla.kernel.messages.toHost.Ping pingHost = new colla.kernel.messages.toHost.Ping();
         for (String username : this.server.getUsersSet()) {
-            user = this.server.getUser(username);
-            if (user != null) {
+            try {
+                user = this.server.getUser(username);
                 for (CollAHost host : user.getHosts()) {
                     //first we try to contact user's hosts, even if user is offline
                     if (host.IsOnline()) {
@@ -42,7 +44,7 @@ public class ClientsConnectionMonitor extends TimerTask {
                                 socket = this.server.getMappedConnections().get(host.getName());
                             }
                             socket.setSoTimeout(timeout);
-                            output = new ObjectOutputStream(socket.getOutputStream());                           
+                            output = new ObjectOutputStream(socket.getOutputStream());
                             output.writeObject(pingHost);
                             output.flush();
                             input = new ObjectInputStream(socket.getInputStream());
@@ -82,6 +84,7 @@ public class ClientsConnectionMonitor extends TimerTask {
                         this.server.updateUser(user);
                     }
                 }
+            } catch (NonExistentUser nonUser) {
             }
         }
         //System.err.println("Connections checked");

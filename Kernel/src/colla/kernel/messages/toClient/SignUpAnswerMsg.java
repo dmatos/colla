@@ -19,7 +19,7 @@ public class SignUpAnswerMsg implements Serializable, CollAMessage {
         this.operation = null;
     }
 
-    public void confirmUserName(Boolean confirmName) {
+    public void nameAlreadyInUse(Boolean confirmName) {
         this.confirmName = confirmName;
     }
     

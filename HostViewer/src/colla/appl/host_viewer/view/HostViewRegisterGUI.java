@@ -151,6 +151,8 @@ private void jButtonRegisterMouseClicked( java.awt.event.MouseEvent evt ){//GEN-
         port = 6969;
     }
     if(hostViewRegister.register(userName, pass, port)) {
+        hostViewRegister.shutdown();
+        hostViewRegister = null;         
         this.dispose();
     }
     else {

@@ -18,10 +18,8 @@ public abstract class GenericConsumer<S> extends Thread{
                     //fazer algo com o recurso que foi consumido
                     doSomething( str );
                 }
-            }
-
+            }            
         }catch( Exception e ){
-
            // e.printStackTrace();
         }
     }

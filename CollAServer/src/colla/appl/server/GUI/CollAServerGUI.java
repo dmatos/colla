@@ -7,14 +7,6 @@
 package colla.appl.server.GUI;
 
 import colla.appl.server.Server;
-import colla.kernel.api.CollAHost;
-import colla.kernel.api.CollAJob;
-import colla.kernel.api.CollAServer;
-import colla.kernel.api.CollASession;
-import colla.kernel.api.CollAUser;
-import colla.kernel.impl.Session;
-import colla.kernel.util.NetworkDevices;
-import colla.kernel.util.TimeAndDate;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -25,7 +17,7 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
+
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.BadLocationException;
@@ -36,12 +28,24 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
+import colla.kernel.api.CollAHost;
+import colla.kernel.api.CollAJob;
+import colla.kernel.api.CollAServer;
+import colla.kernel.api.CollASession;
+import colla.kernel.api.CollAUser;
+import colla.kernel.exceptions.server.NonExistentUser;
+import colla.kernel.exceptions.server.ServerInitializationException;
+import colla.kernel.impl.Session;
+import colla.kernel.util.LogWriter;
+import colla.kernel.util.NetworkDevices;
+import colla.kernel.util.TimeAndDate;
+
 /**
  * @todo esta implementação não pode lidar diretamente com os users no sentido
  * de armazenar informações dos mesmos em memória. Como por exemplo as
  * activities de um usuário, pois chegará num ponto onde não haverá memória
  * suficiente. As atividades de um usuário devem ser salvas em disco e
- * recuperadas pelo server apenas para exibição. 
+ * recuperadas pelo server apenas para exibição.
  */
 /**
  * @author dmatos
@@ -51,11 +55,9 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
     /**
      * Creates new form CollAServerGUI
      */
-    public CollAServerGUI(CollAServer server) {
+    public CollAServerGUI() {
 
         initializeLookAndFeel();
-
-        this.superServer = server;
 
         this.connectionTime = new TimeAndDate();
 
@@ -97,18 +99,17 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
     }
 
     /**
-     * Shutdown the server, closing its connections and saving its data to permanent memory.
+     * Shutdown the server, closing its connections and saving its data to
+     * permanent memory.
      */
     public void shutdown() {
         try {
-            this.superServer.disconnectAllClients();
-            this.superServer.storeAllServerData();
+            Server server = Server.getInstance();           
+            server.shutdown();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Couldn't store all data", "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
+            LogWriter.generateLog("Couldn't store all data");
         }
         this.dispose();
-        System.exit(0);
     }
 
     /**
@@ -363,7 +364,8 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
     }//GEN-LAST:event_jComboBox_activitiesListActionPerformed
 
     /**
-     * Exhibits a message. 
+     * Exhibits a message.
+     *
      * @param msg message to exhibit.
      */
     public final void displayMessage(String msg) {
@@ -392,22 +394,31 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
      * Updates the Tree of clients on the GUI.
      */
     public void updateClientsTree() {
-        Set<String> clientsSet = superServer.getUsersSet();
-        DefaultTreeModel model = (DefaultTreeModel) jTree_clients.getModel();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-        root.removeAllChildren();
-        for (String userName : clientsSet) {
-            DefaultMutableTreeNode client = new DefaultMutableTreeNode(userName);
-            root.add(client);
-            CollAUser usr = superServer.getUser(userName);
-            for (CollAHost cHost : usr.getHosts()) {
-                DefaultMutableTreeNode host = new DefaultMutableTreeNode(cHost.getName());
-                client.add(host);
-                //System.out.println(cHost.getName());
+        try {
+            Server server = Server.getInstance();
+            Set<String> clientsSet = server.getUsersSet();
+            DefaultTreeModel model = (DefaultTreeModel) jTree_clients.getModel();
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+            root.removeAllChildren();
+            for (String userName : clientsSet) {
+                DefaultMutableTreeNode client = new DefaultMutableTreeNode(userName);
+                root.add(client);
+                try {
+                    CollAUser usr = server.getUser(userName);
+                    for (CollAHost cHost : usr.getHosts()) {
+                        DefaultMutableTreeNode host = new DefaultMutableTreeNode(cHost.getName());
+                        client.add(host);
+                        //System.out.println(cHost.getName());
+                    }
+                } catch (NonExistentUser nExUsr) {
+                    //nExUsr.printStackTrace();
+                }
             }
+            model.setRoot(root);
+            jTree_clients.repaint();
+        } catch (ServerInitializationException serverEx) {
+            serverEx.printStackTrace();
         }
-        model.setRoot(root);
-        jTree_clients.repaint();
     }
 
     @Override
@@ -420,15 +431,6 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
         }
     }
 
-    /**
-     * 
-     * @return the CollAServer instance used by this GUI instance. 
-     * should it be singleton?
-     */
-    private CollAServer getServer() {
-        return this.superServer;
-    }
-
     class UsersTreeSelectionListener implements TreeSelectionListener {
 
         @Override
@@ -439,9 +441,9 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
             }
             Color green = new Color(2, 161, 14);
             String nodeName = (String) node.getUserObject();
-
-            if (superServer.getUsersSet().contains(nodeName)) {
-                CollAUser usr = superServer.getUser(nodeName);
+            try {
+                Server server = Server.getInstance();
+                CollAUser usr = server.getUser(nodeName);
 
                 jTextField_nome.setText(usr.getName());
                 jTextField_group.setText(usr.getIp());
@@ -473,14 +475,19 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
                 }
 
                 //jComboBox_listaAtitvidades.repaint();
-            } else {
+            } catch (ServerInitializationException serverEx) {
+                //serverEx.printStackTrace();
+            } catch (NonExistentUser nExUsr) {
+                //nExUsr.printStackTrace();
+            } finally {
                 DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
                 if (parentNode == null) {
                     return;
                 }
                 CollAUser user;
-                if (superServer.getUsersSet().contains((String) parentNode.getUserObject())) {
-                    user = superServer.getUser((String) parentNode.getUserObject());
+                try {
+                    Server server = Server.getInstance();
+                    user = server.getUser((String) parentNode.getUserObject());
                     CollAHost hst = user.getHost(nodeName);
                     if (hst != null) {
                         jTextField_email.setVisible(false);
@@ -511,6 +518,10 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
                         }
                         jTextArea_activities.setText("");
                     }
+                } catch (NonExistentUser nExUsr) {
+                    //nExUsr.printStackTrace();
+                } catch (ServerInitializationException serverEx) {
+                    //serverEx.printStackTrace();
                 }
             }
         }
@@ -518,14 +529,15 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
 
     /**
      * Deals with jCombobox_activitiesList actions.
-     * 
+     *
      * @param arg0 value get at jCombobox_activitiesList
      */
     private void comboBoxActions(String arg0) {
         int index = jComboBox_activitiesList.getSelectedIndex();
-        jTextArea_activities.setText("");
-        if (superServer.getUsersSet().contains(arg0)) {
-            CollAUser user = superServer.getUser(arg0);
+        jTextArea_activities.setText("");        
+        try {
+            Server server = Server.getInstance();
+            CollAUser user = server.getUser(arg0);
             if (index >= 0) {
                 String selectedDate = (String) jComboBox_activitiesList.getItemAt(index);
                 HashMap<String, CollASession> userSessions = user.getSessions();
@@ -541,9 +553,11 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
 
                 jTextArea_activities.repaint();
             }
-        } else {
+        } catch (NonExistentUser nExUsr) {
             jTextArea_activities.setText("");
             jComboBox_activitiesList.removeAllItems();
+        } catch (ServerInitializationException serverEx){
+            serverEx.printStackTrace();
         }
     }
 
@@ -568,7 +582,6 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
             java.util.logging.Logger.getLogger(CollAServerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
-    private CollAServer superServer;
     private TimeAndDate connectionTime;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox jComboBox_activitiesList;

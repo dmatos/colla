@@ -1,5 +1,6 @@
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
 import colla.appl.developer_viewer.view.Client_Login;
 import javax.swing.JOptionPane;
 
@@ -41,7 +42,7 @@ public class DeveloperViewerStarter{
              * copy the following line as many times as you want.
              */
             //devViewerLogin.addObserverToDeveloperViewer(arg);
-        }catch( ConfigException cex ){
+        }catch( DeveloperConfigurationException cex ){
             if( useGUI ){
                 JOptionPane.showMessageDialog( null, "Could not read file server_conf.xml.", "Erro", JOptionPane.ERROR_MESSAGE );
             }else{

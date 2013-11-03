@@ -5,6 +5,8 @@
 package colla.appl.developer_viewer;
 
 
+import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
+import colla.appl.developer_viewer.exceptions.DeveloperControllerInitializationException;
 import colla.kernel.api.*;
 import colla.kernel.enumerations.ClientOps;
 import colla.kernel.impl.Group;
@@ -21,15 +23,13 @@ import java.util.*;
  */
 public class DevWorker extends Observable{
     
-    public void execute(CollAMessage collAMessage, DevMicroServer devMicroServer){
+    public void execute(CollAMessage collAMessage, DevMicroServer devMicroServer) throws DeveloperControllerInitializationException{
         // Envia resposta pro cliente de que a mensagem foi recebida e que ele pode encerrar a conexão.        
-        this.devViewer = devMicroServer.getDevViewer();
+        DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
         this.serverIPaddress = devMicroServer.getServerIPaddress();
-        this.serverPortNumber = devMicroServer.getServerPortNumber();
-        this.user = devMicroServer.getUser();
-        this.validIP = user.hasValidIP();
+        this.serverPortNumber = devMicroServer.getServerPortNumber();        
         this.debugInfo = new DebugInfo();
-        this.debugInfo.setDebuggedName(user.getName());
+        this.debugInfo.setDebuggedName(devViewer.getUser().getName());
         
         ClientOps operation;// operação a ser lida        
         try{
@@ -70,7 +70,7 @@ public class DevWorker extends Observable{
                 group.addAdmin( devViewer.getUser().getName() );
                 if( msg.getConfirmation() ){
                     HashMap<String, CollAUser> usersMap = new HashMap<String, CollAUser>();
-                    usersMap.put( this.devViewer.getUser().getName(), this.devViewer.getUser() );
+                    usersMap.put( devViewer.getUser().getName(), devViewer.getUser() );
                     devViewer.addGroup( groupName, group, usersMap );
                     devViewer.confirmGroupCreation( true, group );
                     debug( groupName + "criacao confirmada." );
@@ -182,14 +182,16 @@ public class DevWorker extends Observable{
 
     @Override
     public void notifyObservers( Object aspect ){
-        this.devViewer.notifyObservers( aspect );
+       try{
+        DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+        devViewer.notifyObservers( aspect );
+       } catch(DeveloperControllerInitializationException devEx){
+           debug(devEx);
+       }
     }
     
     private final int timeout = 0;
     String serverIPaddress;
     int serverPortNumber;
-    private boolean validIP;
     private DebugInfo debugInfo;
-    private CollAUser user;
-    private DeveloperViewerController devViewer;
 }// end of class DevWorker

@@ -11,6 +11,7 @@ import colla.kernel.messages.toHost.RegisterFileMsg;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.RetrieveOnlineHostsMsg;
 import colla.kernel.messages.toServer.TransmitResultMsg;
+import colla.kernel.util.Debugger;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
@@ -21,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
 
@@ -42,7 +42,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             this.serverIPaddress = serverIP;
             this.serverPortNumber = serverPortNumber;
         } catch (Exception e) {
-            e.printStackTrace();
+            Debugger.debug(e);
         }
 
         this.distributedExecutor = new DistributedTaskExecutor();
@@ -54,7 +54,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
 
         try {
             operation = (HostOps) collAMessage.getOperation();
-            //System.err.println(operation.toString());
+            Debugger.debug(operation.toString());
             switch (operation) {
                 case PING: {
                 }
@@ -103,7 +103,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                         JCL_result jclr = this.distributedExecutor.executeDistributedTask(taskMessage, this);
                         HostViewerController.getInstance().displayStatus("done!!! ");
                         if (jclr.getErrorResult() == null) {
-                            System.err.println(jclr.getCorrectResult().toString());
+                            Debugger.debug(jclr.getCorrectResult().toString());
                         } else {
                             //jclr.getErrorResult().printStackTrace();
                         }
@@ -139,17 +139,17 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                  }
                  break;*/
                 default:
-                    System.err.println("Operation not supported: " + operation.toString());
+                    Debugger.debug("Operation not supported: " + operation.toString());
             }
 
         } catch (SocketException se) {
-            //se.printStackTrace();
+            Debugger.debug(se);
         } catch (ClassNotFoundException cnfe) {
-           // cnfe.printStackTrace();
+            Debugger.debug(cnfe);
         } catch (IOException io) {
-            //io.printStackTrace();
+            Debugger.debug(io);
         } catch (Exception e) {
-            //e.printStackTrace();
+            Debugger.debug(e);
         }
     }// end of doSomething
 
@@ -167,10 +167,8 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                 try {
                     HostViewerController.getInstance().displayStatus("Result sent back to valid ip.");
                 } catch (HostControllerInitializationException ex) {
-                    Logger.getLogger(CollAConsumer.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                    Debugger.debug(ex);
                 }
-
             } else {
                 sendResultBackToInvalidIPClient(groupName, group.get(userName), task);
             }
@@ -204,17 +202,14 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                     }
                 }
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                Debugger.debug(ex);
             }
         } catch (UnknownHostException ex) {
-            Logger.getLogger(CollAConsumer.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Debugger.debug(ex);
         } catch (IOException ex) {
-            Logger.getLogger(CollAConsumer.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Debugger.debug(ex);
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(CollAConsumer.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Debugger.debug(ex);
         }
 
     }
@@ -231,7 +226,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             try {
                 TaskResultMsg outgoingOfClient = new TaskResultMsg(HostViewerController.getInstance().getHost().getName(), task.getTaskName(), task);
                 outgoingOfClient.setGroupName(groupName);
-                //System.err.println("sending result to valid");
+                Debugger.debug("sending result to valid");
 
                 Socket socket = new Socket(InetAddress.getByName(client.getIp()), client.getPort());
                 ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -242,7 +237,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                 input.readObject();
                 socket.close();
             } catch (Exception e) {
-                //e.printStackTrace();
+                Debugger.debug(e);
                 //sendResultBackToInvalidIPClient(groupName, client, task);
             }
         }
@@ -273,8 +268,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                     HostViewerController.getInstance().displayStatus("Error: couldn't send result back!");
 
                 } catch (HostControllerInitializationException ex) {
-                    Logger.getLogger(CollAConsumer.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                    Debugger.debug(ex);
                 }
 
             }
@@ -344,7 +338,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             }
 
         } catch (Exception e) {
-            //e.printStackTrace();
+            Debugger.debug(e);
         }
 
         String ticket = "";
@@ -355,12 +349,12 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
 
         try {
             Object[] args = cTask.getArguments();
-            /*System.err.println("class: " + cTask.getClassToExecute());
-             System.err.println("method: " + cTask.getMethodToExecute());
-             System.err.println(("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute()));*/
+            Debugger.debug("class: " + cTask.getClassToExecute());
+            Debugger.debug("method: " + cTask.getMethodToExecute());
+            Debugger.debug("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute());
             HostViewerController.getInstance().displayStatus("Task: " + cTask.getTaskID());
             ticket = jcl.execute(cTask.getClassToExecute(), cTask.getMethodToExecute(), args);
-            //System.err.println("Recebeu o ticket " + ticket);
+           Debugger.debug("Recebeu o ticket " + ticket);
         } catch (Exception e) {
             //e.printStackTrace();
         }

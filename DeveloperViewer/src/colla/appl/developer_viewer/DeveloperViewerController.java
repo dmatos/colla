@@ -14,7 +14,7 @@ import colla.kernel.messages.toHost.DistributedTaskMsg;
 import colla.kernel.messages.toHost.DownloadResultMsg;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
-import colla.kernel.util.Debugger.DebugInfo;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.TimeAndDate;
 import java.io.*;
 import java.net.*;
@@ -52,8 +52,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		this.contacts = contacts;
 		this.isDown = false;
 		this.devUI = null;
-		this.debugInfo = new DebugInfo();
-		this.debugInfo.setDebuggedName(user.getName());
 		this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
 	}
 
@@ -182,11 +180,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 				task.addArgument(parameterIterator.next());
 			}
 			tasksToRun.add(task);
-			debug("Task inserida na lista de tasks para ser executada");
+			Debugger.debug("Task inserida na lista de tasks para ser executada");
 		} catch (Exception e) {
-			debugInfo.clear();
+			/*debugInfo.clear();
 			debugInfo.setException(e);
-			this.notifyObservers(debugInfo);
+			this.notifyObservers(debugInfo);*/
 			// e.printStackTrace();
 		}
 	}
@@ -235,14 +233,14 @@ public class DeveloperViewerController extends Observable implements Runnable {
 					socket.getInputStream());
 			input.readObject();
 			socket.close();
-			debug("Mensagem com pedido do host foi enviada ao servidor");
+			Debugger.debug("Mensagem com pedido do host foi enviada ao servidor");
 
 		} catch (SocketTimeoutException tex) {
-			debug(tex);
+			Debugger.debug(tex);
 		} catch (IOException io) {
-			debug(io);
+			Debugger.debug(io);
 		} catch (ClassNotFoundException cnfe) {
-			debug(cnfe);
+			Debugger.debug(cnfe);
 		}
 	}// fim do método getAvailableHostsOnServer
 
@@ -264,11 +262,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			try {
 				// Retrieves the tasks from queue of tasks.
 				task = tasksToRun.remove();
-				debug("tarefa retirada da pilha de tarefas para execução");
+				Debugger.debug("tarefa retirada da pilha de tarefas para execução");
 				this.displayInfo(task.getTaskName()
 						+ " has been successfully sent.");
 			} catch (EmptyStackException e) {
-				debug("list tasksToRun is empty!", e);
+				Debugger.debug("list tasksToRun is empty!", e);
 				this.displayInfo("Sorry, an error has ocurred. Try again later.");
 				return;
 			}
@@ -297,11 +295,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 				// task.getTaskName(), task);
 				// System.err.println("task " + task.getTaskName() + " sent");
 			} catch (Exception ex) {
-				debug("ex! Problema com o envio da task", ex);
+				Debugger.debug("ex! Problema com o envio da task", ex);
 			}
 		}// fim do if (!hosts.isEmpty() && hosts.get(0) != null)
 		else {
-			debug("Sorry, there are not available hosts. Try again later.");
+			Debugger.debug("Sorry, there are not available hosts. Try again later.");
 			this.displayInfo("Sorry, there are not available hosts. Try again later.");
 		}
 		// Destruindo o objeto task
@@ -347,21 +345,21 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		outgoing.setGroupName(task.getGroup());
 
 		// A host that has a valid IP address must receive a direct connection
-		debug("abrindo comunicação para enviar tarefa para IP valido...");
+		Debugger.debug("abrindo comunicação para enviar tarefa para IP valido...");
 		socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
 		socket.setSoTimeout(timeout);
 		output = new ObjectOutputStream(socket.getOutputStream());
 		output.writeObject(outgoing);
 		output.flush();
 		// receives ACK
-                debug("esperando ACK IP valido...");
+                Debugger.debug("esperando ACK IP valido...");
 		input = new ObjectInputStream(socket.getInputStream());
 		input.readObject();
 		socket.close();
 
 		this.hostsWithScheduledTasks.put(task.getTaskID(), host);
 
-		debug("task" + task.getTaskID() + " sent to host " + host.getName()
+		Debugger.debug("task" + task.getTaskID() + " sent to host " + host.getName()
 				+ " (valid ip)");
 		notifyObservers(task);
 	}
@@ -389,7 +387,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		outgoing.setGroup(task.getGroup());
 		outgoing.setReceiver(host.getName());
 
-		debug("abrindo comunicação para enviar tarefa para IP invalido...");
+		Debugger.debug("abrindo comunicação para enviar tarefa para IP invalido...");
 		socket = new Socket(serverIPaddress, serverPortNumber);
 		socket.setSoTimeout(timeout);
 		output = new ObjectOutputStream(socket.getOutputStream());
@@ -401,7 +399,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		input = new ObjectInputStream(socket.getInputStream());
 		input.readObject();
 		socket.close();
-		debug("task" + task.getTaskID() + " sent to host " + host.getName()
+		Debugger.debug("task" + task.getTaskID() + " sent to host " + host.getName()
 				+ "(invalid ip)");
 		notifyObservers(task);
 	}
@@ -426,7 +424,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 		} else {
 			this.displayInfo("Result for " + tName + " is now available");
 		}
-		debug("O resultado da tarefa " + task.getTaskID() + " recebido por "
+		Debugger.debug("O resultado da tarefa " + task.getTaskID() + " recebido por "
 				+ this.user.getName() + " é: " + task.getResult().toString());
 		this.notifyObservers(task);
 		// System.out.println("The result of task " + taskName + " is: " +
@@ -516,11 +514,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			input.readObject();
 			socket.close();
 		} catch (SocketTimeoutException tex) {
-			debug(tex);
+			Debugger.debug(tex);
 		} catch (IOException io) {
-			debug(io);
+			Debugger.debug(io);
 		} catch (Exception e) {
-			debug(e);
+			Debugger.debug(e);
 		}
 	}
 
@@ -565,7 +563,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			input.readObject();
 			socket.close();
 		} catch (Exception io) {
-			debug(io);
+			Debugger.debug(io);
 		}
 	}
 
@@ -587,7 +585,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			input.readObject();
 			socket.close();
 		} catch (Exception io) {
-			debug(io);
+			Debugger.debug(io);
 		}
 
 	}
@@ -622,20 +620,20 @@ public class DeveloperViewerController extends Observable implements Runnable {
 				socket.close();
 				displayInfo("Group " + group.getName() + " has been created.");
 			} catch (SocketTimeoutException tout) {
-				debug("Group " + group.getName()
+				Debugger.debug("Group " + group.getName()
 						+ " could not be created. Connection timeout.", tout);
 				displayInfo("Group " + group.getName()
 						+ " could not be created. Connection timeout.");
 			} catch (IOException io) {
-				debug(group.getName()
+				Debugger.debug(group.getName()
 						+ " could not be created. Connection lost.", io);
 				displayInfo(group.getName()
 						+ " could not be created. Connection lost.");
 			} catch (ClassNotFoundException cnfe) {
-				debug(cnfe);
+				Debugger.debug(cnfe);
 			}
 		} else {
-			debug("Name "
+			Debugger.debug("Name "
 					+ group.getName()
 					+ " has already been taken by another group. Please, try another name.");
 			this.displayInfo("Name "
@@ -678,22 +676,22 @@ public class DeveloperViewerController extends Observable implements Runnable {
 					socket.getInputStream());
 			input.readObject();
 			socket.close();
-			debug("A request to join " + groupName + " was sent to its admin");
+			Debugger.debug("A request to join " + groupName + " was sent to its admin");
 			this.displayInfo("A request to join " + groupName
 					+ " was sent to its admin");
 			// devGUI.closeJoinGroupDialog();
 		} catch (SocketTimeoutException tout) {
-			debug("Could not send request to join " + groupName
+			Debugger.debug("Could not send request to join " + groupName
 					+ ". Connection timeout.", tout);
 			displayInfo("Could not send request to join " + groupName
 					+ ". Connection timeout.");
 		} catch (IOException io) {
-			debug("Could not send request to join " + groupName
+			Debugger.debug("Could not send request to join " + groupName
 					+ ". Connection can't be established.", io);
 			displayInfo("Could not send request to join " + groupName
 					+ ". Connection can't be established.");
 		} catch (ClassNotFoundException cnfe) {
-			debug(cnfe);
+			Debugger.debug(cnfe);
 		}
 	}
 
@@ -812,11 +810,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 						socket.close();
 						return true;
 					} catch (UnknownHostException uhe) {
-						debug(uhe);
+						Debugger.debug(uhe);
 					} catch (IOException io) {
-						debug(io);
+						Debugger.debug(io);
 					} catch (ClassNotFoundException cnfe) {
-						debug(cnfe);
+						Debugger.debug(cnfe);
 					}
 				} else {
 					try {
@@ -837,11 +835,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 						socket.close();
 						return true;
 					} catch (UnknownHostException uhe) {
-						debug(uhe);
+						Debugger.debug(uhe);
 					} catch (IOException io) {
-						debug(io);
+						Debugger.debug(io);
 					} catch (ClassNotFoundException cnfe) {
-						debug(cnfe);
+						Debugger.debug(cnfe);
 					}
 				}
 			}// end if(contact.isOnline)
@@ -920,11 +918,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
 				socket.close();
 
 			} catch (SocketTimeoutException tout) {
-				debug(tout);
+				Debugger.debug(tout);
 			} catch (IOException io) {
-				debug(io);
+				Debugger.debug(io);
 			} catch (ClassNotFoundException cnfe) {
-				debug(cnfe);
+				Debugger.debug(cnfe);
 			}
 		}// end of if
 	}// end of method
@@ -969,9 +967,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			this.receiveTaskResult(groupName, result.getTaskName(), result);
 			return true;
 		} catch (IOException ex) {
-			debug(ex);
+			Debugger.debug(ex);
 		} catch (ClassNotFoundException cnfe) {
-			debug(cnfe);
+			Debugger.debug(cnfe);
 		}
 		return false;
 	}
@@ -1065,34 +1063,12 @@ public class DeveloperViewerController extends Observable implements Runnable {
 			input.readObject();
 			socket.close();
 		} catch (IOException ex) {
-			// Exceptions.printStackTrace(ex);
+			Debugger.debug(ex);
 		} catch (ClassNotFoundException ex) {
-			// ex.printStackTrace();
+			Debugger.debug(ex);
 		}
 	}
-
-	private void debug(String info, Exception ex) {
-		/*
-		  this.debugInfo.clear(); this.debugInfo.setInfo(info);
-		  this.debugInfo.setException(ex);
-		  this.notifyObservers(this.debugInfo); System.out.println(info);
-		  ex.printStackTrace();
-		 //*/
-	}
-
-	private void debug(String info) {
-		/*
-		  this.debugInfo.clear(); this.debugInfo.setInfo(info);
-		  this.notifyObservers(this.debugInfo); System.out.println(info);
-		 //*/
-	}
-
-	private void debug(Exception ex) {
-		/*
-		  this.debugInfo.clear(); this.debugInfo.setException(ex);
-		  this.notifyObservers(this.debugInfo); ex.printStackTrace();
-		 //*/
-	}
+	
 
 	@Override
 	public void notifyObservers(Object interest) {
@@ -1119,7 +1095,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
 	}
 
 	private static DeveloperViewerController devController = null;
-	private DebugInfo debugInfo;
 	private boolean isDown;
 	private final int timeout = 20000;
 	private DevMicroServer microServer;
@@ -1130,19 +1105,13 @@ public class DeveloperViewerController extends Observable implements Runnable {
 	/*
 	 * Sending a Task
 	 */
-	private Queue<Task> tasksToRun; // tarefas armazenadas e que serão enviadas
-									// assim que um host for recebido.
+	private Queue<Task> tasksToRun; 
 	private File taskFile;
 	private List<File> taskDependencies;
 	private List<File> taskArgs;
 	private String classToHostExecute;
 	private String methodToExecute;
 	private HashMap<String, CollAUser> contacts;
-	private HashMap<String, HashMap<String, CollATask>> taskResults; // key:
-																		// group,
-																		// value:
-																		// hash<taskName,
-																		// result>
-																		// >
-	private HashMap<Long, CollAHost> hostsWithScheduledTasks;
+	private HashMap<String, HashMap<String, CollATask>> taskResults; 
+        private HashMap<Long, CollAHost> hostsWithScheduledTasks;
 }

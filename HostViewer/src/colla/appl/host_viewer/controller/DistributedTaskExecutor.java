@@ -9,6 +9,7 @@ import colla.kernel.api.CollATask;
 import colla.kernel.api.CollAUser;
 import colla.kernel.impl.User;
 import colla.kernel.messages.toHost.TaskMessage;
+import colla.kernel.util.Debugger;
 import implementations.dm_kernel.user.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
@@ -57,7 +58,7 @@ public class DistributedTaskExecutor {
             ticket = jcl.execute(task.getClassToExecute(), task.getMethodToExecute(), args);
             //System.err.println("Recebeu o ticket " + ticket);
         } catch (Exception e) {
-            //e.printStackTrace();
+            Debugger.debug(e);
         }
 
         //get result for task
@@ -124,7 +125,7 @@ public class DistributedTaskExecutor {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Debugger.debug(e);
         }
     }
 }

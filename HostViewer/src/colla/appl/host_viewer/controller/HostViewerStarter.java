@@ -1,5 +1,6 @@
 package colla.appl.host_viewer.controller;
 
+import colla.kernel.util.Debugger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,7 +15,13 @@ import java.util.logging.Logger;
  */
 public class HostViewerStarter{
 
-    public static void main( String args[] ){        
+    public static void main( String args[] ){ 
+        Debugger.setDebugger(false);
+        for(int i = 0; i < args.length; i++){
+            if(args[i].equals("--debug")){
+                Debugger.setDebugger(true);
+            }
+        }
         HostViewerRegister register = new HostViewerRegister(); 
         Thread thr = new Thread(register);
         thr.start();             

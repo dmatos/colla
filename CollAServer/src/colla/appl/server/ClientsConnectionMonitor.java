@@ -4,6 +4,7 @@ import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;
+import colla.kernel.util.Debugger;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -87,7 +88,7 @@ public class ClientsConnectionMonitor extends TimerTask {
             } catch (NonExistentUser nonUser) {
             }
         }
-        //System.err.println("Connections checked");
+        Debugger.debug("Connections checked");
     }
     private CollAServer server;
     private final int timeout;

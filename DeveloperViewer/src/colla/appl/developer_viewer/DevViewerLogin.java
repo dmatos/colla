@@ -9,7 +9,7 @@ import colla.kernel.messages.toClient.DeveloperViewerLoginAnswerMsg;
 import colla.kernel.messages.toClient.SignUpAnswerMsg;
 import colla.kernel.messages.toServer.ClientSignUpMsg;
 import colla.kernel.messages.toServer.DeveloperViewerLoginMsg;
-import colla.kernel.util.Debugger.DebugInfo;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.NetworkDevices;
 import colla.kernel.util.SAXReader;
 import java.io.*;
@@ -39,16 +39,14 @@ public class DevViewerLogin extends Observable{
         this.user.setOffline();
         this.connected = false;        
         this.devViewerObservers = new LinkedList<Observer>();
-        this.useGUI = false;
-        this.debugInfo = new DebugInfo();
-        this.debugInfo.setDebuggedName("DevviewerLogin");
+        this.useGUI = false;        
         if (!readServerConfigurations()) {
             throw new DeveloperConfigurationException();
         }
         try {
             this.restoredData();
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            Debugger.debug(ex);
         }        
     }
 
@@ -85,7 +83,7 @@ public class DevViewerLogin extends Observable{
             this.machineIP = netDevices.getIPs().get(0);
             this.user.setIp(this.machineIP);
         } catch (SocketException se) {
-            Logger.getLogger(DevViewerLogin.class.getName()).log(Level.SEVERE, "exception while searching machine IP address", se);
+            Debugger.debug("exception while searching machine IP address", se);
             return false;
         }
         return true;
@@ -226,25 +224,14 @@ public class DevViewerLogin extends Observable{
             this.serverIP = reader.getIPfromXML();
             this.serverPort = reader.getPortNumberFromXML();
         } catch (IOException io) {
-            this.debugInfo.clear();
-            this.debugInfo.setException(io);
-            this.setChanged();
-            this.notifyObservers(this.debugInfo);
-//            io.printStackTrace();            
+            
+            Debugger.debug(io);
             return false;
         } catch (ParserConfigurationException pce) {
-            this.debugInfo.clear();
-            this.debugInfo.setException(pce);
-            this.setChanged();
-            this.notifyObservers(this.debugInfo);
-//            pce.printStackTrace();
+            Debugger.debug(pce);            
             return false;
         } catch (SAXException sax) {
-             this.debugInfo.clear();
-            this.debugInfo.setException(sax);
-            this.setChanged();
-            this.notifyObservers(this.debugInfo);
-//            sax.printStackTrace();
+           Debugger.debug(sax);
             return false;
         }
         return true;
@@ -295,6 +282,5 @@ public class DevViewerLogin extends Observable{
     private List<Observer> devViewerObservers;
     private CollADeveloperViewerUI devUI = null;
     private boolean useGUI;
-    private DebugInfo debugInfo;
 
 }

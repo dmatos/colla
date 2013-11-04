@@ -7,6 +7,7 @@ package colla.appl.server;
 import java.io.IOException;
 
 import colla.appl.server.GUI.CollAServerGUI;
+import colla.kernel.util.Debugger;
 
 /**
  * Class containing a main method to initialize the Server.
@@ -34,6 +35,7 @@ public class ServerStarter {
         int portNumber = 9999;
         Server superServer;
         boolean useGUI = true;
+        Debugger.setDebugger(false);
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-t") && i + 1 < args.length - 1) {
@@ -55,6 +57,9 @@ public class ServerStarter {
             if (args[i].equals("-noX")) {
                 useGUI = false;
             }
+            if(args[i].equals("--debug")){
+                Debugger.setDebugger(true);
+            }
         }
 
         try {
@@ -69,7 +74,7 @@ public class ServerStarter {
                 serverGUI.updateClientsTree();
             }
         } catch (IOException io) {
-            io.printStackTrace();
+            Debugger.debug(io);
             System.exit(1);
         }
     }

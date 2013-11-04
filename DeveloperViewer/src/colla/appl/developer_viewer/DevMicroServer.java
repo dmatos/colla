@@ -9,7 +9,7 @@ import colla.kernel.api.CollAMessage;
 import colla.kernel.api.CollAUser;
 import colla.kernel.messages.toClient.ACK;
 import colla.kernel.messages.toServer.MapConnection;
-import colla.kernel.util.Debugger.DebugInfo;
+import colla.kernel.util.Debugger;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import java.io.*;
@@ -43,9 +43,7 @@ class DevMicroServer extends Observable implements Runnable {
         this.serverPortNumber = portNumber;
         this.active = true;
         this.shutdownCounter = 0;
-        this.debugInfo = new DebugInfo();
         CollAUser usr = devViewer.getUser();
-        this.debugInfo.setDebuggedName(usr.getName());
         this.serverSocket = null;
         this.keepAlive = null;
 
@@ -61,7 +59,7 @@ class DevMicroServer extends Observable implements Runnable {
                 devViewer.setUser(usr);
                 devViewer.uploadUserToServer();
             } catch (IOException e) {
-                debug("Problema com criação do server socket do micro server", e);
+                Debugger.debug("Problema com criação do server socket do micro server", e);
             }
         } else {
             this.validIP = false;
@@ -96,14 +94,14 @@ class DevMicroServer extends Observable implements Runnable {
 
     @Override
     public void run() {
-        debug("microserver criado");
+        Debugger.debug("microserver criado");
         //registering a class in JavaCaLa
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
         jcl.register(DevWorker.class, DevWorker.class.getName());
         Socket connection = null;
         while (active) {
             try {
-                debug("microserver waiting connection...");
+                Debugger.debug("microserver waiting connection...");
                 //if host IP is valid the socketServer is working, else the connection must keep alive
                 try {
                     DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
@@ -122,7 +120,7 @@ class DevMicroServer extends Observable implements Runnable {
                 Object[] args = {collAMessage, this};
                 jcl.execute(DevWorker.class.getName(), args);
             } catch (Exception e) {
-                debug(e);
+                Debugger.debug(e);
             }
         }// end while
     }// end method run
@@ -140,42 +138,10 @@ class DevMicroServer extends Observable implements Runnable {
                 serverSocket.close();
             }
         } catch (IOException io) {
-            debug(io);
+            Debugger.debug(io);
         }
     }
-
-    private void debug(String info, Exception ex) {
-        /* this.debugInfo.clear();
-         this.debugInfo.setInfo( info );
-         this.debugInfo.setException( ex );
-         this.notifyObservers( this.debugInfo );
-         System.out.println(info);
-         ex.printStackTrace();*/
-    }
-
-    /**
-     * Método para debugar o programa e notificar os Observers.
-     *
-     * @param info Informação
-     */
-    private void debug(String info) {
-        /* this.debugInfo.clear();
-         this.debugInfo.setInfo( info );
-         this.notifyObservers( this.debugInfo );
-         System.out.println(info); */
-    }
-
-    /**
-     * Método para debugar o programa e notificar os Observers.
-     *
-     * @param ex Exception
-     */
-    private void debug(Exception ex) {
-        /*this.debugInfo.clear();
-         this.debugInfo.setException( ex );
-         this.notifyObservers( this.debugInfo );
-         ex.printStackTrace();*/
-    }    
+  
 
     public String getServerIPaddress() {
         return serverIPaddress;
@@ -193,5 +159,5 @@ class DevMicroServer extends Observable implements Runnable {
     private ServerSocket serverSocket;
     private final int timeout;
     private int shutdownCounter;
-    private DebugInfo debugInfo;
+    //private DebugInfo debugInfo;
 }

@@ -13,6 +13,7 @@ import colla.kernel.api.CollAMessage;
 import colla.kernel.messages.toClient.ACK;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.MapConnection;
+import colla.kernel.util.Debugger;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import implementations.util.CoresAutodetect;
 import interfaces.kernel.JCL_facade;
@@ -69,7 +70,7 @@ class HostViewerMicroServer implements Runnable {
                     HostViewerController.getInstance().updateHost(hostAux);
                     // System.err.println("ServerSocket criado!");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Debugger.debug(e);
                 }
             } else {
                 try {
@@ -90,11 +91,11 @@ class HostViewerMicroServer implements Runnable {
                     input.readObject();
                     // System.err.println("Conexão mapeada!");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Debugger.debug(e);
                 }
             }
         } catch (HostControllerInitializationException hostEx) {
-            hostEx.printStackTrace();
+            Debugger.debug(hostEx);
         }
         this.initialTime = System.nanoTime();
 
@@ -119,8 +120,7 @@ class HostViewerMicroServer implements Runnable {
         try {
             HostViewerController.getInstance().uploadHostToServer();
         } catch (HostControllerInitializationException ex) {
-            Logger.getLogger(HostViewerMicroServer.class.getName()).log(
-                    Level.SEVERE, null, ex);
+            Debugger.debug(ex);
         }
 
         try {
@@ -169,7 +169,7 @@ class HostViewerMicroServer implements Runnable {
                 serverSocket.close();
             }
         } catch (IOException io) {
-            io.printStackTrace();
+            Debugger.debug(io);
         }
 
         this.serverR.setFinished();

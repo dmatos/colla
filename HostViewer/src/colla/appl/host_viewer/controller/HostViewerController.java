@@ -10,13 +10,13 @@ import colla.kernel.api.*;
 import colla.kernel.messages.toHost.ServerHostLoginAnswer;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.SAXReader;
 import colla.kernel.util.Treater;
 import interfaces.kernel.JCL_result;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -167,7 +167,7 @@ public class HostViewerController implements Runnable {
             input.readObject();
             socket.close();
         } catch (Exception io) {
-            io.printStackTrace();
+            Debugger.debug(io);
         }        
     }
 
@@ -205,12 +205,12 @@ public class HostViewerController implements Runnable {
             
 
         } catch (Exception tout) {
-            tout.printStackTrace();
+           Debugger.debug(tout);
         }
         try{
             HostViewerMicroServer.getInstance().shutdown();
         }catch(Exception ex){
-            ex.printStackTrace();
+            Debugger.debug(ex);
         }
 
         this.deleteDir(new File("../temp_files/"));            
@@ -271,7 +271,7 @@ public class HostViewerController implements Runnable {
             this.displayStatus("Task: " + taskID + " has been canceled.");
         } catch (Exception ex) {
             this.displayStatus("Task: " + taskID + " could not be canceled.");
-            ex.printStackTrace();
+            Debugger.debug(ex);
         }
     }
 
@@ -284,7 +284,7 @@ public class HostViewerController implements Runnable {
         try {
             HostViewerMicroServer.getInstance().scheduleTask(taskMessage);
         } catch (Exception ex) {
-            ex.printStackTrace();
+           Debugger.debug(ex);
         }
     }
     
@@ -296,7 +296,7 @@ public class HostViewerController implements Runnable {
             Thread thr = new Thread(microServer);
             thr.start();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debugger.debug(ex);
         }
     }
     

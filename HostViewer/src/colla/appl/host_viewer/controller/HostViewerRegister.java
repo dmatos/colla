@@ -9,6 +9,7 @@ import colla.kernel.api.CollAHost;
 import colla.kernel.impl.Host;
 import colla.kernel.messages.toHost.ServerHostRegisterAnswerMsg;
 import colla.kernel.messages.toServer.HostRegisterMsg;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.SAXReader;
 import java.io.*;
 import java.net.*;
@@ -50,11 +51,11 @@ public class HostViewerRegister implements Runnable {
                 }
             }
         } catch (ParserConfigurationException ex) {
-            ex.printStackTrace();
+            Debugger.debug(ex);
         } catch (SAXException ex) {
-            ex.printStackTrace();
+             Debugger.debug(ex);
         } catch (IOException ex) {
-            ex.printStackTrace();
+             Debugger.debug(ex);
         }
     }
 
@@ -109,7 +110,7 @@ public class HostViewerRegister implements Runnable {
             // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debugger.debug(ex);
             return false;
         }
         return true;

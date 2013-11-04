@@ -2,6 +2,7 @@ package colla.appl.developer_viewer;
 
 import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
 import colla.appl.developer_viewer.view.Client_Login;
+import colla.kernel.util.Debugger;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,11 +20,15 @@ public class DeveloperViewerStarter{
     public static void main( String args[] ){
 
         boolean useGUI = true;
+        Debugger.setDebugger(false);
 
         for( int i = 0; i < args.length; i++ ){
-            if( args[i].equals( "-noX" ) ){
+            if( args[i].equals( "--noX" ) ){
                 useGUI = false;
             }
+            if( args[i].equals("--debug")){
+                Debugger.setDebugger(true);
+            } 
         }
 
         try{
@@ -44,9 +49,9 @@ public class DeveloperViewerStarter{
             //devViewerLogin.addObserverToDeveloperViewer(arg);
         }catch( DeveloperConfigurationException cex ){
             if( useGUI ){
-                JOptionPane.showMessageDialog( null, "Could not read file server_conf.xml.", "Erro", JOptionPane.ERROR_MESSAGE );
+                JOptionPane.showMessageDialog( null, "Could not read file server_conf.xml.", "Error", JOptionPane.ERROR_MESSAGE );
             }else{
-                //System.err.println( cex.toString() );
+                Debugger.debug(cex.toString());
             }
             System.exit( 1 );
         }

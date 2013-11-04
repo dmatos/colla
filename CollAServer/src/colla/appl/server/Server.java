@@ -5,9 +5,9 @@ import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
 import colla.kernel.exceptions.server.UserAlreadyExists;
 import colla.kernel.messages.toClient.*;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.LogWriter;
 import colla.kernel.util.TimeAndDate;
-import static colla.kernel.util.Treater.treat;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
@@ -44,7 +44,7 @@ public class Server extends Observable implements CollAServer, Runnable {
             this.serverSocket = new ServerSocket(portNumber);
             this.portNumber = this.serverSocket.getLocalPort();
         } catch (IOException io) {
-            treat("Server couldn't be initialized. Please, check for connections setup and firewalls.",
+            Debugger.debug("Server couldn't be initialized. Please, check for connections setup and firewalls.",
                     io);
             System.err
                     .println("Server couldn't be initialized.\nPlease, check for connections setup and firewalls.");
@@ -55,14 +55,14 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.restoreServerData();
         } catch (Exception e) {
-            treat("Couldn't restore all data", e);
+            Debugger.debug("Couldn't restore all data", e);
             System.err.println("Couldn't restore all data to the server");
             LogWriter.generateLog("Couldn't restore all data to the server");
         }
         try {
             this.restoreGUI();
         } catch (NonExistentUser nUsr) {
-            treat("Couldn't set GUI up", nUsr);
+            Debugger.debug("Couldn't set GUI up", nUsr);
             System.err.println("Couldn't set GUI up");
             LogWriter.generateLog("Couldn't set GUI up");
         }
@@ -119,7 +119,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         while (active) {
             String connection_address = "";
             try {
-                treat("waiting connection...");
+                Debugger.debug("waiting connection...");
                 socketAccept = serverSocket.accept();
                 connection_address = socketAccept.getInetAddress().toString()
                         .substring(1);
@@ -318,8 +318,8 @@ public class Server extends Observable implements CollAServer, Runnable {
                         input.readObject();
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException | ClassNotFoundException e) {
+                Debugger.debug(e);
             }
         }// end if
         // notify its observers
@@ -365,9 +365,8 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.userPasswords.put(userName, password);
         try {
             this.storeClientsData();
-        } catch (Exception e) {
-            treat(e);
-            e.printStackTrace();
+        } catch (Exception e) {            
+            Debugger.debug(e);
         }
     }
 
@@ -377,8 +376,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.storeGroupsData();
         } catch (Exception e) {
-            treat(e);
-            e.printStackTrace();
+            Debugger.debug(e);
         }
     }
 
@@ -401,7 +399,7 @@ public class Server extends Observable implements CollAServer, Runnable {
      */
     @Override
     public Set<String> getUsersSet() {
-        Set<String> usersSet = new TreeSet<String>();
+        Set<String> usersSet = new TreeSet<>();
         for (String name : usersMap.keySet()) {
             usersSet.add(name);
 
@@ -434,7 +432,7 @@ public class Server extends Observable implements CollAServer, Runnable {
                 }
                 user.setOffline();
             } catch (IOException ex) {
-                treat(ex);
+                Debugger.debug(ex);
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE,
                         null, ex);
             }
@@ -511,13 +509,13 @@ public class Server extends Observable implements CollAServer, Runnable {
             this.disconnectAllClients();
             this.storeAllServerData();
         } catch (Exception e) {
+            Debugger.debug(e);
         }
         this.active = false;
         try {
             this.serverSocket.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Debugger.debug(e);
         }
         serverInstance = null;
     }

@@ -14,8 +14,8 @@ import colla.kernel.impl.*;
 import colla.kernel.messages.toClient.*;
 import colla.kernel.messages.toHost.*;
 import colla.kernel.messages.toServer.*;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.TimeAndDate;
-import static colla.kernel.util.Treater.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -76,7 +76,7 @@ public class ServerWorker {
                         host.setInicioConexao();
                         server.updateHost(host);
                         //server.displayMessage("Host " + hostName + " is connected");
-                        treat("Host " + hostName + " is connected");
+                        Debugger.debug("Host " + hostName + " is connected");
 
                         // Send true to host if connected
                         ServerHostLoginAnswer outgoing = new ServerHostLoginAnswer(host.IsOnline(), host.hasValidIP(), host.getIp());
@@ -119,21 +119,21 @@ public class ServerWorker {
                             server.updateHost(host);
                             server.notifyObservers();
                             //server.displayMessage("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
-                            treat("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
+                            Debugger.debug("Host " + hostName + ", owned by: " + userName + ", was succefully registered");
                             this.sendHostUpdateToOwner(host, userName);
                         } catch (NonExistentUser nExUsr) {
                             outgoing.setHostName(null);
                             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                             output.writeObject(outgoing);
                             output.flush();
-                            treat("password inserido pelo host é inválido");
+                            Debugger.debug("password inserido pelo host é inválido");
                         }
                     } else {
                         outgoing.setHostName(null);
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                         output.writeObject(outgoing);
                         output.flush();
-                        treat("password inserido pelo host é inválido");
+                        Debugger.debug("password inserido pelo host é inválido");
                     }
                 }// end of case HOST_REGISTER
                 break;
@@ -379,43 +379,31 @@ public class ServerWorker {
                     output.writeObject(new colla.kernel.messages.toClient.ACK());
                     output.flush();
                     server.displayMessage("Operation not supported yet: " + operation.toString());
-                    treat("Operation not supported yet: " + operation.toString());
+                    Debugger.debug("Operation not supported yet: " + operation.toString());
             }// end of switch
         }// end of the try
         catch (SocketTimeoutException se) {
             server.displayMessage("Connection timeout from IP" + socket.getInetAddress().toString());
             server.displayMessage("Operation: " + operation.toString());
-            treat(se);
+            Debugger.debug(se);
         } catch (SocketException se) {
             if (socket != null) {
                 server.displayMessage("Some problem has occured in the connection with " + socket.getInetAddress().toString().substring(1)
                         + " on port " + socket.getPort());
-                treat("Some problem has occured in the connection with " + socket.getInetAddress().toString().substring(1)
+                Debugger.debug("Some problem has occured in the connection with " + socket.getInetAddress().toString().substring(1)
                         + " on port " + socket.getPort(), se);
             } else {
                 server.displayMessage("Some problem has occured in the connections");
-                treat("Some problem has occured in the connections", se);
+                Debugger.debug("Some problem has occured in the connections", se);
             }
         } catch (IOException ioe) {
             server.displayMessage("Some problem has occured in the connections");
-            treat("Some problem has occured in the connections", ioe);
+            Debugger.debug("Some problem has occured in the connections", ioe);
         } catch (ClassNotFoundException cnfe) {
             server.displayMessage("Some problem has occured in the connections");
-            treat("Some problem has occured in the connections", cnfe);
+            Debugger.debug("Some problem has occured in the connections", cnfe);
         }
-
-        /* catch (Exception e) {
-         try {
-         treat(e);
-         this.server.displayMessage("An unexpected behavior ocurred with the server. Storing data...");
-         //this.server.disconnectAllClients();
-         this.server.storeAllServerData();
-         this.server.displayMessage("Done! Now the server can be closed for repairs");
-         } catch (Exception storeException) {
-         this.server.displayMessage("Couldn't store all data");
-         treat(storeException);
-         }
-         }*/
+        
     }// end method execute
 
     /**
@@ -449,10 +437,10 @@ public class ServerWorker {
             try {
                 updateUser(user);
             } catch (NonExistentUser nExUsr) {
-                nExUsr.printStackTrace();
+                Debugger.debug(nExUsr);
             }
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
 
     }
@@ -474,7 +462,7 @@ public class ServerWorker {
                 }
             }
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
         return contacts;
     }
@@ -510,7 +498,7 @@ public class ServerWorker {
             usr.addHost(host);
             server.updateUser(usr);
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
 
     }
@@ -546,15 +534,15 @@ public class ServerWorker {
                                 input.readObject();
                             }
                         } catch (Exception e) {
-                            treat(e);
+                            Debugger.debug(e);
                         }
                     }// end if
                 } catch (NonExistentUser nExUser) {
-                    treat(nExUser);
+                    Debugger.debug(nExUser);
                 }
             }// end for
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
     }// end method 
 
@@ -568,7 +556,7 @@ public class ServerWorker {
             Server server = Server.getInstance();
             server.updateUser(usr);
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
     }
 
@@ -582,7 +570,7 @@ public class ServerWorker {
             Server server = Server.getInstance();
             server.updateHost(host);
         } catch (ServerInitializationException serEx) {
-            serEx.printStackTrace();
+            Debugger.debug(serEx);
         }
     }
 
@@ -602,8 +590,8 @@ public class ServerWorker {
                     sendGroupUpdateToMembers(groupName, usr.getName());
                 }
             }
-        } catch (Exception e) {
-            treat(e);
+        } catch (ServerInitializationException | NonExistentUser e) {
+            Debugger.debug(e);
         }
     }
 
@@ -617,12 +605,12 @@ public class ServerWorker {
         try {
             Server server = Server.getInstance();
             CollAGroup groupUpdated = server.getGroup(groupName);
-            HashMap<String, CollAUser> usersMap = new HashMap<String, CollAUser>();
+            HashMap<String, CollAUser> usersMap = new HashMap<>();
             for (String memberName : groupUpdated.getMembers()) {
                 try {
                     usersMap.put(memberName, server.getUser(memberName));
                 } catch (NonExistentUser nExUsr) {
-                    nExUsr.printStackTrace();
+                    Debugger.debug(nExUsr);
                 }
             }
             for (String memberName : usersMap.keySet()) {
@@ -643,8 +631,8 @@ public class ServerWorker {
                                 ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
                                 inputAux.readObject();
                                 aux.close();
-                            } catch (Exception ex) {
-                                treat(ex);
+                            } catch (IOException | ClassNotFoundException ex) {
+                                Debugger.debug(ex);
                             }
                         } // se usuário não possui ip válido
                         else if (!tempUser.hasValidIP() && server.getAMapedConnection(memberName) != null) {
@@ -658,8 +646,8 @@ public class ServerWorker {
                                 //wait for ACK
                                 ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
                                 inputAux.readObject();
-                            } catch (Exception io) {
-                                treat(io);
+                            } catch (IOException | ClassNotFoundException io) {
+                                Debugger.debug(io);
                             }
                         }
                     } else if (!tempUser.isOnline()) {
@@ -674,7 +662,7 @@ public class ServerWorker {
 
             }// end for
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
     }// end method
 
@@ -688,8 +676,8 @@ public class ServerWorker {
         try {
             Server server = Server.getInstance();
             CollAGroup groupUpdated = server.getGroup(groupName);
-            HashMap<String, CollAUser> adminsMap = new HashMap<String, CollAUser>();
-            HashMap<String, CollAUser> membersMap = new HashMap<String, CollAUser>();
+            HashMap<String, CollAUser> adminsMap = new HashMap<>();
+            HashMap<String, CollAUser> membersMap = new HashMap<>();
             for (String adminName : groupUpdated.getAdminsList()) {
                 try {
                     adminsMap.put(adminName, server.getUser(adminName));
@@ -723,9 +711,8 @@ public class ServerWorker {
                                 ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
                                 inputAux.readObject();
                                 aux.close();
-
                             } catch (Exception ex) {
-                                treat("An error ocurred while sending group " + groupName + " to its admins", ex);
+                                Debugger.debug("An error ocurred while sending group " + groupName + " to its admins", ex);
                                 server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
                             }
                         }//end if
@@ -742,7 +729,7 @@ public class ServerWorker {
                                 ObjectInputStream inputAux = new ObjectInputStream(aux.getInputStream());
                                 inputAux.readObject();
                             } catch (Exception io) {
-                                treat("An error ocurred while sending group " + groupName + " to its admins", io);
+                                Debugger.debug("An error ocurred while sending group " + groupName + " to its admins", io);
                                 server.displayMessage("An error ocurred while sending group " + groupName + " to its admins");
                             }
                         }// end if
@@ -758,7 +745,7 @@ public class ServerWorker {
                 }// end if
             }// end for
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
     }// end method
 
@@ -772,7 +759,7 @@ public class ServerWorker {
             Server server = Server.getInstance();
             portNumber = server.getPortNumber();
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
         return portNumber;
     }
@@ -789,7 +776,7 @@ public class ServerWorker {
             Server server = Server.getInstance();
             user = server.getUser(userName);
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
         return user;
 
@@ -839,11 +826,11 @@ public class ServerWorker {
                     }
                 }
             } catch (Exception io) {
-                treat("Error: could not transmit message from " + sender + " to " + receiver, io);
+                Debugger.debug("Error: could not transmit message from " + sender + " to " + receiver, io);
                 server.displayMessage("Error: could not transmit message from " + sender + " to " + receiver);
             }
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
     }// end of method
 
@@ -858,8 +845,8 @@ public class ServerWorker {
      * @param attachNames name of the attaches
      */
     private void retransmitTask(String group, String sender, String receiver, CollATask task, ArrayList<byte[]> attachBuffers, ArrayList<String> attachNames) {
-        treat("Retransmit with group " + group);
-        treat("Sender = " + sender + " Receiver = " + receiver);
+        Debugger.debug("Retransmit with group " + group);
+        Debugger.debug("Sender = " + sender + " Receiver = " + receiver);
         ObjectOutputStream output;
         ObjectInputStream input;
         TaskMessage outgoing;
@@ -892,7 +879,7 @@ public class ServerWorker {
                 input = new ObjectInputStream(socket.getInputStream());
                 input.readObject();
             } else {
-                treat("Socket null");
+                Debugger.debug("Socket null");
                 /*
                  * TODO Fazer o caso do host estar offline. Retornar uma
                  * mensagem ao usuário, procurar outro host o servidor mesmo e
@@ -900,7 +887,7 @@ public class ServerWorker {
                  */
             }
         } catch (Exception e) {
-            treat("Problema com a retransmissão da task", e);
+            Debugger.debug("Problema com a retransmissão da task", e);
         }
     }
 
@@ -923,7 +910,7 @@ public class ServerWorker {
             Socket socket = server.getAMapedConnection(receiver.getName());
             // se usuário está online
             if (socket != null && server.getUser(receiver.getName()).isOnline()) {
-                treat("Sending a task_result to " + receiver.getName());
+                Debugger.debug("Sending a task_result to " + receiver.getName());
                 output = new ObjectOutputStream(socket.getOutputStream());
                 output.writeObject(outgoing);
                 output.flush();
@@ -940,7 +927,7 @@ public class ServerWorker {
                 server.updateResultsMap(receiver.getName(), resultsArray);
             }
         } catch (Exception io) {
-            treat("Error: could not transmit message from " + sender + " to " + receiver, io);
+            Debugger.debug("Error: could not transmit message from " + sender + " to " + receiver, io);
         }
     }// end method
 
@@ -980,7 +967,7 @@ public class ServerWorker {
                 }
             }// end while
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
         return HostsFromGroup;
     }// end method
@@ -1014,12 +1001,12 @@ public class ServerWorker {
                         }
                     }//end while
                 } catch (NonExistentUser nExUsr) {
-                    treat(nExUsr);
+                    Debugger.debug(nExUsr);
                 }
 
             }// end while
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
         return hostsOnline;
     }// end method
@@ -1061,9 +1048,9 @@ public class ServerWorker {
             if (user.hasValidIP()) {
                 socket.close();
             }
-            treat("Host " + h.getName() + " has been sent to user " + user.getName());
+            Debugger.debug("Host " + h.getName() + " has been sent to user " + user.getName());
         } catch (Exception ex) {
-            treat("Error: could not retrive hosts to " + name, ex);
+            Debugger.debug("Error: could not retrive hosts to " + name, ex);
         }
     }
     
@@ -1094,7 +1081,7 @@ public class ServerWorker {
             Server server = Server.getInstance();
             userSet.addAll(server.getUsersSet());
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
         return userSet;
     }
@@ -1139,7 +1126,7 @@ public class ServerWorker {
                 newSession.setSessionID(server.generateSessionID());
                 user.addSession(newSession);
                 //server.displayMessage("User " + user.getName() + " has connected");
-                treat("User " + user.getName() + " has connected");
+                Debugger.debug("User " + user.getName() + " has connected");
                 answer.confirmPassword(true);
                 answer.setUser(server.getUser(user.getName()));
                 recordActivities(user, ActivityID.LOGIN, null);
@@ -1148,10 +1135,10 @@ public class ServerWorker {
                 answer.confirmPassword(false);
             }
         } catch (NonExistentUser nExUsr) {
-            nExUsr.printStackTrace();
+            Debugger.debug(nExUsr);
             answer.confirmUserName(false);
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
 
         return answer;
@@ -1170,7 +1157,7 @@ public class ServerWorker {
             group.addMemberToWaitingList(userName);
             server.updateGroup(groupName, group);
         } catch (ServerInitializationException servInit) {
-            treat(servInit);
+            Debugger.debug(servInit);
         }
     }
 
@@ -1189,17 +1176,17 @@ public class ServerWorker {
             user.setPort(-1);
             user.setOffline();
             //server.displayMessage("User " + user.getName() + " has disconnected");
-            treat("User " + user.getName() + " has disconnected");
+            Debugger.debug("User " + user.getName() + " has disconnected");
             try {
                 updateUser(user);
                 sendMemberUpdateToGroups(user.getName());
                 recordActivities(user, ActivityID.DISCONNECT, "\nConnection total time: " + user.getConnectionTotalTime());
             } catch (NonExistentUser nExUsr) {
-                treat(nExUsr);
+                Debugger.debug(nExUsr);
             }
             server.removeAMappedConnection(user.getName());
         } catch (ServerInitializationException servInit) {
-            treat(servInit);
+            Debugger.debug(servInit);
         }
     }
 
@@ -1214,14 +1201,14 @@ public class ServerWorker {
             host.setPort(-1);
             host.setOffline();
             //server.displayMessage("Host " + host.getName() + " has disconnected");
-            treat("Host " + host.getName() + " has disconnected");
+            Debugger.debug("Host " + host.getName() + " has disconnected");
             try {
                 updateHost(host);
             } catch (NonExistentUser nExUsr) {
-                treat(nExUsr);
+                Debugger.debug(nExUsr);
             }
         } catch (ServerInitializationException servInit) {
-            treat(servInit);
+            Debugger.debug(servInit);
         }
     }
 
@@ -1248,13 +1235,13 @@ public class ServerWorker {
                 } catch (UserAlreadyExists usrAEx) {
                     //true if the name is not available
                     response.nameAlreadyInUse(Boolean.TRUE);
-                    usrAEx.printStackTrace();
+                    Debugger.debug(usrAEx);
                 }
                 //reads crypted passaword
                 server.setUserPassword(user.getName(), pass);
             }
         } catch (ServerInitializationException servInit) {
-            treat(servInit);
+            Debugger.debug(servInit);
         }
         return response;
     }
@@ -1295,7 +1282,7 @@ public class ServerWorker {
                 socket.close();
             }
         } catch (Exception io) {
-            treat("Error while creating new group. Client: " + usr.getName() + "\n"
+            Debugger.debug("Error while creating new group. Client: " + usr.getName() + "\n"
                     + "Client IP Address: " + usr.getIp(), io);
         }
     }// end method
@@ -1306,7 +1293,7 @@ public class ServerWorker {
      * @param user user that will receive the groups
      */
     private void sendGroupsToClient(CollAUser user) {
-        TreeSet<String> groupsSet = new TreeSet<String>();
+        TreeSet<String> groupsSet = new TreeSet<>();
         GetGroupsAnswerMsg response = new GetGroupsAnswerMsg();
         Socket socketAux;
         try {
@@ -1332,8 +1319,8 @@ public class ServerWorker {
             if (user.hasValidIP()) {
                 socketAux.close();
             }
-        } catch (Exception ex) {
-            treat("Error: couldn't send list of groups to client " + user.getName()
+        } catch (ServerInitializationException | IOException | ClassNotFoundException ex) {
+            Debugger.debug("Error: couldn't send list of groups to client " + user.getName()
                     + " at " + user.getIp(), ex);
         }
     }// end method
@@ -1357,7 +1344,7 @@ public class ServerWorker {
             user.addHost(host);
             this.updateUser(user);
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
     }
 
@@ -1394,15 +1381,13 @@ public class ServerWorker {
                         //discards stored result                        
                         server.removeMapedResults(userName);
                     } // otherwise there is nothing to send to client
-                } catch (Exception ex) {
+                } catch (IOException | ClassNotFoundException ex) {
                     server.displayMessage("Couldn't send stored results to " + userName);
-                    treat("Couldn't send stored results to " + userName, ex);
+                    Debugger.debug("Couldn't send stored results to " + userName, ex);
                 }
             }// end if
-        } catch (NonExistentUser nExUsr) {
-            treat(nExUsr);
-        } catch (ServerInitializationException servInit) {
-            treat(servInit);
+        } catch (NonExistentUser | ServerInitializationException nExUsr) {
+            Debugger.debug(nExUsr);
         }
     }// end method
 
@@ -1413,7 +1398,7 @@ public class ServerWorker {
      * @return os usuários do grupo
      */
     private HashMap<String, CollAUser> getUsersFromGroup(String groupName) {
-        HashMap<String, CollAUser> group = new HashMap<String, CollAUser>();
+        HashMap<String, CollAUser> group = new HashMap<>();
         return group;
     }
 
@@ -1425,7 +1410,7 @@ public class ServerWorker {
                 this.sendGroupUpdateToMembers(group.getName(), "0");
             }
         } catch (ServerInitializationException servEx) {
-            treat(servEx);
+            Debugger.debug(servEx);
         }
     }
 
@@ -1460,8 +1445,8 @@ public class ServerWorker {
                     socket.close();
                 }
             }
-        } catch (Exception io) {
-            treat("Problema com o envio do Host Update to Owner", io);
+        } catch (NonExistentUser | ServerInitializationException | IOException | ClassNotFoundException io) {
+            Debugger.debug("Problema com o envio do Host Update to Owner", io);
         }
     }// end method    
 }

@@ -10,7 +10,7 @@ import colla.kernel.api.*;
 import colla.kernel.enumerations.ClientOps;
 import colla.kernel.impl.Group;
 import colla.kernel.messages.toClient.*;
-import colla.kernel.util.Debugger.DebugInfo;
+import colla.kernel.util.Debugger;
 import java.util.*;
 
 /**
@@ -23,14 +23,12 @@ public class DevWorker extends Observable{
         // Envia resposta pro cliente de que a mensagem foi recebida e que ele pode encerrar a conexão.        
         DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
         this.serverIPaddress = devMicroServer.getServerIPaddress();
-        this.serverPortNumber = devMicroServer.getServerPortNumber();        
-        this.debugInfo = new DebugInfo();
-        this.debugInfo.setDebuggedName(devViewer.getUser().getName());
+        this.serverPortNumber = devMicroServer.getServerPortNumber();                
         
         ClientOps operation;// operação a ser lida        
         try{
             operation = ( ClientOps ) collAMessage.getOperation();
-            //System.err.println(operation.toString());
+            Debugger.debug(operation.toString());
             switch( operation ){
             case PING: {
                
@@ -47,7 +45,7 @@ public class DevWorker extends Observable{
                 String groupName = incoming.getGroupName();
                 HashMap<String, CollAUser> usersMap = incoming.getUsersMap();
                 devViewer.addGroup( groupName, group, usersMap );
-                debug( groupName + "accepted" );
+                Debugger.debug( groupName + "accepted" );
             }
             break;
             case LIST_GROUPS: {
@@ -69,11 +67,11 @@ public class DevWorker extends Observable{
                     usersMap.put( devViewer.getUser().getName(), devViewer.getUser() );
                     devViewer.addGroup( groupName, group, usersMap );
                     devViewer.confirmGroupCreation( true, group );
-                    debug( groupName + "criacao confirmada." );
+                    Debugger.debug( groupName + "criacao confirmada." );
                 }else{
                     //if it was not possible to create a group
                     devViewer.confirmGroupCreation( false, group );
-                    debug( groupName + "nao criado." );
+                    Debugger.debug( groupName + "nao criado." );
                 }
             }
             break;
@@ -94,9 +92,9 @@ public class DevWorker extends Observable{
                 LinkedList<CollAHost> hosts = msg.getHosts();
                 Long taskID = msg.getTaskID();
                 if( hosts.getFirst() != null ){
-                    debug( hosts.getFirst().getName() + " is received" );
+                    Debugger.debug( hosts.getFirst().getName() + " is received" );
                 }else{
-                    debug( "Nenhum host foi recebido" );
+                    Debugger.debug( "Nenhum host foi recebido" );
                 }
                 devViewer.sendTaskToRun( hosts, taskID );
             }
@@ -106,7 +104,7 @@ public class DevWorker extends Observable{
                 TaskResultMsg msg = ( TaskResultMsg ) collAMessage;
                 String taskName = msg.getTaskName();
                 CollATask result = msg.getResult();
-                debug( "receiving result for: " + msg.getGroupName() );
+                Debugger.debug( "receiving result for: " + msg.getGroupName() );
                 devViewer.receiveTaskResult( msg.getGroupName(), taskName, result );
             }
             break;
@@ -123,64 +121,20 @@ public class DevWorker extends Observable{
             case TASK_START_NOTIFICATION: {
                 
                 colla.kernel.messages.toClient.NotifyTaskStarted msg = ( NotifyTaskStarted ) collAMessage;
-                debug( "TASK_START_NOTIFICATION no implemented received" );
+                Debugger.debug( "TASK_START_NOTIFICATION no implemented received" );
                 devViewer.updateResults( msg.getGroupName(), msg.getTaskName(), msg.getTask() );
             }
             break;
             default:
                 
-                debug( "Command still not available: " + operation.toString() );
+                Debugger.debug( "Command still not available: " + operation.toString() );
             }// end of switch
         }catch( Exception e ){
-            debug( e );
+            Debugger.debug( e );
         }
 
     }// end method execute
-
-    /**
-     * Método para debugar o programa e notificar os Observers.
-     *
-     * @param info Informação
-     * @param ex   Exceprion
-     */
-    private void debug( String info, Exception ex ){
-        /*
-         this.debugInfo.clear();
-        this.debugInfo.setInfo( info );
-        this.debugInfo.setException( ex );
-        this.notifyObservers( this.debugInfo );
-        System.out.println( info );        
-        ex.printStackTrace();
-        */
-    }
-
-    /**
-     * Método para debugar o programa e notificar os Observers.
-     *
-     * @param info Informação
-     */
-    private void debug( String info ){
-        /*
-        this.debugInfo.clear();
-        this.debugInfo.setInfo( info );
-        this.notifyObservers( this.debugInfo );
-        System.out.println( info );
-        //*/
-    }
-
-    /**
-     * Método para debugar o programa e notificar os Observers.
-     *
-     * @param ex Exception
-     */
-    private void debug( Exception ex ){
-       /*
-         this.debugInfo.clear();
-        this.debugInfo.setException( ex );
-        this.notifyObservers( this.debugInfo );
-        ex.printStackTrace();
-        //*/
-    }
+    
 
     @Override
     public void notifyObservers( Object aspect ){
@@ -188,12 +142,11 @@ public class DevWorker extends Observable{
         DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
         devViewer.notifyObservers( aspect );
        } catch(DeveloperControllerInitializationException devEx){
-           debug(devEx);
+           Debugger.debug(devEx);
        }
     }
     
     private final int timeout = 0;
     String serverIPaddress;
     int serverPortNumber;
-    private DebugInfo debugInfo;
 }// end of class DevWorker

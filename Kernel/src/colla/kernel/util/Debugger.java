@@ -11,7 +11,7 @@ package colla.kernel.util;
 public class Debugger {
 
     public static void setDebugger(boolean debug) {
-        debug = debug;
+        Debugger.debug = debug;
     }
 
     public static void debug(String info, Exception ex) {

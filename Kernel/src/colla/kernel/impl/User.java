@@ -42,7 +42,7 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
     @Override
     public int compareTo(CollAUser user) {
         if (this.name == null)
-            return -1; //@todo lançar exceção        
+            return -1;       
         if (this.name.equals(user.getName())) {
             return 0;
         } else if (this.getName().compareTo(user.getName()) > 0) {

@@ -104,7 +104,8 @@ public class HostViewerRegister implements Runnable {
                 Thread thr = new Thread(hostViewer);
                 thr.start();
                 this.shutdown();
-                this.hostRegisterGUI.dispose();
+                if(this.hostRegisterGUI != null)
+                    this.hostRegisterGUI.dispose();
             }
             // System.err.println("register");
             // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());

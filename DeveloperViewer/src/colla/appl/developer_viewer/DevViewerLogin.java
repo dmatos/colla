@@ -13,6 +13,7 @@ import colla.kernel.util.Debugger;
 import colla.kernel.util.NetworkDevices;
 import colla.kernel.util.SAXReader;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -21,25 +22,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 /**
- * This class deals with the communications between server and client
- * during login.
+ * This class deals with the communications between server and client during
+ * login.
+ *
  * @author Diogo Matos <dmatos88 at gmail.com>
  */
-public class DevViewerLogin extends Observable{
-   
-    public DevViewerLogin() throws DeveloperConfigurationException{
+public class DevViewerLogin extends Observable {
+
+    public DevViewerLogin() throws DeveloperConfigurationException {
         this.user = new User();
         this.user.setOffline();
-        this.connected = false;        
+        this.connected = false;
         this.devViewerObservers = new LinkedList<Observer>();
-        this.useGUI = false;        
+        this.useGUI = false;
         if (!readServerConfigurations()) {
             throw new DeveloperConfigurationException();
         }
@@ -47,15 +46,16 @@ public class DevViewerLogin extends Observable{
             this.restoredData();
         } catch (Exception ex) {
             Debugger.debug(ex);
-        }        
+        }
     }
 
     /**
      * Restores previously saved configurations data.
+     *
      * @return if data was successfully restored.
-     * @throws Exception  
+     * @throws Exception
      */
-    private boolean restoredData() throws Exception{
+    private boolean restoredData() throws Exception {
         //creates a data directory if it does not alredy exists       
         new File("data/").mkdir();
 
@@ -73,7 +73,7 @@ public class DevViewerLogin extends Observable{
 
     /**
      * Retrieves the IP address for the established connection.
-     * 
+     *
      * @return if it was able to retrieve the IP address from the network card.
      */
     private boolean retrieveIPaddress() {
@@ -87,7 +87,7 @@ public class DevViewerLogin extends Observable{
             return false;
         }
         return true;
-    }  
+    }
 
     public String getServerIPaddress() {
         return this.serverIP;
@@ -152,18 +152,19 @@ public class DevViewerLogin extends Observable{
     public CollAUser getUser() {
         return this.user;
     }
-    
+
     /**
      * Connects to the server to execute a login request.
-     * @param userName 
+     *
+     * @param userName
      * @param password
-     * @return a DeveloperViewerController instance if logged in, otherwise returns null.
-     * @throws Exception 
+     * @return a DeveloperViewerController instance if logged in, otherwise
+     * returns null.
+     * @throws Exception
      */
     public DeveloperViewerController logInServer(String userName, String password) throws Exception {
         this.retrieveIPaddress();
         HashMap<String, CollAUser> groupMembers;
-
         /* sends IP address of the machine to let server check if the IP address
          * is valid. A valid IP address means that the machine can receive
          * outside connections. An invalid IP address means that the machine is
@@ -176,12 +177,11 @@ public class DevViewerLogin extends Observable{
         output = new ObjectOutputStream(socket.getOutputStream());
         output.writeObject(outgoing);
         output.flush();
-        
+
         input = new ObjectInputStream(socket.getInputStream());
         DeveloperViewerLoginAnswerMsg incoming = (DeveloperViewerLoginAnswerMsg) input.readObject();
         socket.close();
-        //System.out.println("login pela porta: "+sock.getLocalPort());        
-        
+        //System.out.println("login pela porta: "+sock.getLocalPort());                
         if (incoming.getNameConfirmation()) {
             if (incoming.getPassConfirmation()) {
                 this.displayMessage("Receiving data from server.");
@@ -189,10 +189,10 @@ public class DevViewerLogin extends Observable{
                 this.user = incoming.getUser();
                 this.user.setIp(this.machineIP);
                 DeveloperViewerController devViewer = DeveloperViewerController.setupDeveloperController(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
-                for(Observer observer : this.devViewerObservers){
+                for (Observer observer : this.devViewerObservers) {
                     devViewer.addObserver(observer);
                 }
-                if(this.useGUI){
+                if (this.useGUI) {
                     DeveloperViewerGUI gui = DeveloperViewerGUI.getInstance(this.user.getName());
                     this.setDeveloperViewerUI(gui);
                     devViewer.addObserver(gui);
@@ -202,18 +202,20 @@ public class DevViewerLogin extends Observable{
                 thr.start();
                 return devViewer;
             }// fim do if
-            else{
+            else {
                 this.displayMessage("Error: incorrect username or password");
             }
         }//fim do if
         else {
             this.displayMessage("Error: incorrect username or password");
         }
+
         return null;
     }// fim do método logInServer
 
     /**
-     * Reads IP address and port number from a xml file to connect with the server.
+     * Reads IP address and port number from a xml file to connect with the
+     * server.
      *
      * @return true if it was succesfully read, false otherwise
      */
@@ -224,50 +226,59 @@ public class DevViewerLogin extends Observable{
             this.serverIP = reader.getIPfromXML();
             this.serverPort = reader.getPortNumberFromXML();
         } catch (IOException io) {
-            
+
             Debugger.debug(io);
             return false;
         } catch (ParserConfigurationException pce) {
-            Debugger.debug(pce);            
+            Debugger.debug(pce);
             return false;
         } catch (SAXException sax) {
-           Debugger.debug(sax);
+            Debugger.debug(sax);
             return false;
         }
         return true;
-    }  
-    
+    }
+
     /**
      * Exhibits a message to the user.
+     *
      * @param message message to exhibit.
      */
-    public void displayMessage(String message){
+    public void displayMessage(String message) {
         this.setChanged();
         this.notifyObservers(message);
     }
-    
-    
+
     /**
-     * 
-     * @param userInterface an UI to be used in DeveloperViewerController, not here in this class!
+     *
+     * @param userInterface an UI to be used in DeveloperViewerController, not
+     * here in this class!
      */
-    public void setDeveloperViewerUI(CollADeveloperViewerUI userInterface){
+    public void setDeveloperViewerUI(CollADeveloperViewerUI userInterface) {
         this.devUI = userInterface;
     }
-    
-    public void addObserverToDeveloperViewer(Observer observer){
+
+    public void addObserverToDeveloperViewer(Observer observer) {
         this.devViewerObservers.add(observer);
-    }   
-    
-    
+    }
+
     /**
-     * 
+     *
      * @param useGUI This application will use some UI if true.
      */
-    public void useGUI(boolean useGUI){
+    public void useGUI(boolean useGUI) {
         this.useGUI = useGUI;
     }
-    
+
+    /**
+     * The IP address is collected from the machine and shouldn't change.
+     *
+     * @param user
+     */
+    public void setUser(CollAUser user) {
+        user.setIp(this.user.getIp());
+        this.user = user;
+    }
     //Variables declaration
     private String serverIP;    //server IP addres read from server_conf.xml
     private Integer serverPort; //server port number read from server_conf.xml
@@ -278,9 +289,8 @@ public class DevViewerLogin extends Observable{
     private ClientConfigurations config;
     private Socket socket;
     private ObjectInputStream input;
-    private ObjectOutputStream output;    
+    private ObjectOutputStream output;
     private List<Observer> devViewerObservers;
     private CollADeveloperViewerUI devUI = null;
     private boolean useGUI;
-
 }

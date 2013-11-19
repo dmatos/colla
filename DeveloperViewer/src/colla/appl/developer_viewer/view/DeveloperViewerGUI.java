@@ -1949,7 +1949,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         int returnFileChooser = jFileChooser.showOpenDialog(this);
         if (returnFileChooser == JFileChooser.APPROVE_OPTION) {
             taskFile = jFileChooser.getSelectedFile();
-            clearTaskFields();
+            //clearTaskFields();
             if (taskFile.getAbsolutePath().endsWith(".jar")) {
                 jTextFieldTask.setText(taskFile.getAbsolutePath());
                 ArrayList<String> classes = getClassesInsideJar();

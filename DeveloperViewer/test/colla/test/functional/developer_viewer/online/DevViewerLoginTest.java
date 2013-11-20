@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.developer_viewer.online;
+package colla.test.functional.developer_viewer.online;
 
 import colla.appl.developer_viewer.DevViewerLogin;
 import colla.appl.developer_viewer.DeveloperViewerController;

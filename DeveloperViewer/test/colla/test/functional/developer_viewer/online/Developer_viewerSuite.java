@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.developer_viewer.standalone;
+package colla.test.functional.developer_viewer.online;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
  * @author dmatos
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({colla.appl.developer_viewer.standalone.DevViewerLoginTest.class, colla.appl.developer_viewer.standalone.DeveloperViewerTaskTests.class})
+@Suite.SuiteClasses({colla.test.functional.developer_viewer.online.DevViewerLoginTest.class, colla.test.functional.developer_viewer.online.DeveloperViewerTaskTests.class})
 public class Developer_viewerSuite {
 
     @BeforeClass

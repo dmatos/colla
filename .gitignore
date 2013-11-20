@@ -1,11 +1,6 @@
 *.class
 *~
 
-# Package Files #
-*.jar
-*.war
-*.ear
-
 #NetBeans specific#
 nbproject/private/
 bin/
@@ -38,3 +33,6 @@ store/
 saida.txt
 exception.txt
 *.csv
+/SuperServer4/data/
+/CollAServer/nbproject/private/
+/CollAServer/data/

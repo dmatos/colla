@@ -429,7 +429,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 .generateUniqueTaskName(taskName, result.getTaskID());
         taskMap.put(tName, result);
         taskResults.put(groupName, taskMap);
-        Debugger.debug(tName + " up to date for "+ groupName );
+        Debugger.debug(tName + " up to date for " + groupName);
         // redo list of tasks on resultWindow
         if (devUI != null) {
             devUI.setListOfTasks(this.getTasks());
@@ -576,6 +576,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                         + " is available. Sending request to server...");
                 // socket.setSoTimeout(timeout);
                 group.addMember(this.user.getName());
+                group.addAdmin(this.user.getName());
                 CreateGroupMsg addGroup = new CreateGroupMsg(group);
                 Socket socket = new Socket(
                         InetAddress.getByName(serverIPaddress),
@@ -952,6 +953,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     group.remMemberFromWaitingList(memberName);
                 }
             }
+
             if (refusedMembers.get(groupName) != null
                     && refusedMembers.get(groupName).size() > 0) {
                 isModified = true;

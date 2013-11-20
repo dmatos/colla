@@ -173,7 +173,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.storeClientsData();
         } catch (Exception e) {
-            e.printStackTrace();
+            Debugger.debug(e);
         }
         this.setChanged();
         this.notifyObservers();

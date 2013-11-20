@@ -80,7 +80,7 @@ public class DeveloperViewerTaskTests {
         File taskFile = new File(testFilesDir + "testes.jar");
         ArrayList<File> args = new ArrayList<File>();
         ArrayList<File> attaches = new ArrayList<File>();
-        args.add(new File(testFilesDir + "entrada.txt"));
+        args.add(new File(testFilesDir + "testesinput.txt"));
         String classToExecute = "Fibonacci";
         String methodToExecute = "calculate";
 
@@ -88,7 +88,7 @@ public class DeveloperViewerTaskTests {
         devViewer.getAvailableHostsOnServer(taskFile, attaches, args, classToExecute, methodToExecute, groupName, null, false);
 
         while (devViewer.getTasks().isEmpty()) {
-            Debugger.debug("waiting task");
+            Debugger.debug("waiting parallel task");
             try {
                 //wait until it has a result from a host (30 seconds)
                 Thread.sleep(10000);
@@ -102,6 +102,8 @@ public class DeveloperViewerTaskTests {
         assertNotNull(task);
         assertEquals("O número de fibonacci posição 6 é 8", task.getResult());
 
+        Debugger.debug("no testes o tamanho de getTask eh " + devViewer.getTasks().size());
+
         /* Sending task to multicore host.
          * Given that any File sent as argument for a task will
          * be write by a CollAHost, the JCLHost MUST be started
@@ -109,27 +111,22 @@ public class DeveloperViewerTaskTests {
          */
         devViewer.getAvailableHostsOnServer(taskFile, attaches, args, classToExecute, methodToExecute, groupName, null, true);
 
-        while (devViewer.getTasks().size() == 1) {
-            Debugger.debug("waiting task");
-            try {
-                //wait until it has a result from a host (30 seconds)
-                Thread.sleep(10000);
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+
+        Debugger.debug("waiting distributed task for 30 seconds");
+        try {
+            //wait until it has a result from a host (30 seconds)
+            Thread.sleep(30000);
+        } catch (InterruptedException ex) {
+            Exceptions.printStackTrace(ex);
         }
+
 
         task = devViewer.getTaskResult(groupName, "[2]testes.jar");
         assertNotNull(task);
         assertEquals("O número de fibonacci posição 6 é 8", task.getResult());
 
         devViewer.shutdown();
-    }
-
-    @Test
-    public void testChat() {
-        //@todo implementar
-    }
+    }  
 
     private static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {

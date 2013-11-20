@@ -71,8 +71,6 @@ public class DevViewerLoginTest {
                 Exceptions.printStackTrace(ex);
             }
         }
-        
-        //@todo testar join group
 
         /*try login with correct password*/
         DeveloperViewerController devViewer;

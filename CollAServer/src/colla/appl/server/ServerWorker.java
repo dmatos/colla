@@ -263,6 +263,7 @@ public class ServerWorker {
                     JoinAGroupMsg msg = (JoinAGroupMsg) collAMessage;
                     String userName = msg.getSender();
                     String groupName = msg.getGroupName();
+                    Debugger.debug("server: join group request from "+userName);
                     this.requestToJoinGroup(userName, groupName);
                     this.sendGroupUpdateToAdmins(groupName, userName);
                 }//finishes JOIN_A_GROUP
@@ -677,14 +678,14 @@ public class ServerWorker {
             Server server = Server.getInstance();
             CollAGroup groupUpdated = server.getGroup(groupName);
             HashMap<String, CollAUser> adminsMap = new HashMap<>();
-            HashMap<String, CollAUser> membersMap = new HashMap<>();
+            HashMap<String, CollAUser> membersMap = new HashMap<>();            
             for (String adminName : groupUpdated.getAdminsList()) {
                 try {
                     adminsMap.put(adminName, server.getUser(adminName));
                 } catch (NonExistentUser ex) {
                     Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
+            }            
             for (String usrName : groupUpdated.getMembers()) {
                 try {
                     membersMap.put(usrName, server.getUser(usrName));
@@ -694,7 +695,6 @@ public class ServerWorker {
             }
             for (String adminName : adminsMap.keySet()) {
                 CollAUser temp = adminsMap.get(adminName);
-                if (username.equals(temp.getName())) {
                     // se administrador está online
                     if (temp.isOnline()) {
                         // se administrador possui IP válido
@@ -734,15 +734,14 @@ public class ServerWorker {
                             }
                         }// end if
                     }// end if
-                    else if (!temp.isOnline()) {
+                    else if (!temp.isOnline()) {      
                         temp.addGroup(groupName, groupUpdated);
                         try {
                             server.updateUser(temp);
                         } catch (NonExistentUser ex) {
-                            Logger.getLogger(ServerWorker.class.getName()).log(Level.SEVERE, null, ex);
+                           Debugger.debug(ex);
                         }
                     }
-                }// end if
             }// end for
         } catch (ServerInitializationException servEx) {
             Debugger.debug(servEx);
@@ -1280,7 +1279,8 @@ public class ServerWorker {
             input.readObject();
             if (usr.hasValidIP()) {
                 socket.close();
-            }
+            }           
+            
         } catch (Exception io) {
             Debugger.debug("Error while creating new group. Client: " + usr.getName() + "\n"
                     + "Client IP Address: " + usr.getIp(), io);

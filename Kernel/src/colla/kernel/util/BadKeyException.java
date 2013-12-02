@@ -1,1 +1,0 @@
-package colla.kernel.util;public class BadKeyException extends Exception{	private static final long serialVersionUID = -5143257290856459023L;	public BadKeyException( char c )	{		super( "converting '" + c + "' (" +			(new java.lang.Character( c )).toString() + ") to range 0->25" );	}	public BadKeyException( String s )	{		super( s );	}}

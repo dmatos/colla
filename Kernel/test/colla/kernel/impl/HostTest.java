@@ -43,14 +43,11 @@ public class HostTest {
      */
     @Test
     public void testCompareTo() {
-        System.out.println("compareTo");
-        CollAHost host = null;
-        Host instance = new Host();
+        CollAHost host = new Host("host", "127.0.0.1", 8080);
+        Host instance = new Host("host", "127.0.0.1", 8080);
         int expResult = 0;
         int result = instance.compareTo(host);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -58,13 +55,9 @@ public class HostTest {
      */
     @Test
     public void testGetSystemProperties() {
-        System.out.println("getSystemProperties");
         Host instance = new Host();
-        String expResult = "";
         String result = instance.getSystemProperties();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 
     /**
@@ -72,11 +65,11 @@ public class HostTest {
      */
     @Test
     public void testValidateIP() {
-        System.out.println("validateIP");
         Host instance = new Host();
         instance.validateIP();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        boolean result = instance.hasValidIP();
+        boolean expResult = true;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -84,11 +77,11 @@ public class HostTest {
      */
     @Test
     public void testInvalidateIP() {
-        System.out.println("invalidateIP");
         Host instance = new Host();
         instance.invalidateIP();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        boolean result = instance.hasValidIP();
+        boolean expResult = false;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -96,13 +89,10 @@ public class HostTest {
      */
     @Test
     public void testHasValidIP() {
-        System.out.println("hasValidIP");
         Host instance = new Host();
         boolean expResult = false;
         boolean result = instance.hasValidIP();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult, result);       
     }
 
     /**
@@ -110,63 +100,55 @@ public class HostTest {
      */
     @Test
     public void testSetName() {
-        System.out.println("setName");
-        String name = "";
+        String name = "host";
         Host instance = new Host();
         instance.setName(name);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(name, instance.getName());
     }
 
     /**
      * Test of setNameUser method, of class Host.
      */
     @Test
-    public void testSetNameUser() {
-        System.out.println("setNameUser");
-        String nameUser = "";
+    public void testSetNameUser() {       
+        String nameUser = "owner";
         Host instance = new Host();
         instance.setNameUser(nameUser);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(nameUser, instance.getNameUser());
     }
 
     /**
      * Test of setIp method, of class Host.
      */
     @Test
-    public void testSetIp() {
-        System.out.println("setIp");
-        String ip = "";
+    public void testSetIp() {       
+        String ip = "122.0.0.1";
         Host instance = new Host();
         instance.setIp(ip);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(ip, instance.getIp());
     }
 
     /**
      * Test of setPort method, of class Host.
      */
     @Test
-    public void testSetPort() {
-        System.out.println("setPort");
-        int port = 0;
+    public void testSetPort() {        
+        int port = 8080;
         Host instance = new Host();
         instance.setPort(port);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(port, instance.getPort());
     }
 
     /**
      * Test of setOnline method, of class Host.
      */
     @Test
-    public void testSetOnline() {
-        System.out.println("setOnline");
+    public void testSetOnline() {        
         Host instance = new Host();
         instance.setOnline();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        boolean expResult = true;
+        boolean result = instance.IsOnline();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -174,11 +156,11 @@ public class HostTest {
      */
     @Test
     public void testSetOffline() {
-        System.out.println("setOffline");
-        Host instance = new Host();
+         Host instance = new Host();
         instance.setOffline();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        boolean expResult = false;
+        boolean result = instance.IsOnline();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -186,13 +168,10 @@ public class HostTest {
      */
     @Test
     public void testIsOnline() {
-        System.out.println("IsOnline");
         Host instance = new Host();
         boolean expResult = false;
         boolean result = instance.IsOnline();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -200,13 +179,10 @@ public class HostTest {
      */
     @Test
     public void testGetName() {
-        System.out.println("getName");
         Host instance = new Host();
         String expResult = "";
         String result = instance.getName();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -214,13 +190,10 @@ public class HostTest {
      */
     @Test
     public void testGetNameUser() {
-        System.out.println("getNameUser");
         Host instance = new Host();
         String expResult = "";
         String result = instance.getNameUser();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -228,13 +201,10 @@ public class HostTest {
      */
     @Test
     public void testGetIp() {
-        System.out.println("getIp");
         Host instance = new Host();
         String expResult = "";
         String result = instance.getIp();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -242,13 +212,10 @@ public class HostTest {
      */
     @Test
     public void testGetPort() {
-        System.out.println("getPort");
         Host instance = new Host();
-        int expResult = 0;
+        int expResult = -1;
         int result = instance.getPort();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -256,11 +223,10 @@ public class HostTest {
      */
     @Test
     public void testSetInicioConexao() {
-        System.out.println("setInicioConexao");
         Host instance = new Host();
         instance.setInicioConexao();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getTempoTotalConexao();
+        assertNotNull(result);
     }
 
     /**
@@ -268,13 +234,10 @@ public class HostTest {
      */
     @Test
     public void testGetTempoTotalConexao() {
-        System.out.println("getTempoTotalConexao");
         Host instance = new Host();
-        String expResult = "";
+        instance.setInicioConexao();
         String result = instance.getTempoTotalConexao();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 
     /**
@@ -282,13 +245,10 @@ public class HostTest {
      */
     @Test
     public void testRecordActivities() {
-        System.out.println("recordActivities");
         String date = "";
         String activity = "";
         Host instance = new Host();
         instance.recordActivities(date, activity);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -296,12 +256,9 @@ public class HostTest {
      */
     @Test
     public void testSetActivities() {
-        System.out.println("setActivities");
         HashMap<String, String> map = null;
         Host instance = new Host();
         instance.setActivities(map);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -309,13 +266,10 @@ public class HostTest {
      */
     @Test
     public void testGetActivities() {
-        System.out.println("getActivities");
         Host instance = new Host();
-        HashMap expResult = null;
+        HashMap expResult = new HashMap();
         HashMap result = instance.getActivities();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -324,11 +278,11 @@ public class HostTest {
     @Test
     public void testSetCountry() {
         System.out.println("setCountry");
-        String cntry = "";
+        String cntry = "test";
         Host instance = new Host();
         instance.setCountry(cntry);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getCountry();
+        assertEquals(cntry, result);
     }
 
     /**
@@ -336,13 +290,10 @@ public class HostTest {
      */
     @Test
     public void testGetCountry() {
-        System.out.println("getCountry");
         Host instance = new Host();
         String expResult = "";
         String result = instance.getCountry();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -350,12 +301,8 @@ public class HostTest {
      */
     @Test
     public void testToString() {
-        System.out.println("toString");
         Host instance = new Host();
-        String expResult = "";
         String result = instance.toString();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 }

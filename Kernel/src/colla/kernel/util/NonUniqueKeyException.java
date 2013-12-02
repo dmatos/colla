@@ -1,1 +1,0 @@
-package colla.kernel.util;public class NonUniqueKeyException extends Exception{	/**	 * 	 */	private static final long serialVersionUID = -6733844194302779371L;	String key;	public NonUniqueKeyException( String s )	{		super( "attempting to insert '" + s + "'" );		key = s;	}	public String getKey()	{		return( key );	}}

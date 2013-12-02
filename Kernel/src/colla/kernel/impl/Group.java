@@ -25,6 +25,8 @@ public class Group implements Serializable, Comparable<CollAGroup>, CollAGroup{
 
     @Override
     public int compareTo( CollAGroup group ){
+        if(group == null)
+            return -1;
         if( this.name.equals( group.getName() ) ){
             return 0;
         }else if( this.getName().compareTo( group.getName() ) > 0 ){

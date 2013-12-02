@@ -182,7 +182,7 @@
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.SOFT_GREEN.getPath())"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.SOFT_GREEN.getPath())"/>
           </AuxValues>
 
           <Layout>
@@ -440,7 +440,7 @@
               <SubComponents>
                 <Container class="javax.swing.JPanel" name="jPanel6">
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.SOFT_GREEN.getPath())"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.SOFT_GREEN.getPath())"/>
                   </AuxValues>
 
                   <Layout>
@@ -999,14 +999,14 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="colla.kernel.util.ImagePane" name="imagePane1">
+        <Container class="colla.kernel.util.ImagePanel" name="imagePane1">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="a3" green="d5" red="a5" type="rgb"/>
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.RADIAL_GREEN.getPath())"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.RADIAL_GREEN.getPath())"/>
           </AuxValues>
 
           <Layout>
@@ -1087,14 +1087,14 @@
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
               <SubComponents>
-                <Container class="colla.kernel.util.ImagePane" name="imagePane2">
+                <Container class="colla.kernel.util.ImagePanel" name="imagePane2">
                   <Properties>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                       <Color blue="a2" green="e6" red="a5" type="rgb"/>
                     </Property>
                   </Properties>
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath())"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath())"/>
                   </AuxValues>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -1311,9 +1311,9 @@
                     </Component>
                   </SubComponents>
                 </Container>
-                <Container class="colla.kernel.util.ImagePane" name="imagePane3">
+                <Container class="colla.kernel.util.ImagePanel" name="imagePane3">
                   <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath())"/>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath())"/>
                   </AuxValues>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -1510,7 +1510,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="colla.kernel.util.ImagePane" name="imagePane4">
+        <Container class="colla.kernel.util.ImagePanel" name="imagePane4">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="63" green="fe" red="63" type="rgb"/>
@@ -1520,7 +1520,7 @@
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
           </AuxValues>
 
           <Layout>
@@ -2106,7 +2106,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.INVERSE_DENSE_GREEN.getPath())"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.INVERSE_DENSE_GREEN.getPath())"/>
               </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
@@ -2202,7 +2202,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.DENSE_GREEN.getPath())"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.DENSE_GREEN.getPath())"/>
               </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">

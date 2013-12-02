@@ -48,7 +48,10 @@ public class Task implements CollATask, Serializable {
     public Task() {
         this.methodToExecute = "";
         this.name = "";
+        this.owner = "";
+        this.group = "";
         this.task = null;
+        this.distributedTask = false;
         this.classToExecute = "";
         this.dependencies = new HashMap<String, byte[]>();
         this.parameters = new ArrayList<byte[]>();
@@ -168,7 +171,7 @@ public class Task implements CollATask, Serializable {
     }
 
     @Override
-    public void setResult(JCL_result jclr) throws Exception {
+    public void setResult(JCL_result jclr) throws FileNotFoundException, IOException{
         if (jclr == null) {
             result = "could not execute task";
         } else if (jclr.getErrorResult() == null) {
@@ -229,7 +232,7 @@ public class Task implements CollATask, Serializable {
     }
 
     @Override
-    public void addArgument(File file) throws Exception {
+    public void addArgument(File file) throws FileNotFoundException, IOException{
         FileInputStream fiin = new FileInputStream(file);
         DataInputStream diin = new DataInputStream(fiin);
         byte fileBuffer[] = new byte[(int) file.length()];

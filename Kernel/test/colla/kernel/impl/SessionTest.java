@@ -42,12 +42,16 @@ public class SessionTest {
      */
     @Test
     public void testAddJob() {
-        System.out.println("addJob");
-        CollAJob job = null;
+        CollAJob job = new JobChat();
         Session instance = new Session();
         instance.addJob(job);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        CollAJob[] jobs = instance.getJobs();
+        int result = 0;
+        for(CollAJob temp : jobs)            
+            if(temp != null)
+                result++;        
+        int expResult = 1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -55,13 +59,23 @@ public class SessionTest {
      */
     @Test
     public void testGetJobs() {
-        System.out.println("getJobs");
+       CollAJob job = new JobChat();
         Session instance = new Session();
-        CollAJob[] expResult = null;
-        CollAJob[] result = instance.getJobs();
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        CollAJob[] jobs = instance.getJobs();
+        int result = 0;
+        for(CollAJob temp : jobs)
+            if(temp != null)
+                result++;        
+        int expResult = 0;
+        assertEquals(expResult, result);
+        instance.addJob(job);
+        jobs = instance.getJobs();
+        result = 0;
+        for(CollAJob temp : jobs)
+            if(temp != null)
+                result++;        
+        expResult = 1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -69,12 +83,11 @@ public class SessionTest {
      */
     @Test
     public void testSetSessionID() {
-        System.out.println("setSessionID");
         long id = 0L;
         Session instance = new Session();
         instance.setSessionID(id);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        long result = instance.getSessionID();
+        assertEquals(id, result);
     }
 
     /**
@@ -82,13 +95,11 @@ public class SessionTest {
      */
     @Test
     public void testGetSessionID() {
-        System.out.println("getSessionID");
+        long id = 0L;
         Session instance = new Session();
-        long expResult = 0L;
+        instance.setSessionID(id);
         long result = instance.getSessionID();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(id, result);
     }
 
     /**
@@ -98,10 +109,7 @@ public class SessionTest {
     public void testGetSessionDateAndTime() {
         System.out.println("getSessionDateAndTime");
         Session instance = new Session();
-        String expResult = "";
         String result = instance.getSessionDateAndTime();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 }

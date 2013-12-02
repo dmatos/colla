@@ -41,11 +41,8 @@ public class JobChatTest {
      */
     @Test
     public void testSetJobName() {
-        System.out.println("setJobName");
         JobChat instance = new JobChat();
         instance.setJobName();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -53,13 +50,10 @@ public class JobChatTest {
      */
     @Test
     public void testGetJobName() {
-        System.out.println("getJobName");
         JobChat instance = new JobChat();
-        String expResult = "";
+        String expResult = "Chat";
         String result = instance.getJobName();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -67,12 +61,8 @@ public class JobChatTest {
      */
     @Test
     public void testGetJobDateAndTime() {
-        System.out.println("getJobDateAndTime");
         JobChat instance = new JobChat();
-        String expResult = "";
         String result = instance.getJobDateAndTime();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 }

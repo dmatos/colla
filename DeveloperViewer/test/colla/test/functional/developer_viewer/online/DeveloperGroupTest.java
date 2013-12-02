@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.test.functional.developer_viewer.standalone;
+package colla.test.functional.developer_viewer.online;
 
 import colla.appl.developer_viewer.DevViewerLogin;
 import colla.appl.developer_viewer.DeveloperViewerController;
@@ -204,16 +204,7 @@ public class DeveloperGroupTest {
 
     @BeforeClass
     public static void setUpClass() {
-        Debugger.setDebugger(true);
-        try {
-            /* at this point all server data should have been wiped out.*/
-            deleteDir(new File("data/"));
-            collaServer = Server.setupServer(9999, 40000);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        Thread thr = new Thread(collaServer);
-        thr.start();
+        Debugger.setDebugger(true);        
     }
 
     @AfterClass

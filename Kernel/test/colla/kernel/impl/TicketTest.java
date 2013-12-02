@@ -41,12 +41,11 @@ public class TicketTest {
      */
     @Test
     public void testSetTicket() {
-        System.out.println("setTicket");
-        Integer ticket = null;
+        int ticket = 123;
         Ticket instance = new Ticket();
         instance.setTicket(ticket);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        int result = instance.getTicket();
+        assertEquals(ticket, result);
     }
 
     /**
@@ -54,13 +53,10 @@ public class TicketTest {
      */
     @Test
     public void testGetTicket() {
-        System.out.println("getTicket");
         Ticket instance = new Ticket();
-        Integer expResult = null;
+        Integer expResult = -1;
         Integer result = instance.getTicket();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -68,12 +64,11 @@ public class TicketTest {
      */
     @Test
     public void testSetHostPort() {
-        System.out.println("setHostPort");
-        Integer port = null;
+        int port = 8080;
         Ticket instance = new Ticket();
         instance.setHostPort(port);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        int result = instance.getHostPort();
+        assertEquals(port, result);
     }
 
     /**
@@ -81,13 +76,10 @@ public class TicketTest {
      */
     @Test
     public void testGetHostPort() {
-        System.out.println("getHostPort");
         Ticket instance = new Ticket();
-        Integer expResult = null;
+        Integer expResult = -1;
         Integer result = instance.getHostPort();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -95,12 +87,11 @@ public class TicketTest {
      */
     @Test
     public void testSetHostIPaddress() {
-        System.out.println("setHostIPaddress");
-        String ipAddress = "";
+        String ipAddress = "127.0.0.1";
         Ticket instance = new Ticket();
         instance.setHostIPaddress(ipAddress);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getHostIPAddress();
+        assertEquals(ipAddress, result);
     }
 
     /**
@@ -108,12 +99,9 @@ public class TicketTest {
      */
     @Test
     public void testGetHostIPAddress() {
-        System.out.println("getHostIPAddress");
         Ticket instance = new Ticket();
         String expResult = "";
         String result = instance.getHostIPAddress();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 }

@@ -72,7 +72,7 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
         this.port = port;
     }
     
-    public final void initializeUser(){
+    private final void initializeUser(){
         this.name = "";
         this.ip = "127.0.0.1";
         this.port = 0;
@@ -83,6 +83,7 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
         this.validIP = false;
         this.email = "";
         this.country = "";
+        this.company = "";
         this.activities = new HashMap<String, String>();
         this.sessions = new HashMap<String, CollASession>();
         this.orderedSessions = new ArrayList<String>();

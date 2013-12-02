@@ -5,6 +5,7 @@
 package colla.kernel.impl;
 
 import colla.kernel.api.CollAGroup;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,22 +19,22 @@ import static org.junit.Assert.*;
  * @author dmatos
  */
 public class GroupTest {
-    
+
     public GroupTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -43,14 +44,15 @@ public class GroupTest {
      */
     @Test
     public void testCompareTo() {
-        System.out.println("compareTo");
         CollAGroup group = null;
-        Group instance = null;
+        Group instanceA = new Group("A");
+        Group instanceB = new Group("A");
         int expResult = 0;
-        int result = instance.compareTo(group);
+        int result = instanceA.compareTo(instanceB);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        result = instanceA.compareTo(group);
+        expResult = -1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -58,13 +60,10 @@ public class GroupTest {
      */
     @Test
     public void testGetName() {
-        System.out.println("getName");
-        Group instance = null;
-        String expResult = "";
+        Group instance = new Group("A");
+        String expResult = "A";
         String result = instance.getName();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -72,12 +71,10 @@ public class GroupTest {
      */
     @Test
     public void testSetName() {
-        System.out.println("setName");
-        String name = "";
-        Group instance = null;
+        String name = "B";
+        Group instance = new Group("A");
         instance.setName(name);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(name, instance.getName());
     }
 
     /**
@@ -85,14 +82,16 @@ public class GroupTest {
      */
     @Test
     public void testAddMember() {
-        System.out.println("addMember");
-        String memberName = "";
-        Group instance = null;
-        boolean expResult = false;
+        String memberName = "member";
+        Group instance = new Group("A");
+        boolean expResult = true;
+        //add member once = true;
         boolean result = instance.addMember(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = false;
+        //add member twice = false
+        result = instance.addMember(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -100,14 +99,17 @@ public class GroupTest {
      */
     @Test
     public void testRemoveMember() {
-        System.out.println("removeMember");
-        String memberName = "";
-        Group instance = null;
+        String memberName = "member";
+        Group instance = new Group("A");
         boolean expResult = false;
         boolean result = instance.removeMember(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = true;
+        result = instance.addMember(memberName);
+        assertEquals(expResult, result);
+        expResult = true;
+        result = instance.removeMember(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -115,14 +117,14 @@ public class GroupTest {
      */
     @Test
     public void testAddMemberToWaitingList() {
-        System.out.println("addMemberToWaitingList");
-        String memberName = "";
-        Group instance = null;
-        boolean expResult = false;
+        String memberName = "member";
+        Group instance = new Group("A");
+        boolean expResult = true;
         boolean result = instance.addMemberToWaitingList(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = false;
+        result = instance.addMemberToWaitingList(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -130,14 +132,17 @@ public class GroupTest {
      */
     @Test
     public void testRemMemberFromWaitingList() {
-        System.out.println("remMemberFromWaitingList");
-        String memberName = "";
-        Group instance = null;
-        boolean expResult = false;
-        boolean result = instance.remMemberFromWaitingList(memberName);
+        String memberName = "member";
+        Group instance = new Group("A");
+        boolean expResult = true;
+        boolean result = instance.addMemberToWaitingList(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = true;
+        result = instance.remMemberFromWaitingList(memberName);
+        assertEquals(expResult, result);
+        expResult = false;
+        result = instance.remMemberFromWaitingList(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -145,14 +150,14 @@ public class GroupTest {
      */
     @Test
     public void testAddMemberToBlockedList() {
-        System.out.println("addMemberToBlockedList");
-        String memberName = "";
-        Group instance = null;
-        boolean expResult = false;
+        String memberName = "member";
+        Group instance = new Group("A");
+        boolean expResult = true;
         boolean result = instance.addMemberToBlockedList(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = false;
+        result = instance.addMemberToBlockedList(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -160,14 +165,17 @@ public class GroupTest {
      */
     @Test
     public void testRemMemberFromBlockedList() {
-        System.out.println("remMemberFromBlockedList");
-        String memberName = "";
-        Group instance = null;
+        String memberName = "member";
+        Group instance = new Group("A");
         boolean expResult = false;
         boolean result = instance.remMemberFromBlockedList(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = true;
+        result = instance.addMemberToBlockedList(memberName);
+        assertEquals(expResult, result);
+        expResult = true;
+        result = instance.remMemberFromBlockedList(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -175,14 +183,14 @@ public class GroupTest {
      */
     @Test
     public void testAddAdmin() {
-        System.out.println("addAdmin");
-        String memberName = "";
-        Group instance = null;
-        boolean expResult = false;
+        String memberName = "admin";
+        Group instance = new Group("A");
+        boolean expResult = true;
         boolean result = instance.addAdmin(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = false;
+        result = instance.addAdmin(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -190,14 +198,17 @@ public class GroupTest {
      */
     @Test
     public void testRemoveAdmin() {
-        System.out.println("removeAdmin");
-        String memberName = "";
-        Group instance = null;
+        String memberName = "admin";
+        Group instance = new Group("A");
         boolean expResult = false;
         boolean result = instance.removeAdmin(memberName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        expResult = true;
+        result = instance.addAdmin(memberName);
+        assertEquals(expResult, result);
+        expResult = true;
+        result = instance.removeAdmin(memberName);
+        assertEquals(expResult, result);
     }
 
     /**
@@ -205,13 +216,10 @@ public class GroupTest {
      */
     @Test
     public void testGetMembers() {
-        System.out.println("getMembers");
-        Group instance = null;
-        List expResult = null;
+        Group instance = new Group("A");
+        List expResult = new ArrayList();
         List result = instance.getMembers();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -219,13 +227,10 @@ public class GroupTest {
      */
     @Test
     public void testGetWaitingList() {
-        System.out.println("getWaitingList");
-        Group instance = null;
-        List expResult = null;
+        Group instance = new Group("A");
+        List expResult = new ArrayList();
         List result = instance.getWaitingList();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -233,13 +238,10 @@ public class GroupTest {
      */
     @Test
     public void testGetBlockedList() {
-        System.out.println("getBlockedList");
-        Group instance = null;
-        List expResult = null;
+        Group instance = new Group("A");
+        List expResult = new ArrayList();
         List result = instance.getBlockedList();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -247,12 +249,9 @@ public class GroupTest {
      */
     @Test
     public void testGetAdminsList() {
-        System.out.println("getAdminsList");
-        Group instance = null;
-        List expResult = null;
+        Group instance = new Group("A");
+        List expResult = new ArrayList();
         List result = instance.getAdminsList();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 }

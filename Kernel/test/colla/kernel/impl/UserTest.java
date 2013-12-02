@@ -9,9 +9,11 @@ import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAJob;
 import colla.kernel.api.CollASession;
 import colla.kernel.api.CollAUser;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,40 +51,22 @@ public class UserTest {
      */
     @Test
     public void testCompareTo() {
-        System.out.println("compareTo");
-        CollAUser user = null;
-        User instance = new User();
+        CollAUser user = new User();
+        User instance = new User();                
         int expResult = 0;
         int result = instance.compareTo(user);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of initializeUser method, of class User.
-     */
-    @Test
-    public void testInitializeUser() {
-        System.out.println("initializeUser");
-        User instance = new User();
-        instance.initializeUser();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+        assertEquals(expResult, result);       
+    }  
 
     /**
      * Test of getHosts method, of class User.
      */
     @Test
     public void testGetHosts() {
-        System.out.println("getHosts");
         User instance = new User();
-        Set expResult = null;
+        Set expResult = new TreeSet();
         Set result = instance.getHosts();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -90,12 +74,13 @@ public class UserTest {
      */
     @Test
     public void testAddHost() {
-        System.out.println("addHost");
-        CollAHost host = null;
+        CollAHost host = new Host();
         User instance = new User();
         instance.addHost(host);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        int expResult = 1;
+        Set hosts = instance.getHosts();
+        int result = hosts.size();
+        assertEquals(expResult, result);
     }
 
     /**
@@ -103,14 +88,11 @@ public class UserTest {
      */
     @Test
     public void testGetHost() {
-        System.out.println("getHost");
-        String hostName = "";
+        String hostName = "host";
         User instance = new User();
         CollAHost expResult = null;
         CollAHost result = instance.getHost(hostName);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -118,11 +100,9 @@ public class UserTest {
      */
     @Test
     public void testValidateIP() {
-        System.out.println("validateIP");
         User instance = new User();
         instance.validateIP();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(instance.hasValidIP());
     }
 
     /**
@@ -130,11 +110,9 @@ public class UserTest {
      */
     @Test
     public void testInvalidateIP() {
-        System.out.println("invalidateIP");
         User instance = new User();
         instance.invalidateIP();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse(instance.hasValidIP());
     }
 
     /**
@@ -142,13 +120,10 @@ public class UserTest {
      */
     @Test
     public void testHasValidIP() {
-        System.out.println("hasValidIP");
         User instance = new User();
         boolean expResult = false;
         boolean result = instance.hasValidIP();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -156,12 +131,11 @@ public class UserTest {
      */
     @Test
     public void testSetName() {
-        System.out.println("setName");
-        String name = "";
+        String name = "username";
         User instance = new User();
         instance.setName(name);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getName();
+        assertEquals(name, result);
     }
 
     /**
@@ -169,25 +143,23 @@ public class UserTest {
      */
     @Test
     public void testSetIp() {
-        System.out.println("setIp");
-        String ip = "";
+        String ip = "127.0.0.1";
         User instance = new User();
         instance.setIp(ip);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getIp();
+        assertEquals(ip, result);
     }
 
     /**
      * Test of setPort method, of class User.
      */
     @Test
-    public void testSetPort() {
-        System.out.println("setPort");
-        int port = 0;
+    public void testSetPort() {        
+        int port = 8080;
         User instance = new User();
         instance.setPort(port);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        int result = instance.getPort();
+        assertEquals(port, result);
     }
 
     /**
@@ -195,11 +167,9 @@ public class UserTest {
      */
     @Test
     public void testSetOnline() {
-        System.out.println("setOnline");
         User instance = new User();
         instance.setOnline();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(instance.isOnline());
     }
 
     /**
@@ -207,11 +177,9 @@ public class UserTest {
      */
     @Test
     public void testSetOffline() {
-        System.out.println("setOffline");
         User instance = new User();
         instance.setOffline();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse(instance.isOnline());
     }
 
     /**
@@ -219,13 +187,10 @@ public class UserTest {
      */
     @Test
     public void testIsOnline() {
-        System.out.println("isOnline");
         User instance = new User();
         boolean expResult = false;
         boolean result = instance.isOnline();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -233,13 +198,10 @@ public class UserTest {
      */
     @Test
     public void testGetName() {
-        System.out.println("getName");
         User instance = new User();
         String expResult = "";
         String result = instance.getName();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -247,13 +209,10 @@ public class UserTest {
      */
     @Test
     public void testGetIp() {
-        System.out.println("getIp");
         User instance = new User();
-        String expResult = "";
+        String expResult = "127.0.0.1";
         String result = instance.getIp();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -261,13 +220,10 @@ public class UserTest {
      */
     @Test
     public void testGetPort() {
-        System.out.println("getPort");
         User instance = new User();
         int expResult = 0;
         int result = instance.getPort();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -275,11 +231,9 @@ public class UserTest {
      */
     @Test
     public void testSetConnectionInitialized() {
-        System.out.println("setConnectionInitialized");
         User instance = new User();
         instance.setConnectionInitialized();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(instance.getConnectionTotalTime());
     }
 
     /**
@@ -287,13 +241,10 @@ public class UserTest {
      */
     @Test
     public void testGetConnectionTotalTime() {
-        System.out.println("getConnectionTotalTime");
         User instance = new User();
-        String expResult = "";
+        String expResult = "not finished";
         String result = instance.getConnectionTotalTime();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -301,13 +252,14 @@ public class UserTest {
      */
     @Test
     public void testAddGroup() {
-        System.out.println("addGroup");
         String groupName = "";
-        CollAGroup group = null;
+        CollAGroup group = new Group("group");
         User instance = new User();
         instance.addGroup(groupName, group);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        HashMap groups = instance.getGroups();
+        int result = groups.size();
+        int expResult = 1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -315,13 +267,10 @@ public class UserTest {
      */
     @Test
     public void testGetGroups() {
-        System.out.println("getGroups");
         User instance = new User();
-        HashMap expResult = null;
+        HashMap expResult = new HashMap();
         HashMap result = instance.getGroups();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -329,13 +278,14 @@ public class UserTest {
      */
     @Test
     public void testRecordActivities() {
-        System.out.println("recordActivities");
         String date = "";
         String activity = "";
         User instance = new User();
         instance.recordActivities(date, activity);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        HashMap activities = instance.getActivities();
+        int result = activities.size();
+        int expResult = 1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -343,12 +293,11 @@ public class UserTest {
      */
     @Test
     public void testSetActivities() {
-        System.out.println("setActivities");
-        HashMap<String, String> map = null;
+        HashMap<String, String> map = new HashMap<String, String>();
         User instance = new User();
-        instance.setActivities(map);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        instance.setActivities(map);     
+        HashMap result = instance.getActivities();
+        assertEquals(map.size(), result.size());
     }
 
     /**
@@ -356,13 +305,10 @@ public class UserTest {
      */
     @Test
     public void testGetActivities() {
-        System.out.println("getActivities");
         User instance = new User();
-        HashMap expResult = null;
+        HashMap expResult = new HashMap();
         HashMap result = instance.getActivities();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -370,12 +316,11 @@ public class UserTest {
      */
     @Test
     public void testSetCountry() {
-        System.out.println("setCountry");
-        String cntry = "";
+        String cntry = "country";
         User instance = new User();
         instance.setCountry(cntry);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getCountry();
+        assertEquals(cntry, result);
     }
 
     /**
@@ -383,13 +328,10 @@ public class UserTest {
      */
     @Test
     public void testGetCountry() {
-        System.out.println("getCountry");
         User instance = new User();
         String expResult = "";
         String result = instance.getCountry();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -397,12 +339,11 @@ public class UserTest {
      */
     @Test
     public void testSetEmail() {
-        System.out.println("setEmail");
-        String mail = "";
+        String mail = "email";
         User instance = new User();
         instance.setEmail(mail);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getEmail();
+        assertEquals(mail, result);
     }
 
     /**
@@ -410,13 +351,10 @@ public class UserTest {
      */
     @Test
     public void testGetEmail() {
-        System.out.println("getEmail");
         User instance = new User();
         String expResult = "";
         String result = instance.getEmail();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -424,12 +362,13 @@ public class UserTest {
      */
     @Test
     public void testAddSession() {
-        System.out.println("addSession");
-        CollASession ses = null;
+        CollASession ses = new Session();
         User instance = new User();
         instance.addSession(ses);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        HashMap sessions = instance.getSessions();
+        int result = sessions.size();
+        int expResult = 1;
+        assertEquals(expResult, result);
     }
 
     /**
@@ -437,13 +376,10 @@ public class UserTest {
      */
     @Test
     public void testGetSessions() {
-        System.out.println("getSessions");
         User instance = new User();
-        HashMap expResult = null;
+        HashMap expResult = new HashMap();
         HashMap result = instance.getSessions();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(expResult.size(), result.size());
     }
 
     /**
@@ -451,13 +387,9 @@ public class UserTest {
      */
     @Test
     public void testGetLastSession() {
-        System.out.println("getLastSession");
         User instance = new User();
-        Session expResult = null;
         Session result = instance.getLastSession();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
     }
 
     /**
@@ -465,12 +397,9 @@ public class UserTest {
      */
     @Test
     public void testAddJob() {
-        System.out.println("addJob");
-        CollAJob job = null;
+        CollAJob job = new JobChat();
         User instance = new User();
         instance.addJob(job);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -478,13 +407,10 @@ public class UserTest {
      */
     @Test
     public void testGetOrderedSessions() {
-        System.out.println("getOrderedSessions");
         User instance = new User();
-        List expResult = null;
+        List expResult = new ArrayList();
         List result = instance.getOrderedSessions();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -492,12 +418,11 @@ public class UserTest {
      */
     @Test
     public void testSetCompany() {
-        System.out.println("setCompany");
         String company = "";
         User instance = new User();
         instance.setCompany(company);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String result = instance.getCompany();
+        assertEquals(company, result);
     }
 
     /**
@@ -505,12 +430,9 @@ public class UserTest {
      */
     @Test
     public void testGetCompany() {
-        System.out.println("getCompany");
         User instance = new User();
         String expResult = "";
         String result = instance.getCompany();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 }

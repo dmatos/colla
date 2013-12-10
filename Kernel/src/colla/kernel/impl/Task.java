@@ -173,7 +173,7 @@ public class Task implements CollATask, Serializable {
     @Override
     public void setResult(JCL_result jclr) throws FileNotFoundException, IOException{
         if (jclr == null) {
-            result = "could not execute task";
+            result = " Fail: could not execute task";
         } else if (jclr.getErrorResult() == null) {
             this.result = jclr.getCorrectResult();
             if (this.result instanceof File) {
@@ -300,7 +300,7 @@ public class Task implements CollATask, Serializable {
     }
 
     @Override
-    public void clean() {
+    public void clear() {
         this.classToExecute = null;
         for (String name : this.dependencies.keySet()) {
             @SuppressWarnings("unused")

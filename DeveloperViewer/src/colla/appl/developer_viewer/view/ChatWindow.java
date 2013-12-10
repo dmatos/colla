@@ -78,9 +78,9 @@ public class ChatWindow extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new colla.kernel.util.ImagePane(BackGround.INVERSE_DENSE_GREEN.getPath());
+        jPanel1 = new colla.kernel.util.ImagePanel(BackGround.INVERSE_DENSE_GREEN.getPath());
         jTabbedPane_conversations = TabbedPaneFactory.createCloseButtonTabbedPane();
-        jPanel2 = new colla.kernel.util.ImagePane(BackGround.DENSE_GREEN.getPath());
+        jPanel2 = new colla.kernel.util.ImagePanel(BackGround.DENSE_GREEN.getPath());
         jButton_cleanInput = new javax.swing.JButton();
         jButton_submit = new javax.swing.JButton();
         jCheckBox_submitWithEnter = new javax.swing.JCheckBox();

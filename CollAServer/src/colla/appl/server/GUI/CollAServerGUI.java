@@ -122,14 +122,14 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
     private void initComponents() {
 
         jTabbedPane_server = new javax.swing.JTabbedPane();
-        jPanel_serverStatus = new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
+        jPanel_serverStatus = new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextPane_serverStatus = new javax.swing.JTextPane();
         jSplitPane4 = new javax.swing.JSplitPane();
         jSplitPane5 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
-        jPanel_userStatus = new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath());
+        jPanel_userStatus = new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath());
         jTextField_nome = new javax.swing.JTextField();
         jTextField_isOnline = new javax.swing.JTextField();
         jTextField_group = new javax.swing.JTextField();
@@ -141,7 +141,7 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
         jTextField_clientCompany = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTree_clients = new javax.swing.JTree();
-        jPanel3 = new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
+        jPanel3 = new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
         jComboBox_activitiesList = new javax.swing.JComboBox();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTextArea_activities = new javax.swing.JTextArea();

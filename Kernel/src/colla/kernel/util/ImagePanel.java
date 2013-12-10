@@ -15,16 +15,16 @@ import javax.swing.JPanel;
  *
  * @author dmatos
  */
-public class ImagePane extends JPanel{
+public class ImagePanel extends JPanel{
     
 	private static final long serialVersionUID = 1L;
 	private Image image;
     
-    public ImagePane(){
+    public ImagePanel(){
         this.image = null;
     }
     
-    public ImagePane(String imageSource){
+    public ImagePanel(String imageSource){
         ImageIcon temp = new ImageIcon(getClass().getResource(imageSource));
         image = temp.getImage();
     }

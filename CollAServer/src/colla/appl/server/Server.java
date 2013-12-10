@@ -104,10 +104,8 @@ public class Server extends Observable implements CollAServer, Runnable {
     public void run() {
         ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor(
                 this);
-        Long monitorDelayAndPeriod = new Long(300000); // start in 5 minutes
-        // (delay) and repeat
-        // each 5 minutes
-        // (period)
+        /* start in 5 minutes (delay) and repeat each 5 minutes (period) */
+        Long monitorDelayAndPeriod = new Long(300000);
         this.checkOnlineUsers.schedule(connMonitor, monitorDelayAndPeriod,
                 monitorDelayAndPeriod);
         this.active = true;
@@ -287,7 +285,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         CollAUser user = this.usersMap.get(host.getNameUser());
         user.addHost(host);
         this.updateUser(user);
-        // send host to its onwer
+        // send host informations to its onwer
         SendOwnedHostsMsg msg = new SendOwnedHostsMsg();
         msg.addHost(host);
         if (user.isOnline()) {
@@ -365,7 +363,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.userPasswords.put(userName, password);
         try {
             this.storeClientsData();
-        } catch (Exception e) {            
+        } catch (Exception e) {
             Debugger.debug(e);
         }
     }

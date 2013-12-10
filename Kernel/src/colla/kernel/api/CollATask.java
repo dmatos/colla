@@ -227,6 +227,11 @@ public interface CollATask {
     /**
      * Destructor
      */
-    public void clean();
+    public void clear();
     
+    /**
+     * 
+     * @return name of the group from which the task has been sent
+     */
+    public String getGroup();
 }

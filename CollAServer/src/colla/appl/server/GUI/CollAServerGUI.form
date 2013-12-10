@@ -61,7 +61,7 @@
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
@@ -189,7 +189,7 @@
                             </Property>
                           </Properties>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath())"/>
+                            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath())"/>
                           </AuxValues>
 
                           <Layout>
@@ -409,7 +409,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath())"/>
               </AuxValues>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">

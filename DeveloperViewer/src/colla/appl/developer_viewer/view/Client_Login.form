@@ -30,7 +30,7 @@
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.GREEN_SPIRAL.getPath())"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.GREEN_SPIRAL.getPath())"/>
           </AuxValues>
 
           <Layout>
@@ -79,21 +79,21 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" pref="27" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel_signUpWarning" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace pref="12" max="32767" attributes="0"/>
                       <Component id="jTextField_signUpName" linkSize="11" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jPasswordField_signUpPass" linkSize="11" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jPasswordField_signUpRepeatPass" linkSize="11" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jTextField_email" linkSize="11" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jTextField_company" linkSize="11" min="-2" pref="50" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jComboBox_countries" min="-2" pref="65" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jButton_cancel" linkSize="2" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jButton_signUp" linkSize="2" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
@@ -119,7 +119,8 @@
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="0" green="0" id="red" palette="1" red="ff" type="palette"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="*Error"/>
+                <Property name="text" type="java.lang.String" value="-"/>
+                <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jTextField_signUpName">
@@ -412,7 +413,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Verdana" size="15" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Signup"/>
+                <Property name="text" type="java.lang.String" value="Sign up"/>
               </Properties>
               <Events>
                 <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jButton_signUpMouseClicked"/>
@@ -489,7 +490,7 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePane(BackGround.GREEN_SPIRAL.getPath())"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new colla.kernel.util.ImagePanel(BackGround.GREEN_SPIRAL.getPath())"/>
         <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="Cliente_Login_jPanel_fundo"/>
       </AuxValues>
 
@@ -647,7 +648,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Ubuntu" size="18" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Signup"/>
+            <Property name="text" type="java.lang.String" value="Sign up"/>
           </Properties>
           <Events>
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jLabel_signupMouseClicked"/>

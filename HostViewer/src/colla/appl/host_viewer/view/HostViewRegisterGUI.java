@@ -28,7 +28,7 @@ public HostViewRegisterGUI(HostViewerRegister hv){
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new colla.kernel.util.ImagePane("/colla/appl/host_viewer/view/images/login_fundo.jpg");
+        jPanel1 = new colla.kernel.util.ImagePanel("/colla/appl/host_viewer/view/images/login_fundo.jpg");
         jTextFieldUser = new javax.swing.JTextField();
         jPasswordFieldPass = new javax.swing.JPasswordField();
         jButtonRegister = new javax.swing.JButton();

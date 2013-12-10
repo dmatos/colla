@@ -164,8 +164,6 @@ public class DeveloperGroupTest {
 
         devViewer.shutdown();
 
-        //@todo logar userB novamente
-
         /*sign user up for the server*/
         devViewerLogin.setUser(userB);
 

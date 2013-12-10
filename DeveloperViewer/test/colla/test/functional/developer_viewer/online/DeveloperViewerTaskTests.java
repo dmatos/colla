@@ -122,12 +122,7 @@ public class DeveloperViewerTaskTests {
 
         devViewer.shutdown();
     }
-
-    @Test
-    public void testChat() {
-        //@todo implementar
-    }
-
+    
     private static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();

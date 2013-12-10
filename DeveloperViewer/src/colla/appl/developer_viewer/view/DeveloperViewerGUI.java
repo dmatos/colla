@@ -20,7 +20,7 @@ import colla.kernel.api.CollAGroup;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollATask;
 import colla.kernel.api.CollAUser;
-import colla.kernel.util.ImagePane;
+import colla.kernel.util.ImagePanel;
 import colla.kernel.util.TimeAndDate;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -135,10 +135,10 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
             developerGUI = null;
             System.exit(1);
         } catch (DeveloperControllerInitializationException devEx) {
-            JOptionPane.showMessageDialog(null, "Could not initialize DeveloperController.", "Error", JOptionPane.ERROR_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "Could not initialize DeveloperController.", "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
             developerGUI = null;
-            System.exit(1);
+            //System.exit(1);
         }
         developerGUI = null;
         this.dispose();
@@ -297,14 +297,14 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private void initComponents() {
 
         jDialog_creatGroup = new javax.swing.JDialog();
-        jPanel3 = new ImagePane(BackGround.SOFT_GREEN.getPath());
+        jPanel3 = new colla.kernel.util.ImagePanel(BackGround.SOFT_GREEN.getPath());
         jTextField_groupName = new javax.swing.JTextField();
         jButton_createGroup = new javax.swing.JButton();
         jButton_cancelCreateGroup = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLayeredPane1 = new javax.swing.JLayeredPane();
         jDialog_joinGroup = new javax.swing.JDialog();
-        jPanel4 = new colla.kernel.util.ImagePane(BackGround.SOFT_GREEN.getPath());
+        jPanel4 = new colla.kernel.util.ImagePanel(BackGround.SOFT_GREEN.getPath());
         jScrollPane2 = new javax.swing.JScrollPane();
         jList_listJoinGroup = new javax.swing.JList<String>();
         jButton_join = new javax.swing.JButton();
@@ -318,7 +318,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jDialog_sendTask = new javax.swing.JDialog();
         jPanel7 = new javax.swing.JPanel();
         jScrollPane6 = new javax.swing.JScrollPane();
-        jPanel6 = new colla.kernel.util.ImagePane(BackGround.SOFT_GREEN.getPath());
+        jPanel6 = new colla.kernel.util.ImagePanel(BackGround.SOFT_GREEN.getPath());
         jLabelError = new javax.swing.JLabel();
         AddTask = new javax.swing.JButton();
         jTextFieldTask = new javax.swing.JTextField();
@@ -347,10 +347,10 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jRadioButtonMulticore = new javax.swing.JRadioButton();
         jRadioButtonDistributed = new javax.swing.JRadioButton();
         jDialog_manageGroups = new javax.swing.JDialog();
-        imagePane1 = new colla.kernel.util.ImagePane(BackGround.RADIAL_GREEN.getPath());
+        imagePane1 = new colla.kernel.util.ImagePanel(BackGround.RADIAL_GREEN.getPath());
         jComboBox_grpManager = new javax.swing.JComboBox<String>();
         jTabbedPane_manageGroups = new javax.swing.JTabbedPane();
-        imagePane2 = new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath());
+        imagePane2 = new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath());
         jScrollPane7 = new javax.swing.JScrollPane();
         jList_groupRequests = new javax.swing.JList<String>();
         jScrollPane8 = new javax.swing.JScrollPane();
@@ -361,7 +361,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_refuse = new javax.swing.JList<String>();
         jButton_toRefused = new javax.swing.JButton();
         jButton_froRefuse2Wating = new javax.swing.JButton();
-        imagePane3 = new colla.kernel.util.ImagePane(BackGround.SMOOTH_GREEN.getPath());
+        imagePane3 = new colla.kernel.util.ImagePanel(BackGround.SMOOTH_GREEN.getPath());
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane10 = new javax.swing.JScrollPane();
         jTextPane_memberInfo = new javax.swing.JTextPane();
@@ -372,7 +372,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jButton_applyGrpManager = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         jDialog_settings = new javax.swing.JDialog();
-        imagePane4 = new colla.kernel.util.ImagePane(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
+        imagePane4 = new colla.kernel.util.ImagePanel(BackGround.RADIAL_CENTER_SOFTGREEN.getPath());
         jPanel2 = new javax.swing.JPanel();
         jButton_generalSettings = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -394,11 +394,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         buttonGroupHost = new javax.swing.ButtonGroup();
         jSplitPane_desktopAndContacts = new javax.swing.JSplitPane();
         jSplitPane_contactsAndHosts = new javax.swing.JSplitPane();
-        jPanel1 = new colla.kernel.util.ImagePane(BackGround.INVERSE_DENSE_GREEN.getPath());
+        jPanel1 = new colla.kernel.util.ImagePanel(BackGround.INVERSE_DENSE_GREEN.getPath());
         jScrollPane1 = new javax.swing.JScrollPane();
         jList_contacts = new javax.swing.JList<String>();
         jComboBox_groups = new javax.swing.JComboBox<String>();
-        jPanel_myHosts = new colla.kernel.util.ImagePane(BackGround.DENSE_GREEN.getPath());
+        jPanel_myHosts = new colla.kernel.util.ImagePanel(BackGround.DENSE_GREEN.getPath());
         jComboBox_hosts = new javax.swing.JComboBox<String>();
         jScrollPane4 = new javax.swing.JScrollPane();
         jTextArea_hostProp = new javax.swing.JTextArea();
@@ -1510,7 +1510,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1572,6 +1572,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 jMenuItem_quitMouseReleased(evt);
             }
         });
+        jMenuItem_quit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem_quitActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem_quit);
 
         jMenuBar1.add(jMenu1);
@@ -1586,6 +1591,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 jMenuItem_joinGroupMouseReleased(evt);
             }
         });
+        jMenuItem_joinGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem_joinGroupActionPerformed(evt);
+            }
+        });
         jMenu_groups.add(jMenuItem_joinGroup);
 
         jMenuItem_createGroup.setFont(new java.awt.Font("DejaVu Sans", 0, 14)); // NOI18N
@@ -1593,6 +1603,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jMenuItem_createGroup.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 jMenuItem_createGroupMouseReleased(evt);
+            }
+        });
+        jMenuItem_createGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem_createGroupActionPerformed(evt);
             }
         });
         jMenu_groups.add(jMenuItem_createGroup);
@@ -1632,7 +1647,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 658, Short.MAX_VALUE)
+            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
         );
 
         pack();
@@ -2420,6 +2435,32 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         }
     }//GEN-LAST:event_jCheckBoxScheduleActionPerformed
 
+    private void jMenuItem_quitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem_quitActionPerformed
+        shutdown();
+    }//GEN-LAST:event_jMenuItem_quitActionPerformed
+
+    private void jMenuItem_joinGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem_joinGroupActionPerformed
+        try {
+            DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+            Point point = this.getLocation();
+            Dimension parentSize = this.getSize();
+            jDialog_joinGroup.setLocation(point.x + parentSize.width / 4, point.y + parentSize.height / 10);
+            devViewer.getGroupsListFromServer();
+            jTextField_groupSearch.setText("[Search]");
+            jDialog_joinGroup.pack();
+            jDialog_joinGroup.setVisible(true);
+        } catch (DeveloperControllerInitializationException ex) {
+            //Exceptions.printStackTrace(ex);
+        }
+    }//GEN-LAST:event_jMenuItem_joinGroupActionPerformed
+
+    private void jMenuItem_createGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem_createGroupActionPerformed
+        Point point = this.getLocation();
+        Dimension parentSize = this.getSize();
+        jDialog_creatGroup.setLocation(point.x + parentSize.width / 4, point.y + parentSize.width / 4);
+        jDialog_creatGroup.setVisible(true);
+    }//GEN-LAST:event_jMenuItem_createGroupActionPerformed
+
     private void showScheduleOptions() {
         this.jCalendarSendTask.setEnabled(true);
         this.jButtonTime.setEnabled(true);
@@ -2610,10 +2651,10 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JButton Cancel;
     private javax.swing.JButton RemoveAtach;
     private javax.swing.ButtonGroup buttonGroupHost;
-    private colla.kernel.util.ImagePane imagePane1;
-    private colla.kernel.util.ImagePane imagePane2;
-    private colla.kernel.util.ImagePane imagePane3;
-    private colla.kernel.util.ImagePane imagePane4;
+    private colla.kernel.util.ImagePanel imagePane1;
+    private colla.kernel.util.ImagePanel imagePane2;
+    private colla.kernel.util.ImagePanel imagePane3;
+    private colla.kernel.util.ImagePanel imagePane4;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButtonTime;
     private javax.swing.JButton jButton_ResultsDirNonFile;

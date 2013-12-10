@@ -427,12 +427,12 @@ public class TaskTest {
     }
 
     /**
-     * Test of clean method, of class Task.
+     * Test of clear method, of class Task.
      */
     @Test
     public void testClean() {
         Task instance = new Task();
-        instance.clean();
+        instance.clear();
     }
 
     /**

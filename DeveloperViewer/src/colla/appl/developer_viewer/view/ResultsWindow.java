@@ -93,7 +93,7 @@ public class ResultsWindow extends javax.swing.JInternalFrame {
 	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 
-		jPanel1 = new colla.kernel.util.ImagePane(
+		jPanel1 = new colla.kernel.util.ImagePanel(
 				BackGround.DENSE_GREEN.getPath());
 		jSplitPane1 = new javax.swing.JSplitPane();
 		jScrollPane1 = new javax.swing.JScrollPane();

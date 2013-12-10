@@ -74,7 +74,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
     private void initComponents() {
 
         jDialog_signUp = new javax.swing.JDialog();
-        jPanel1 = new colla.kernel.util.ImagePane(BackGround.GREEN_SPIRAL.getPath());
+        jPanel1 = new colla.kernel.util.ImagePanel(BackGround.GREEN_SPIRAL.getPath());
         jLabel1 = new javax.swing.JLabel();
         jLabel_signUpWarning = new javax.swing.JLabel();
         jTextField_signUpName = new javax.swing.JTextField();
@@ -85,7 +85,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         jButton_signUp = new javax.swing.JButton();
         jButton_cancel = new javax.swing.JButton();
         jTextField_company = new javax.swing.JTextField();
-        jPanel_fundo = new colla.kernel.util.ImagePane(BackGround.GREEN_SPIRAL.getPath());
+        jPanel_fundo = new colla.kernel.util.ImagePanel(BackGround.GREEN_SPIRAL.getPath());
         jTextField_username = new javax.swing.JTextField();
         jButton_login = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -100,12 +100,15 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         jDialog_signUp.setModal(true);
         jDialog_signUp.setResizable(false);
 
+        jPanel1.setBackground(java.awt.SystemColor.control);
+
         jLabel1.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jLabel1.setText("Please, enter the required information:");
 
         jLabel_signUpWarning.setFont(new java.awt.Font("DejaVu Sans", 0, 14)); // NOI18N
         jLabel_signUpWarning.setForeground(java.awt.Color.red);
-        jLabel_signUpWarning.setText("*Error");
+        jLabel_signUpWarning.setText("-");
+        jLabel_signUpWarning.setToolTipText("");
 
         jTextField_signUpName.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
         jTextField_signUpName.setBorder(javax.swing.BorderFactory.createTitledBorder("Username"));
@@ -122,7 +125,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
 
         jButton_signUp.setBackground(java.awt.Color.white);
         jButton_signUp.setFont(new java.awt.Font("Verdana", 0, 15)); // NOI18N
-        jButton_signUp.setText("Signup");
+        jButton_signUp.setText("Sign up");
         jButton_signUp.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton_signUpMouseClicked(evt);
@@ -190,21 +193,21 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel_signUpWarning)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addComponent(jTextField_signUpName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPasswordField_signUpPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPasswordField_signUpRepeatPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jTextField_email, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTextField_company, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jComboBox_countries, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton_cancel)
                     .addComponent(jButton_signUp, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -218,7 +221,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         jDialog_signUp.getContentPane().setLayout(jDialog_signUpLayout);
         jDialog_signUpLayout.setHorizontalGroup(
             jDialog_signUpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 335, Short.MAX_VALUE)
         );
         jDialog_signUpLayout.setVerticalGroup(
             jDialog_signUpLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -287,7 +290,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
         jLabel5.setText("New user?");
 
         jLabel_signup.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
-        jLabel_signup.setText("Signup");
+        jLabel_signup.setText("Sign up");
         jLabel_signup.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel_signupMouseClicked(evt);
@@ -373,7 +376,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_jButton_loginMouseClicked
 
     private void showSignUpDialog() {
-        jLabel_signUpWarning.setVisible(false);
+        jLabel_signUpWarning.setVisible(true);
         Dimension parentSize = this.getSize();
         Point p = this.getLocation();
         jDialog_signUp.setLocation(p.x , p.y);
@@ -383,6 +386,7 @@ public class Client_Login extends javax.swing.JFrame implements Observer{
 
     private void jButton_cancelMouseClicked( java.awt.event.MouseEvent evt ){//GEN-FIRST:event_jButton_cancelMouseClicked
         clearSignUpDialog();
+        jLabel_signUpWarning.setText("-");
     }//GEN-LAST:event_jButton_cancelMouseClicked
 
     //erase jDialog_cadastrar fields

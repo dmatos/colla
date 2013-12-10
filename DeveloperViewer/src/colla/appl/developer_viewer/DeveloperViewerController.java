@@ -4,7 +4,9 @@
  */
 package colla.appl.developer_viewer;
 
+import colla.appl.developer_viewer.tasks.SentTask;
 import colla.appl.developer_viewer.exceptions.DeveloperControllerInitializationException;
+import colla.appl.developer_viewer.tasks.SentTasksMonitor;
 import colla.appl.developer_viewer.view.CollADeveloperViewerUI;
 import colla.kernel.api.*;
 import colla.kernel.impl.Task;
@@ -40,7 +42,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.user = usr;
         this.serverIPaddress = serverIP;
         this.serverPortNumber = serverPort;
-        this.tasksToRun = new ConcurrentLinkedQueue<Task>();
+        this.tasksToRun = new ConcurrentLinkedQueue<CollATask>();
         this.taskFile = null;
         this.taskDependencies = new ArrayList<File>();
         this.taskArgs = new ArrayList<File>();
@@ -49,6 +51,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.isDown = false;
         this.devUI = null;
         this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
+        this.sentTaskMonitor = new SentTasksMonitor(serverIP, serverPort);
+        this.scheduleSentTaskMonitor = new Timer();        
+        this.monitorDelayAndPeriod = new Long(300000); //5 minutes
     }
 
     /**
@@ -100,6 +105,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
         } catch (DeveloperControllerInitializationException devEx) {
             devEx.printStackTrace();
         }
+        this.scheduleSentTaskMonitor.schedule(sentTaskMonitor, monitorDelayAndPeriod,
+                monitorDelayAndPeriod);
     }
 
     /**
@@ -176,6 +183,10 @@ public class DeveloperViewerController extends Observable implements Runnable {
             Debugger.debug(e);
         }
     }
+    
+    public void setTaskToResend(CollATask task){
+        this.tasksToRun.add(task);
+    }
 
     /**
      * Asks the server for a set of available hosts to execute a task.
@@ -238,7 +249,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
         Socket socket;
         ObjectOutputStream output;
         ObjectInputStream input;
-        Task task;
+        CollATask task;
+        SentTask sentTask;
         if (!tasksToRun.isEmpty()) {
             try {
                 // Retrieves the tasks from queue of tasks.
@@ -251,43 +263,72 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 this.displayInfo("Sorry, an error has ocurred. Try again later.");
                 return;
             }
+
             task.setTaskID(taskID);
+            sentTask = new SentTask(task);
+            sentTask.addHosts(hosts);
+
         } else {
             Debugger.debug("no task found to send to run");
             return;
         }
 
-        if (!hosts.isEmpty() && hosts.get(0) != null) {
+        if (this.sendTaskToHost(task, hosts, 0)) {
+            // update the sent tasks table
+            updateResults(sentTask.getGroup(), sentTask.getTaskName(), sentTask);
+            // System.err.println("task " + task.getTaskName() + " sent");
+        } else if (this.getTaskResult(sentTask.getGroup(), sentTask.getTaskName()) != null) {
             try {
-                // For now, we just send a Task to one host.
-                CollAHost host = hosts.get(0);
+                sentTask.setResult(null);
+                updateResults(sentTask.getGroup(), sentTask.getTaskName(), sentTask);
+            } catch (Exception ex) {
+                Debugger.debug(ex);
+            }
+        }
+
+        /* Destruindo o objeto task
+         * task.clear();
+         * task = null;
+         */
+
+        /*
+         * @todo ativer Timer, na inicialização desta classe, para checar 
+         * se host continua ativo enquanto resultado
+         * da task não retorna.
+         */
+    }
+
+    /**
+     * Try to send a task to at most a host from a list of available hosts.
+     *
+     * @param task
+     * @param hosts
+     * @param hostToTry
+     * @return
+     */
+    private boolean sendTaskToHost(CollATask task, List<CollAHost> hosts, int hostToTry) {
+        if (!hosts.isEmpty() && hostToTry < hosts.size() && hosts.get(hostToTry) != null) {
+            try {
+                CollAHost host = hosts.get(hostToTry);
+                //trying to send to primary host
                 if (host.hasValidIP()) {
                     this.sendTaskToValidIP(task, host);
-                }// fim do if(host.hasValidIP())
-                else {
+                } else {
                     this.sendTaskToInvalidIP(task, host);
-                }// fim do else
-                // a result of a task will come by either TCPServer or
-                // KeepAliveClient depending on the validity of user's IP
-                // address
-                // put the sent task in the hashmap with a message
-                updateResults(task.getGroup(), task.getTaskName(), task);
-                // notify other members about this task
-                // this.notifyGroupAboutTask(task.getGroup(),
-                // task.getTaskName(), task);
-                // System.err.println("task " + task.getTaskName() + " sent");
+                    //return true;
+                }
+                return true;
             } catch (Exception ex) {
-                Debugger.debug("ex! Problema com o envio da task", ex);
+                Debugger.debug("Problema com o envio da task para host primario", ex);
+                return this.sendTaskToHost(task, hosts, ++hostToTry);
             }
         }// fim do if (!hosts.isEmpty() && hosts.get(0) != null)
         else {
             Debugger.debug("Sorry, there are not available hosts. Try again later.");
             this.displayInfo("Sorry, there are not available hosts. Try again later.");
         }
-        // Destruindo o objeto task
-        // task.clean();
-        // task = null;
-    }// fim do método sendTaskToRun
+        return false;
+    }
 
     /**
      * Sends a task to run in a CollAHost which has a valid IP.
@@ -297,7 +338,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private void sendTaskToValidIP(Task task, CollAHost host)
+    private void sendTaskToValidIP(CollATask task, CollAHost host)
             throws IOException, ClassNotFoundException {
         Socket socket;
         ObjectOutputStream output;
@@ -352,7 +393,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private void sendTaskToInvalidIP(Task task, CollAHost host)
+    private void sendTaskToInvalidIP(CollATask task, CollAHost host)
             throws IOException, ClassNotFoundException {
         Socket socket;
         ObjectOutputStream output;
@@ -416,25 +457,25 @@ public class DeveloperViewerController extends Observable implements Runnable {
      *
      * @param groupName name of the group sharing the task
      * @param taskName name of the task
-     * @param result textual representation of the result
+     * @param task textual representation of the result
      */
     public void updateResults(String groupName, String taskName,
-            CollATask result) {
+            CollATask task) {
         HashMap<String, CollATask> taskMap = new HashMap<String, CollATask>();
         if (taskResults.get(groupName) != null) {
             taskMap = taskResults.get(groupName);
         }
 
         String tName = this
-                .generateUniqueTaskName(taskName, result.getTaskID());
-        taskMap.put(tName, result);
+                .generateUniqueTaskName(taskName, task.getTaskID());
+        taskMap.put(tName, task);
         taskResults.put(groupName, taskMap);
         Debugger.debug(tName + " up to date for " + groupName);
         // redo list of tasks on resultWindow
         if (devUI != null) {
             devUI.setListOfTasks(this.getTasks());
         }
-    }// fim do método updateResults
+    } // fim do método updateResults
 
     /**
      *
@@ -1058,7 +1099,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     /*
      * Sending a Task
      */
-    private Queue<Task> tasksToRun;
+    private Queue<CollATask> tasksToRun;
     private File taskFile;
     private List<File> taskDependencies;
     private List<File> taskArgs;
@@ -1067,4 +1108,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     private HashMap<String, CollAUser> contacts;
     private HashMap<String, HashMap<String, CollATask>> taskResults;
     private HashMap<Long, CollAHost> hostsWithScheduledTasks;
+    private SentTasksMonitor sentTaskMonitor;
+    private Timer scheduleSentTaskMonitor;
+    private Long monitorDelayAndPeriod;
 }

@@ -85,7 +85,7 @@ public class ServerWorker {
                         output.flush();
                         this.sendHostUpdateToOwner(host, host.getNameUser());
                     } catch (NonExistentUser nExUsr) {
-                        // TODO Bruno: fazer caso em que houve falha na conexão
+                        // TODO fazer caso em que houve falha na conexão do host
                     }
                 }// end of case HOST_LOGIN
                 break;
@@ -883,6 +883,7 @@ public class ServerWorker {
                  * TODO Fazer o caso do host estar offline. Retornar uma
                  * mensagem ao usuário, procurar outro host o servidor mesmo e
                  * repassar a task. 
+                 * A questão é: continuaremos suportando hosts com ip invalido?
                  */
             }
         } catch (Exception e) {
@@ -983,8 +984,7 @@ public class ServerWorker {
             Set<String> userNames = server.getUsersSet();
 //        System.out.println("Users from group " + groupName + ": " + userNames);
             Iterator<String> userNamesIt = userNames.iterator();
-            /*
-             * For each user I get your hosts and add in the list of hosts
+            /* For each user I get its hosts and add in the list of hosts
              */
             while (userNamesIt.hasNext()) {
                 try {
@@ -1022,14 +1022,19 @@ public class ServerWorker {
             Server server = Server.getInstance();
             SendAvailableHostsMsg outgoing = new SendAvailableHostsMsg(server.generateTaskID());
             CollAUser user = server.getUser(name);
-            // Get a random host
-            CollAHost h = null;
+            // Get both primary and secondary hosts at random
+            CollAHost primary = null;
+            CollAHost secondary = null;
             List<CollAHost> hostsOnline = getHostsOnline();
             if (hostsOnline.size() > 0) {
                 int i = (int) (Math.random() * hostsOnline.size());
-                h = hostsOnline.get(i);
+                primary = hostsOnline.get(i);
+                int secondaryIndex = (i+1) % hostsOnline.size();
+                if( secondaryIndex != i)
+                    secondary = hostsOnline.get(secondaryIndex);                    
             }
-            outgoing.addHost(h);
+            outgoing.addHost(primary);
+            outgoing.addHost(secondary);
             // If user don't have a valid IP we use the socket in connectionsMap
             if (!user.hasValidIP()) {
                 socket = server.getAMapedConnection(user.getName());
@@ -1047,7 +1052,7 @@ public class ServerWorker {
             if (user.hasValidIP()) {
                 socket.close();
             }
-            Debugger.debug("Host " + h.getName() + " has been sent to user " + user.getName());
+            Debugger.debug("Host " + primary.getName() + " has been sent to user " + user.getName());
         } catch (Exception ex) {
             Debugger.debug("Error: could not retrive hosts to " + name, ex);
         }

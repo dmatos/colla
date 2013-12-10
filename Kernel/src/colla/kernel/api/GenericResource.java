@@ -18,7 +18,6 @@ public class GenericResource<S>{
             wakeup();
         }else{
             return;
-            //@todo seria melhor lançar uma exceção
         }
 
     }

@@ -219,24 +219,24 @@ public class HostTest {
     }
 
     /**
-     * Test of setInicioConexao method, of class Host.
+     * Test of startUptimeCounter method, of class Host.
      */
     @Test
     public void testSetInicioConexao() {
         Host instance = new Host();
-        instance.setInicioConexao();
-        String result = instance.getTempoTotalConexao();
+        instance.startUptimeCounter();
+        String result = instance.getUptime();
         assertNotNull(result);
     }
 
     /**
-     * Test of getTempoTotalConexao method, of class Host.
+     * Test of getUptime method, of class Host.
      */
     @Test
     public void testGetTempoTotalConexao() {
         Host instance = new Host();
-        instance.setInicioConexao();
-        String result = instance.getTempoTotalConexao();
+        instance.startUptimeCounter();
+        String result = instance.getUptime();
         assertNotNull(result);
     }
 

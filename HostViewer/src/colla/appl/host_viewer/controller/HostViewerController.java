@@ -161,7 +161,7 @@ public class HostViewerController implements Runnable {
                     socket.getOutputStream());
             output.writeObject(outgoing);
             output.flush();
-            // espera por ACK
+            // wait ACK
             ObjectInputStream input = new ObjectInputStream(
                     socket.getInputStream());
             input.readObject();
@@ -288,6 +288,10 @@ public class HostViewerController implements Runnable {
         }
     }
     
+    public void updateHostWeight(Long taskTotalTime){
+         this.collAHost.increaseTaskCounter(taskTotalTime);
+         this.uploadHostToServer();
+    }
     
     @Override
     public void run() {

@@ -378,4 +378,9 @@ public class User implements Serializable, Comparable<CollAUser>, CollAUser {
     public String getCompany() {
        return this.company;
     }
+
+    @Override
+    public void removeAllHosts() {
+        this.hosts.clear();
+    }
 }

@@ -1,5 +1,6 @@
 package colla.appl.server;
 
+import colla.appl.server.util.WeightedHost;
 import colla.kernel.api.*;
 import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
@@ -30,26 +31,28 @@ public class Server extends Observable implements CollAServer, Runnable {
     private Server(int portN, int timeOut) throws IOException {
         this.portNumber = portN;
         this.timeout = timeOut;
-        this.userPasswords = new HashMap<String, String>();
-        this.usersMap = new HashMap<String, CollAUser>();
-        this.groupsMap = new HashMap<String, CollAGroup>();
+        this.hostWeightIncrement = 0L;
+        this.userPasswords = new HashMap<>();
+        this.usersMap = new HashMap<>();
+        this.groupsMap = new HashMap<>();
         this.dateAndTime = new TimeAndDate();
         this.checkOnlineUsers = new Timer();
-        this.connectionsMap = new HashMap<String, Socket>();
+        this.connectionsMap = new HashMap<>();
         this.sessions = new Long(0);
-        this.resultsMap = new HashMap<String, ArrayList<TaskResultMsg>>();
+        this.resultsMap = new HashMap<>();
         this.currentHost = 0;
         this.taskIDs = new Long(0);
+        this.weightedHosts = new PriorityQueue<>();
         try {
             this.serverSocket = new ServerSocket(portNumber);
             this.portNumber = this.serverSocket.getLocalPort();
         } catch (IOException io) {
-            Debugger.debug("Server couldn't be initialized. Please, check for connections setup and firewalls.",
-                    io);
-            System.err
-                    .println("Server couldn't be initialized.\nPlease, check for connections setup and firewalls.");
-            LogWriter
-                    .generateLog("Server couldn't be initialized.\nPlease, check for connections setup and firewalls.");
+            Debugger.debug("Server couldn't be initialized. Please, check"
+                    + " for connections setup and firewalls.", io);
+            System.err.println("Server couldn't be initialized.\nPlease,"
+                    + " check for connections setup and firewalls.");
+            LogWriter.generateLog("Server couldn't be initialized."
+                    + "\nPlease, check for connections setup and firewalls.");
             throw new IOException();
         }
         try {
@@ -95,15 +98,15 @@ public class Server extends Observable implements CollAServer, Runnable {
      */
     public static Server getInstance() throws ServerInitializationException {
         if (serverInstance == null) {
-            throw new ServerInitializationException("Server not initialized yet, setupServer must be called first.");
+            throw new ServerInitializationException("Server not initialized yet,"
+                    + " setupServer must be called first.");
         }
         return serverInstance;
     }
 
     @Override
     public void run() {
-        ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor(
-                this);
+        ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor();
         /* start in 5 minutes (delay) and repeat each 5 minutes (period) */
         Long monitorDelayAndPeriod = new Long(300000);
         this.checkOnlineUsers.schedule(connMonitor, monitorDelayAndPeriod,
@@ -279,47 +282,23 @@ public class Server extends Observable implements CollAServer, Runnable {
             this.updateUser(user);
         }
     }
+    
+    public synchronized void updateWeightedHost(WeightedHost wHost){                
+        this.weightedHosts.remove(wHost);
+        this.weightedHosts.add(wHost);
+    }
+    
+    public synchronized WeightedHost poolWeightedHost(){
+        return this.weightedHosts.poll();
+    }
 
     @Override
     public synchronized void updateHost(CollAHost host) throws NonExistentUser {
         CollAUser user = this.usersMap.get(host.getNameUser());
         user.addHost(host);
-        this.updateUser(user);
-        // send host informations to its onwer
-        SendOwnedHostsMsg msg = new SendOwnedHostsMsg();
-        msg.addHost(host);
-        if (user.isOnline()) {
-            try {
-                if (user.hasValidIP()) {
-                    Socket s = new Socket(InetAddress.getByName(user.getIp()),
-                            user.getPort());
-                    s.setSoTimeout(timeout);
-                    ObjectOutputStream output = new ObjectOutputStream(
-                            s.getOutputStream());
-                    output.writeObject(msg);
-                    output.flush();
-                    // espera por ACK
-                    ObjectInputStream input = new ObjectInputStream(
-                            s.getInputStream());
-                    input.readObject();
-                    s.close();
-                } else {
-                    Socket s = connectionsMap.get(user.getName());
-                    if (s != null) {
-                        ObjectOutputStream output = new ObjectOutputStream(
-                                s.getOutputStream());
-                        output.writeObject(msg);
-                        output.flush();
-                        // espera por ACK
-                        ObjectInputStream input = new ObjectInputStream(
-                                s.getInputStream());
-                        input.readObject();
-                    }
-                }
-            } catch (IOException | ClassNotFoundException e) {
-                Debugger.debug(e);
-            }
-        }// end if
+        if(!host.IsOnline())
+            this.weightedHosts.remove(new WeightedHost(host));
+        this.updateUser(user);     
         // notify its observers
         this.setChanged();
         this.notifyObservers();
@@ -420,10 +399,11 @@ public class Server extends Observable implements CollAServer, Runnable {
     public void disconnectAllClients() {
         for (String userName : this.usersMap.keySet()) {
             try {
-                CollAUser user = this.usersMap.get(userName);
-                for (CollAHost host : user.getHosts()) {
+                CollAUser user = this.usersMap.get(userName);                
+                /*for (CollAHost host : user.getHosts()) {
                     host.setOffline();
-                }
+                }*/
+                user.removeAllHosts();
                 Socket temp = this.connectionsMap.get(userName);
                 if (temp != null && !temp.isClosed()) {
                     temp.close();
@@ -547,6 +527,15 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.setChanged();
         notifyObservers(message);
     }
+    
+    public long getHostWeightIncrement(){
+        return this.hostWeightIncrement;
+    }
+    
+    public synchronized void setHostWeightIncrement(long weightIncrement){
+        this.hostWeightIncrement = weightIncrement;
+    }
+    
     private static Server serverInstance = null; // singleton pattern
     private boolean active;
     private Long taskIDs;
@@ -561,5 +550,7 @@ public class Server extends Observable implements CollAServer, Runnable {
     private Timer checkOnlineUsers;
     private HashMap<String, Socket> connectionsMap;// map  
     private int currentHost;
-    private HashMap<String, ArrayList<TaskResultMsg>> resultsMap; // store    
-}// fim da classe Server
+    private HashMap<String, ArrayList<TaskResultMsg>> resultsMap; // store 
+    private PriorityQueue<WeightedHost> weightedHosts;
+    private long hostWeightIncrement;
+}

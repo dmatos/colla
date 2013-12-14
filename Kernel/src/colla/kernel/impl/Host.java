@@ -19,7 +19,11 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
     private String country;
     private HashMap<String, String> activities;
     private String systemProperties;
-
+    private Long weight;
+    private Long roundTrip;
+    private Long taskCounter;
+    private Long tasksTotalTime; 
+    
     /**
      * Constructor without parameters
      */
@@ -27,38 +31,42 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
         this.name = "";
         this.nameUser = "";
         this.ip = "";
-        this.port = -1;
-        this.online = false;
-        this.tempoConexao = new TimeAndDate();
-        this.validIP = false;
-        this.country = "";
-        this.activities = new HashMap<String, String>();
-        systemProperties = new SystemProperties().getSystemProperties();
+        this.initialize();
     }
 
     /**
      * Constructor with a few arguments
+     *
      * @param name Name of the host
      * @param ip Ip of the host
      * @param port port of the host
      */
     public Host(String name, String ip, int port) {
         this.name = name;
-        this.nameUser = "";
         this.ip = ip;
         this.port = port;
+        this.initialize();
+    }
+
+    private void initialize() {
+        this.nameUser = "";
         this.online = false;
         this.tempoConexao = new TimeAndDate();
         this.validIP = false;
         this.country = "";
         this.activities = new HashMap<String, String>();
-        systemProperties = new SystemProperties().getSystemProperties();
+        this.weight = 0L;
+        this.systemProperties = new SystemProperties().getSystemProperties();
+        this.roundTrip = 0L;
+        this.taskCounter = 0L;
+        this.tasksTotalTime = 0L;
     }
 
     /**
      * Useful method to order Hosts by name.
+     *
      * @param host
-     * @return 
+     * @return
      */
     @Override
     public int compareTo(CollAHost host) {
@@ -189,7 +197,7 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
      * marca data do inicio da conexão
      */
     @Override
-    public void setInicioConexao() {
+    public void startUptimeCounter() {
         this.tempoConexao.startTimer();
     }
 
@@ -197,16 +205,14 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
      * retorna o tempo total de conexão
      */
     @Override
-    public String getTempoTotalConexao() {
+    public String getUptime() {
         return this.tempoConexao.getTotalTime();
     }
 
     /**
      * store in a String the actvities of the user on the server
      *
-     * @param date
-    param
-     *                                                                                                     activity
+     * @param date param activity
      */
     @Override
     public void recordActivities(String date, String activity) {
@@ -263,5 +269,29 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
         s = s + "port: " + this.getPort() + "\n";
         s = s + "validIp: " + this.validIP + "\n";
         return s;
-    }   
+    }
+
+    @Override
+    public void increaseTaskCounter(Long taskTotalTime) {
+        /* Task total time of execution comes in nanos
+         */
+        this.tasksTotalTime += taskTotalTime / 1000000000L;
+        this.taskCounter += 1L;
+        this.weight = this.tasksTotalTime / this.taskCounter;
+    }
+
+    @Override
+    public void setRoundTripTime(Long elapsedTime) {
+        this.roundTrip = elapsedTime / 1000000L;
+    }
+
+    @Override
+    public Long getWeight() {
+        return this.weight + this.roundTrip;
+    }
+
+    @Override
+    public Long getRoundTripTime() {
+        return this.roundTrip;
+    }
 }

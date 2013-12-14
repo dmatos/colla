@@ -114,13 +114,13 @@ public interface CollAHost{
     /**
      * Sets current time when connection to server is established.
      */
-    public abstract void setInicioConexao();
+    public abstract void startUptimeCounter();
 
     /**
      * 
      * @return elapsed time of connection to server.
      */
-    public abstract String getTempoTotalConexao();
+    public abstract String getUptime();
 
     /**
      * Records CollAHost activities performed on the server. 
@@ -153,10 +153,27 @@ public interface CollAHost{
      * @return current country of host
      */
     public abstract String getCountry();
-
+    
     /**
-     * @return 
+     * Updates average time of task execution.
+     * @param taskTotalTime elapsed time between a task begin and end.
      */
+    public void increaseTaskCounter(Long taskTotalTime);
+    
+    /**
+     * Time elapsed between echo request and reply.
+     * @param elapsedTime 
+     */
+    public void setRoundTripTime(Long elapsedTime);
+    
+    public Long getRoundTripTime();
+    
+    /**
+     * 
+     * @return weight for load balancing
+     */
+    public Long getWeight();
+    
     @Override
     public abstract String toString();
 }

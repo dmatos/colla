@@ -213,4 +213,6 @@ public interface CollAUser {
      * @return a company to which user belongs
      */
     String getCompany();
+    
+    void removeAllHosts();
 }

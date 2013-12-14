@@ -71,7 +71,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                         HashMap<String, CollAUser> group = taskMessage.getGroup();
                         String groupName = taskMessage.getGroupName();
 
-                        //running task
+                        //running task                       
                         JCL_result jclr = this.executeTask(task);
                         HostViewerController.getInstance().displayStatus("done!!! ");
                         if (jclr.getErrorResult() == null) {
@@ -80,10 +80,15 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                             //jclr.getErrorResult().printStackTrace();
                         }
                         // Sending a result to client
-                        HostViewerController.getInstance().displayStatus("Sending result back...");
+                        HostViewerController.getInstance().displayStatus(
+                                "Sending result back...");
                         task.setResult(jclr);
                         this.sendResultBack(groupName, group, task, taskName);
-                        HostViewerController.getInstance().deleteDir(new File("../" + task.getTaskID()));
+                        task.setFinished();
+                        HostViewerController.getInstance().updateHostWeight(
+                                task.getTotalTimeInNanoS());
+                        HostViewerController.getInstance().deleteDir(
+                                new File("../" + task.getTaskID()));
                     }
                 }
                 break; // end case TASK_EXECUTE
@@ -111,7 +116,11 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
                         HostViewerController.getInstance().displayStatus("Sending result back...");
                         task.setResult(jclr);
                         this.sendResultBack(groupName, group, task, taskName);
-                        HostViewerController.getInstance().deleteDir(new File("../temp_files/" + task.getTaskID()));
+                        task.setFinished();
+                        HostViewerController.getInstance().updateHostWeight(
+                                task.getTotalTimeInNanoS());
+                        HostViewerController.getInstance().deleteDir(
+                                new File("../temp_files/" + task.getTaskID()));
                     }
                 }
                 break; // end case TASK_EXECUTE-DISTRIBUTED
@@ -354,7 +363,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             Debugger.debug("Task: " + cTask.getTaskName() + "\n Executing: " + cTask.getClassToExecute());
             HostViewerController.getInstance().displayStatus("Task: " + cTask.getTaskID());
             ticket = jcl.execute(cTask.getClassToExecute(), cTask.getMethodToExecute(), args);
-           Debugger.debug("Recebeu o ticket " + ticket);
+            Debugger.debug("Recebeu o ticket " + ticket);
         } catch (Exception e) {
             //e.printStackTrace();
         }

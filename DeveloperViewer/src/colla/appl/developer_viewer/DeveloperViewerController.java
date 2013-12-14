@@ -289,13 +289,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         /* Destruindo o objeto task
          * task.clear();
          * task = null;
-         */
-
-        /*
-         * @todo ativer Timer, na inicialização desta classe, para checar 
-         * se host continua ativo enquanto resultado
-         * da task não retorna.
-         */
+         */      
     }
 
     /**
@@ -464,18 +458,18 @@ public class DeveloperViewerController extends Observable implements Runnable {
         HashMap<String, CollATask> taskMap = new HashMap<String, CollATask>();
         if (taskResults.get(groupName) != null) {
             taskMap = taskResults.get(groupName);
-        }
-
+        }      
         String tName = this
-                .generateUniqueTaskName(taskName, task.getTaskID());
-        taskMap.put(tName, task);
+                .generateUniqueTaskName(taskName, task.getTaskID());        
+        SentTask sentTask = new SentTask(task);
+        taskMap.put(tName, sentTask);
         taskResults.put(groupName, taskMap);
         Debugger.debug(tName + " up to date for " + groupName);
         // redo list of tasks on resultWindow
         if (devUI != null) {
             devUI.setListOfTasks(this.getTasks());
         }
-    } // fim do método updateResults
+    } 
 
     /**
      *

@@ -30,7 +30,6 @@ import javax.swing.tree.TreeSelectionModel;
 
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAJob;
-import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollASession;
 import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;

@@ -48,7 +48,7 @@ class HostViewerMicroServer implements Runnable {
         this.serverPortNumber = HostViewerController.getInstance().getServerPortNumber();
         this.timer = new Timer();
         this.scheduleMap = new HashMap<Long, ScheduledTask>();
-        this.init();
+        this.initialize();
 
     }
 
@@ -59,7 +59,7 @@ class HostViewerMicroServer implements Runnable {
         return microServer;
     }
 
-    private void init() {
+    private void initialize() {
         try {
             if (HostViewerController.getInstance().getHost().hasValidIP()) {
                 try {

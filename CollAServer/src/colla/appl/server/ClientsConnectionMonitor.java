@@ -1,9 +1,11 @@
 package colla.appl.server;
 
+import colla.appl.server.util.WeightedHost;
 import colla.kernel.api.CollAHost;
 import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;
+import colla.kernel.exceptions.server.ServerInitializationException;
 import colla.kernel.util.Debugger;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,9 +20,8 @@ import java.util.TimerTask;
  */
 public class ClientsConnectionMonitor extends TimerTask {
 
-    public ClientsConnectionMonitor(CollAServer server) {
-        this.server = server;
-        this.timeout = 45000;
+    public ClientsConnectionMonitor() {
+        this.timeout = 5000;
     }
 
     @Override
@@ -30,66 +31,83 @@ public class ClientsConnectionMonitor extends TimerTask {
         Socket socket;
         ObjectInputStream input;
         ObjectOutputStream output;
+        Long totalWeight = 0L;
+        Long totalOfHosts = 0L;
         colla.kernel.messages.toClient.Ping pingUser = new colla.kernel.messages.toClient.Ping(1);
         colla.kernel.messages.toHost.Ping pingHost = new colla.kernel.messages.toHost.Ping();
-        for (String username : this.server.getUsersSet()) {
-            try {
-                user = this.server.getUser(username);
-                for (CollAHost host : user.getHosts()) {
-                    //first we try to contact user's hosts, even if user is offline
-                    if (host.IsOnline()) {
+        try {
+            Server server = Server.getInstance();
+            for (String username : server.getUsersSet()) {
+                try {
+                    user = server.getUser(username);
+                    for (CollAHost host : user.getHosts()) {
+                        //first we try to contact user's hosts, even if user is offline
+                        if (host.IsOnline()) {
+                            try {
+                                if (host.hasValidIP()) {
+                                    socket = new Socket(
+                                            InetAddress.getByName(host.getIp()),
+                                            host.getPort());
+                                } else {
+                                    socket = server.getMappedConnections().get(
+                                            host.getName());
+                                }
+                                socket.setSoTimeout(timeout);
+                                output = new ObjectOutputStream(socket.getOutputStream());
+                                Long timestamp = System.nanoTime();
+                                output.writeObject(pingHost);
+                                output.flush();
+                                input = new ObjectInputStream(socket.getInputStream());
+                                input.readObject();    
+                                host.setRoundTripTime(System.nanoTime() - timestamp);
+                                server.updateWeightedHost(new WeightedHost(host));
+                                totalWeight += host.getWeight();
+                                totalOfHosts += 1L;
+                                if (host.hasValidIP()) {
+                                    socket.close();
+                                }
+                            } catch (ClassNotFoundException cnfe) {
+                                Debugger.debug(cnfe);
+                            } catch (Exception ex) {
+                                host.setOffline();
+                                server.updateHost(host);
+                            }
+                        }
+                    }
+                    if (user.isOnline()) {
+                        //the we try to contact the user itself                    
                         try {
-                            if (host.hasValidIP()) {
-                                socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
+                            if (user.hasValidIP()) {
+                                socket = new Socket(InetAddress.getByName(
+                                        user.getIp()), user.getPort());
                             } else {
-                                socket = this.server.getMappedConnections().get(host.getName());
+                                socket = server.getMappedConnections().get(username);
                             }
                             socket.setSoTimeout(timeout);
                             output = new ObjectOutputStream(socket.getOutputStream());
-                            output.writeObject(pingHost);
+                            output.writeObject(pingUser);
                             output.flush();
                             input = new ObjectInputStream(socket.getInputStream());
                             input.readObject();
-                            if (host.hasValidIP()) {
+                            if (user.hasValidIP()) {
                                 socket.close();
                             }
                         } catch (ClassNotFoundException cnfe) {
                             //cnfe.printStackTrace();
                         } catch (Exception ex) {
-                            host.setOffline();
-                            this.server.updateHost(host);
+                            user.setOffline();
+                            server.updateUser(user);
                         }
                     }
+                } catch (NonExistentUser nonUser) {
                 }
-                if (user.isOnline()) {
-                    //the we try to contact the user itself                    
-                    try {
-                        if (user.hasValidIP()) {
-                            socket = new Socket(InetAddress.getByName(user.getIp()), user.getPort());
-                        } else {
-                            socket = this.server.getMappedConnections().get(username);
-                        }
-                        socket.setSoTimeout(timeout);
-                        output = new ObjectOutputStream(socket.getOutputStream());
-                        output.writeObject(pingUser);
-                        output.flush();
-                        input = new ObjectInputStream(socket.getInputStream());
-                        input.readObject();
-                        if (user.hasValidIP()) {
-                            socket.close();
-                        }
-                    } catch (ClassNotFoundException cnfe) {
-                        //cnfe.printStackTrace();
-                    } catch (Exception ex) {
-                        user.setOffline();
-                        this.server.updateUser(user);
-                    }
-                }
-            } catch (NonExistentUser nonUser) {
             }
+            
+            //increment given by average weight
+            server.setHostWeightIncrement(totalWeight / totalOfHosts);
+            Debugger.debug("Connections checked");            
+        } catch (ServerInitializationException ex) {
         }
-        Debugger.debug("Connections checked");
     }
-    private CollAServer server;
     private final int timeout;
 }

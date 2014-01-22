@@ -1510,7 +1510,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1600,11 +1600,6 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
 
         jMenuItem_createGroup.setFont(new java.awt.Font("DejaVu Sans", 0, 14)); // NOI18N
         jMenuItem_createGroup.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jMenuItem_createGroup.text")); // NOI18N
-        jMenuItem_createGroup.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                jMenuItem_createGroupMouseReleased(evt);
-            }
-        });
         jMenuItem_createGroup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem_createGroupActionPerformed(evt);
@@ -1647,18 +1642,11 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
+            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jMenuItem_createGroupMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuItem_createGroupMouseReleased
-        Point point = this.getLocation();
-        Dimension parentSize = this.getSize();
-        jDialog_creatGroup.setLocation(point.x + parentSize.width / 4, point.y + parentSize.width / 4);
-        jDialog_creatGroup.setVisible(true);
-    }//GEN-LAST:event_jMenuItem_createGroupMouseReleased
 
     private void jButton_cancelCreateGroupMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton_cancelCreateGroupMouseClicked
         if (evt.getButton() == MouseEvent.BUTTON1) {

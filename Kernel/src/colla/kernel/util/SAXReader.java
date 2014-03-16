@@ -21,6 +21,8 @@ public class SAXReader extends DefaultHandler {
 
     private String ipAddress;
     private Integer portNumber;
+    private String secondaryIPAddress;
+    private Integer secondaryPortNumber;
     private final String IPADDRESS = "IPAddress";
     private final String PORTNUMBER = "portNumber";
 
@@ -60,12 +62,15 @@ public class SAXReader extends DefaultHandler {
      * Este evento fornece o nome do elemento, o nome e valor dos atributos
      * deste elemento, e também pode fornecer as informações sobre o namespace.
      */
+    @Override
     public void startElement(String uri, String localName, String tag, Attributes atributos) {
         if(tag.equals(IPADDRESS)){
             ipAddress = atributos.getValue("ip");
+            secondaryIPAddress = atributos.getValue("secondaryIP");
         }
         if(tag.equals(PORTNUMBER)){
             portNumber = Integer.parseInt(atributos.getValue("port"));
+            secondaryPortNumber = Integer.parseInt(atributos.getValue("secondaryPort"));
         }        
     }
     
@@ -77,9 +82,25 @@ public class SAXReader extends DefaultHandler {
     }
     
     /**
+     * 
+     * @return secondary server IP address as read from the xml file
+     */
+    public String getSecondaryIPAddressFromXML(){
+        return this.secondaryIPAddress;
+    }
+    
+    /**
      * Returns the port number found in the xml file
      */
     public Integer getPortNumberFromXML(){
         return portNumber;
+    }
+    
+    /**
+     * 
+     * @return secondary server port number as read from the xml file
+     */
+    public Integer getSecondaryPortNumberFromXML(){
+        return secondaryPortNumber;
     }
 }

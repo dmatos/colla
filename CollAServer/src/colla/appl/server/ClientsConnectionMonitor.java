@@ -1,8 +1,7 @@
 package colla.appl.server;
 
-import colla.appl.server.util.WeightedHost;
+import colla.kernel.impl.WeightedHost;
 import colla.kernel.api.CollAHost;
-import colla.kernel.api.CollAServer;
 import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
@@ -104,7 +103,7 @@ public class ClientsConnectionMonitor extends TimerTask {
             }
             
             //increment given by average weight
-            server.setHostWeightIncrement(totalWeight / totalOfHosts);
+            server.setHostWeightIncrement(totalWeight / (totalOfHosts+ 1) );
             Debugger.debug("Connections checked");            
         } catch (ServerInitializationException ex) {
         }

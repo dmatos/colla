@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package colla.appl.server.util;
+package colla.kernel.impl;
 
 import colla.kernel.api.CollAHost;
 import colla.kernel.impl.Host;

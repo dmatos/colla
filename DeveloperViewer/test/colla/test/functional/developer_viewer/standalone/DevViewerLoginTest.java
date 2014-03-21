@@ -102,7 +102,7 @@ public class DevViewerLoginTest {
         try {
             /* at this point all server data should have been wiped out.*/
             deleteDir(new File("data/"));            
-            collaServer = Server.setupServer(9999, 40000);
+            collaServer = Server.setupServer(40000, true);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

@@ -130,6 +130,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         try {
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
                     serverPortNumber);
+            socket.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
             output.writeObject(outgoing);
@@ -217,6 +218,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
             outgoing.setGroup(group);
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
                     serverPortNumber);
+            socket.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
             output.writeObject(outgoing);
@@ -561,6 +563,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     user.getName());
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
                     serverPortNumber);
+            socket.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
             output.writeObject(add);
@@ -583,6 +586,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
             UpdateUserMsg update = new UpdateUserMsg(user);
             Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
                     serverPortNumber);
+            socket.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
             output.writeObject(update);
@@ -616,6 +620,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 Socket socket = new Socket(
                         InetAddress.getByName(serverIPaddress),
                         serverPortNumber);
+                socket.setSoTimeout(timeout);
                 ObjectOutputStream output = new ObjectOutputStream(
                         socket.getOutputStream());
                 output.writeObject(addGroup);
@@ -1084,7 +1089,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
     private static DeveloperViewerController devController = null;
     private boolean isDown;
-    private final int timeout = 20000;
+    private final int timeout = 10000;
     private DevMicroServer microServer;
     private CollADeveloperViewerUI devUI;
     private int serverPortNumber;

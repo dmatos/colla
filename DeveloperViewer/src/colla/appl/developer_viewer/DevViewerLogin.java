@@ -11,9 +11,8 @@ import colla.kernel.messages.toServer.ClientSignUpMsg;
 import colla.kernel.messages.toServer.DeveloperViewerLoginMsg;
 import colla.kernel.util.Debugger;
 import colla.kernel.util.NetworkDevices;
-import colla.kernel.util.SAXReader;
+import colla.kernel.util.ServerConfReader;
 import java.io.*;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -34,6 +33,7 @@ import org.xml.sax.SAXException;
 public class DevViewerLogin extends Observable {
 
     public DevViewerLogin() throws DeveloperConfigurationException {
+        this.timeout = 25000;
         this.user = new User();
         this.user.setOffline();
         this.connected = false;
@@ -138,7 +138,7 @@ public class DevViewerLogin extends Observable {
         String crypt = this.byteArrayToHexString(this.computeHash(password));
         ClientSignUpMsg signupMsg = new ClientSignUpMsg(user, crypt);
         socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
-        socket.setSoTimeout(40000);
+        socket.setSoTimeout(timeout);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.writeObject(signupMsg);
         output.flush();
@@ -172,8 +172,9 @@ public class DevViewerLogin extends Observable {
          */
         String crypt = this.byteArrayToHexString(this.computeHash(password));
         DeveloperViewerLoginMsg outgoing = new DeveloperViewerLoginMsg(userName, crypt, machineIP);
+        Debugger.debug("Connecting to server at: "+serverIP);
         socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
-        socket.setSoTimeout(40000);
+        socket.setSoTimeout(timeout);
         output = new ObjectOutputStream(socket.getOutputStream());
         output.writeObject(outgoing);
         output.flush();
@@ -220,13 +221,14 @@ public class DevViewerLogin extends Observable {
      * @return true if it was succesfully read, false otherwise
      */
     private boolean readServerConfigurations() {
-        SAXReader reader = new SAXReader();
+        ServerConfReader reader = new ServerConfReader();
         try {
             reader.parse("server_conf.xml");
+            this.secondaryServerIP = reader.getSecondaryIPAddressFromXML();
+            this.secondaryServerPort = reader.getSecondaryPortNumberFromXML();
             this.serverIP = reader.getIPfromXML();
-            this.serverPort = reader.getPortNumberFromXML();
+            this.serverPort = reader.getPortNumberFromXML();  
         } catch (IOException io) {
-
             Debugger.debug(io);
             return false;
         } catch (ParserConfigurationException pce) {
@@ -282,6 +284,8 @@ public class DevViewerLogin extends Observable {
     //Variables declaration
     private String serverIP;    //server IP addres read from server_conf.xml
     private Integer serverPort; //server port number read from server_conf.xml
+    private Integer secondaryServerPort;
+    private String secondaryServerIP;
     private String machineIP;   //IP address of the machine where this code is running
     private CollAUser user;     //the user itself
     private Boolean connected;  //boolean for confirmation of connection with server    
@@ -293,4 +297,5 @@ public class DevViewerLogin extends Observable {
     private List<Observer> devViewerObservers;
     private CollADeveloperViewerUI devUI = null;
     private boolean useGUI;
+    private final int timeout;
 }

@@ -56,7 +56,7 @@ public class ServerTest {
     @Before
     public void setUp() {
         try {
-            instance = Server.setupServer(9999, 15000);
+            instance = Server.setupServer(15000, true);
         } catch (IOException ex) {
             Logger.getLogger(ServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }

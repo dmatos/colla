@@ -1,13 +1,19 @@
 package colla.appl.server;
 
-import colla.appl.server.util.WeightedHost;
+import colla.kernel.impl.WeightedHost;
 import colla.kernel.api.*;
 import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
 import colla.kernel.exceptions.server.UserAlreadyExists;
-import colla.kernel.messages.toClient.*;
+import colla.kernel.messages.toClient.TaskResultMsg;
+import colla.kernel.messages.toSecondary.UpdateGroupMsg;
+import colla.kernel.messages.toSecondary.UpdateHostMsg;
+import colla.kernel.messages.toSecondary.UpdateMsg;
+import colla.kernel.messages.toSecondary.UpdateUserMsg;
+import colla.kernel.messages.toSecondary.UpdateWeightedHostMsg;
 import colla.kernel.util.Debugger;
 import colla.kernel.util.LogWriter;
+import colla.kernel.util.ServerConfReader;
 import colla.kernel.util.TimeAndDate;
 import implementations.sm_kernel.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
@@ -18,6 +24,8 @@ import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 /**
  * Server is an implementation of CollAServer that uses javaCaLa
@@ -28,9 +36,9 @@ import java.util.logging.Logger;
  */
 public class Server extends Observable implements CollAServer, Runnable {
 
-    private Server(int portN, int timeOut) throws IOException {
-        this.portNumber = portN;
+    private Server(int timeOut, boolean isPrimaryServer) throws IOException {        
         this.timeout = timeOut;
+        this.isPrimaryServer = isPrimaryServer;
         this.hostWeightIncrement = 0L;
         this.userPasswords = new HashMap<>();
         this.usersMap = new HashMap<>();
@@ -43,18 +51,9 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.currentHost = 0;
         this.taskIDs = new Long(0);
         this.weightedHosts = new PriorityQueue<>();
-        try {
-            this.serverSocket = new ServerSocket(portNumber);
-            this.portNumber = this.serverSocket.getLocalPort();
-        } catch (IOException io) {
-            Debugger.debug("Server couldn't be initialized. Please, check"
-                    + " for connections setup and firewalls.", io);
-            System.err.println("Server couldn't be initialized.\nPlease,"
-                    + " check for connections setup and firewalls.");
-            LogWriter.generateLog("Server couldn't be initialized."
-                    + "\nPlease, check for connections setup and firewalls.");
-            throw new IOException();
-        }
+
+        this.readServerConfigurations();
+
         try {
             this.restoreServerData();
         } catch (Exception e) {
@@ -62,6 +61,7 @@ public class Server extends Observable implements CollAServer, Runnable {
             System.err.println("Couldn't restore all data to the server");
             LogWriter.generateLog("Couldn't restore all data to the server");
         }
+
         try {
             this.restoreGUI();
         } catch (NonExistentUser nUsr) {
@@ -69,6 +69,29 @@ public class Server extends Observable implements CollAServer, Runnable {
             System.err.println("Couldn't set GUI up");
             LogWriter.generateLog("Couldn't set GUI up");
         }
+    }
+
+    /**
+     * Read secondary server IP address and port number and the port number to
+     * which this server must listen.
+     *
+     * @return
+     */
+    private boolean readServerConfigurations() {
+        ServerConfReader reader = new ServerConfReader();
+        try {
+            reader.parse("server_conf.xml");
+            this.secondaryIPAddress = reader.getSecondaryIPAddressFromXML();
+            this.secondaryPortNumber = reader.getSecondaryPortNumberFromXML();
+            if(this.isPrimaryServer)
+                this.portNumber = reader.getPortNumberFromXML();
+            else
+                this.portNumber = reader.getSecondaryPortNumberFromXML();
+        } catch (IOException | ParserConfigurationException | SAXException io) {
+            Debugger.debug(io);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -80,10 +103,11 @@ public class Server extends Observable implements CollAServer, Runnable {
      * @return an unique Server instance.
      * @throws IOException if the Server couldn't be set online.
      */
-    public static synchronized Server setupServer(int portNumber, int timeOut)
+    public static synchronized Server setupServer(int timeOut,
+            boolean isPrimaryServer)
             throws IOException {
         if (serverInstance == null) {
-            serverInstance = new Server(portNumber, timeOut);
+            serverInstance = new Server(timeOut, isPrimaryServer);
             return serverInstance;
         }
         return serverInstance;
@@ -106,12 +130,29 @@ public class Server extends Observable implements CollAServer, Runnable {
 
     @Override
     public void run() {
+        System.out.println("starting server as primary...");
         ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor();
         /* start in 5 minutes (delay) and repeat each 5 minutes (period) */
         Long monitorDelayAndPeriod = new Long(300000);
         this.checkOnlineUsers.schedule(connMonitor, monitorDelayAndPeriod,
                 monitorDelayAndPeriod);
         this.active = true;
+
+        try {
+            this.serverSocket = new ServerSocket(portNumber);
+            Debugger.debug("Listening to port number "+portNumber);
+            //this.portNumber = this.serverSocket.getLocalPort();
+        } catch (IOException io) {
+            Debugger.debug("Server couldn't be initialized. Please, check"
+                    + " for connections setup and firewalls.", io);
+            System.err.println("Server couldn't be initialized.\nPlease,"
+                    + " check for connections setup and firewalls.");
+            LogWriter.generateLog("Server couldn't be initialized."
+                    + "\nPlease, check for connections setup and firewalls.");
+            this.shutdown();
+            System.exit(0);
+        }
+
         // registering consumers in JavaCaLa
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
         jcl.register(ServerWorker.class, ServerWorker.class.getName());
@@ -159,8 +200,11 @@ public class Server extends Observable implements CollAServer, Runnable {
      */
     @Override
     public synchronized void updateUser(CollAUser usr) throws NonExistentUser {
-        if (!usersMap.containsKey(usr.getName())) {
+        if (this.isPrimaryServer && !usersMap.containsKey(usr.getName())) {
             throw new NonExistentUser(usr.getName() + "is not registered");
+        } else if(!this.isPrimaryServer) {
+            if(!this.usersMap.containsKey(usr.getName()))
+                this.usersMap.put(usr.getName(), usr);
         }
         /*
          * iterates over the groups of a user to update its status to each group
@@ -175,6 +219,12 @@ public class Server extends Observable implements CollAServer, Runnable {
             this.storeClientsData();
         } catch (Exception e) {
             Debugger.debug(e);
+        }
+        UpdateMsg msg = new UpdateUserMsg(usr);
+        try {
+            this.updateSecondary(msg);
+        } catch (IOException | ClassNotFoundException ex) {
+            //@todo treat catch
         }
         this.setChanged();
         this.notifyObservers();
@@ -240,7 +290,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         f_out.close();
     }
 
-    private void restoreServerData() throws Exception {
+    public void restoreServerData() throws Exception {
 
         // create data directory if it does not alredy exist
         new File("data/").mkdir();
@@ -276,19 +326,26 @@ public class Server extends Observable implements CollAServer, Runnable {
         f_in.close();
     }
 
-    private void restoreGUI() throws NonExistentUser {
+    public void restoreGUI() throws NonExistentUser {
         for (String userName : this.usersMap.keySet()) {
             CollAUser user = this.usersMap.get(userName);
             this.updateUser(user);
         }
     }
-    
-    public synchronized void updateWeightedHost(WeightedHost wHost){                
+
+    public synchronized void updateWeightedHost(WeightedHost wHost) {
         this.weightedHosts.remove(wHost);
         this.weightedHosts.add(wHost);
+        UpdateMsg msg = new UpdateWeightedHostMsg(wHost);
+        try {
+            this.updateSecondary(msg);
+        } catch (IOException | ClassNotFoundException ex) {
+            //@todo treat catch
+            Debugger.debug(ex);
+        }
     }
-    
-    public synchronized WeightedHost poolWeightedHost(){
+
+    public synchronized WeightedHost poolWeightedHost() {
         return this.weightedHosts.poll();
     }
 
@@ -296,13 +353,46 @@ public class Server extends Observable implements CollAServer, Runnable {
     public synchronized void updateHost(CollAHost host) throws NonExistentUser {
         CollAUser user = this.usersMap.get(host.getNameUser());
         user.addHost(host);
-        if(!host.IsOnline())
+        if (!host.IsOnline()) {
             this.weightedHosts.remove(new WeightedHost(host));
-        this.updateUser(user);     
+        }
+        this.updateUser(user);
+        //update secondary
+        if (this.isPrimaryServer) {
+            UpdateMsg msg = new UpdateHostMsg(host);
+            try {
+                this.updateSecondary(msg);
+            } catch (IOException | ClassNotFoundException ex) {
+                //Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                //@todo tratar exceção em que secundário não responde
+                Debugger.debug(ex);
+            }
+        }
         // notify its observers
         this.setChanged();
         this.notifyObservers();
     }// fim do método updateHost
+
+    private void updateSecondary(UpdateMsg msg) throws IOException, ClassNotFoundException {
+        if (this.isPrimaryServer) {
+            Debugger.debug("updating secondary server at: " + this.secondaryIPAddress);
+            try {
+                Socket socket = new Socket(
+                        InetAddress.getByName(this.secondaryIPAddress),
+                        this.secondaryPortNumber);
+                socket.setSoTimeout(10000);
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(msg);
+                output.flush();
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                //read ACK
+                input.readObject();
+                socket.close();
+            } catch (SocketTimeoutException timeout) {
+                Debugger.debug(timeout);
+            }
+        }
+    }
 
     /**
      *
@@ -355,6 +445,12 @@ public class Server extends Observable implements CollAServer, Runnable {
         } catch (Exception e) {
             Debugger.debug(e);
         }
+        UpdateMsg msg = new UpdateGroupMsg(group);
+        try {
+            this.updateSecondary(msg);
+        } catch (IOException | ClassNotFoundException ex) {
+            //@todo treat ex
+        }
     }
 
     @Override
@@ -399,10 +495,10 @@ public class Server extends Observable implements CollAServer, Runnable {
     public void disconnectAllClients() {
         for (String userName : this.usersMap.keySet()) {
             try {
-                CollAUser user = this.usersMap.get(userName);                
+                CollAUser user = this.usersMap.get(userName);
                 /*for (CollAHost host : user.getHosts()) {
-                    host.setOffline();
-                }*/
+                 host.setOffline();
+                 }*/
                 user.removeAllHosts();
                 Socket temp = this.connectionsMap.get(userName);
                 if (temp != null && !temp.isClosed()) {
@@ -527,15 +623,17 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.setChanged();
         notifyObservers(message);
     }
-    
-    public long getHostWeightIncrement(){
+
+    public long getHostWeightIncrement() {
         return this.hostWeightIncrement;
     }
-    
-    public synchronized void setHostWeightIncrement(long weightIncrement){
+
+    public synchronized void setHostWeightIncrement(long weightIncrement) {
         this.hostWeightIncrement = weightIncrement;
     }
-    
+    private String secondaryIPAddress;
+    private int secondaryPortNumber;
+    private boolean isPrimaryServer;
     private static Server serverInstance = null; // singleton pattern
     private boolean active;
     private Long taskIDs;

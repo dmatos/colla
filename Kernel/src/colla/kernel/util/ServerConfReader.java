@@ -17,7 +17,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @author dmatos
  */
-public class SAXReader extends DefaultHandler {
+public class ServerConfReader extends DefaultHandler {
 
     private String ipAddress;
     private Integer portNumber;
@@ -74,12 +74,6 @@ public class SAXReader extends DefaultHandler {
         }        
     }
     
-    /**
-     * Returns the IP address found in the xml file
-     */
-    public String getIPfromXML(){
-        return ipAddress;
-    }
     
     /**
      * 
@@ -88,6 +82,13 @@ public class SAXReader extends DefaultHandler {
     public String getSecondaryIPAddressFromXML(){
         return this.secondaryIPAddress;
     }
+    
+    /**
+     * Returns the IP address found in the xml file
+     */
+    public String getIPfromXML(){
+        return ipAddress;
+    }    
     
     /**
      * Returns the port number found in the xml file

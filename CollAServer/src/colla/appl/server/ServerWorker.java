@@ -4,7 +4,7 @@
  */
 package colla.appl.server;
 
-import colla.appl.server.util.WeightedHost;
+import colla.kernel.impl.WeightedHost;
 import colla.kernel.api.*;
 import colla.kernel.enumerations.ActivityID;
 import colla.kernel.enumerations.ServerOps;

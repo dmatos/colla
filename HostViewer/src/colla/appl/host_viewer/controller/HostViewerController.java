@@ -11,7 +11,7 @@ import colla.kernel.messages.toHost.ServerHostLoginAnswer;
 import colla.kernel.messages.toHost.TaskMessage;
 import colla.kernel.messages.toServer.*;
 import colla.kernel.util.Debugger;
-import colla.kernel.util.SAXReader;
+import colla.kernel.util.ServerConfReader;
 import colla.kernel.util.Treater;
 import interfaces.kernel.JCL_result;
 
@@ -34,7 +34,7 @@ public class HostViewerController implements Runnable {
     private HostViewerController() throws ParserConfigurationException, SAXException, IOException {        
         this.storedResults = new HashMap<Integer, CollATask>();
         // Read IP
-        SAXReader reader = new SAXReader();
+        ServerConfReader reader = new ServerConfReader();
 
         reader.parse("server_conf.xml");
         serverIPaddress = reader.getIPfromXML();

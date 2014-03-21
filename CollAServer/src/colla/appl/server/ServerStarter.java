@@ -63,7 +63,7 @@ public class ServerStarter {
         }
 
         try {
-            superServer = Server.setupServer(portNumber, timeout);
+            superServer = Server.setupServer(timeout, true);
             Thread thr = new Thread(superServer);
             thr.start();
 

@@ -35,6 +35,7 @@ import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
 import colla.kernel.impl.Session;
+import colla.kernel.util.Debugger;
 import colla.kernel.util.LogWriter;
 import colla.kernel.util.NetworkDevices;
 import colla.kernel.util.TimeAndDate;
@@ -416,7 +417,7 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
             model.setRoot(root);
             jTree_clients.repaint();
         } catch (ServerInitializationException serverEx) {
-            serverEx.printStackTrace();
+            Debugger.debug(serverEx);
         }
     }
 

@@ -10,7 +10,7 @@ import colla.kernel.impl.Host;
 import colla.kernel.messages.toHost.ServerHostRegisterAnswerMsg;
 import colla.kernel.messages.toServer.HostRegisterMsg;
 import colla.kernel.util.Debugger;
-import colla.kernel.util.SAXReader;
+import colla.kernel.util.ServerConfReader;
 import java.io.*;
 import java.net.*;
 import java.util.Collections;
@@ -28,7 +28,7 @@ public class HostViewerRegister implements Runnable {
     public HostViewerRegister() {
         try {
             this.collAHost = new Host();
-            SAXReader reader = new SAXReader();
+            ServerConfReader reader = new ServerConfReader();
             reader.parse("server_conf.xml");
             serverIP = reader.getIPfromXML();
             serverPort = reader.getPortNumberFromXML();

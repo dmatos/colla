@@ -22,6 +22,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import org.openide.util.Exceptions;
 
 /**
  * Works as union point and controller of the all GUI's
@@ -38,10 +39,13 @@ public class DeveloperViewerController extends Observable implements Runnable {
      * @param contacts contacts of the user
      */
     private DeveloperViewerController(CollAUser usr, int serverPort,
-            String serverIP, HashMap<String, CollAUser> contacts) {
+            String serverIP, int secondaryServerPort,
+            String secondaryServerIp, HashMap<String, CollAUser> contacts) {
         this.user = usr;
         this.serverIPaddress = serverIP;
         this.serverPortNumber = serverPort;
+        this.secondaryServerIP = secondaryServerIp;
+        this.secondaryServerPort = secondaryServerPort;
         this.tasksToRun = new ConcurrentLinkedQueue<CollATask>();
         this.taskFile = null;
         this.taskDependencies = new ArrayList<File>();
@@ -52,7 +56,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         this.devUI = null;
         this.hostsWithScheduledTasks = new HashMap<Long, CollAHost>();
         this.sentTaskMonitor = new SentTasksMonitor(serverIP, serverPort);
-        this.scheduleSentTaskMonitor = new Timer();        
+        this.scheduleSentTaskMonitor = new Timer();
         this.monitorDelayAndPeriod = new Long(300000); //5 minutes
     }
 
@@ -67,10 +71,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
      */
     public static synchronized DeveloperViewerController setupDeveloperController(
             CollAUser usr, int serverPort, String serverIP,
+            int secondaryServerPort, String secondaryServerIp,
             HashMap<String, CollAUser> contacts) {
         if (devController == null) {
             devController = new DeveloperViewerController(usr, serverPort,
-                    serverIP, contacts);
+                    serverIP, secondaryServerPort, secondaryServerIp, contacts);
         }
         return devController;
     }
@@ -140,6 +145,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
+        } catch (ConnectException | SocketTimeoutException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
         } catch (Exception io) {
             // io.printStackTrace();
         }
@@ -184,8 +192,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
             Debugger.debug(e);
         }
     }
-    
-    public void setTaskToResend(CollATask task){
+
+    public void setTaskToResend(CollATask task) {
         this.tasksToRun.add(task);
     }
 
@@ -230,8 +238,12 @@ public class DeveloperViewerController extends Observable implements Runnable {
             socket.close();
             Debugger.debug("Mensagem com pedido do host foi enviada ao servidor");
 
-        } catch (SocketTimeoutException tex) {
+        } catch (ConnectException | SocketTimeoutException tex) {
             Debugger.debug(tex);
+            this.exchangeServers();
+            this.getAvailableHostsOnServer(taskFile, attachFiles, args,
+                    classToExecute, methodToExecute, group, schedule,
+                    isDistributed);
         } catch (IOException io) {
             Debugger.debug(io);
         } catch (ClassNotFoundException cnfe) {
@@ -291,7 +303,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         /* Destruindo o objeto task
          * task.clear();
          * task = null;
-         */      
+         */
     }
 
     /**
@@ -460,9 +472,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
         HashMap<String, CollATask> taskMap = new HashMap<String, CollATask>();
         if (taskResults.get(groupName) != null) {
             taskMap = taskResults.get(groupName);
-        }      
+        }
         String tName = this
-                .generateUniqueTaskName(taskName, task.getTaskID());        
+                .generateUniqueTaskName(taskName, task.getTaskID());
         SentTask sentTask = new SentTask(task);
         taskMap.put(tName, sentTask);
         taskResults.put(groupName, taskMap);
@@ -471,7 +483,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         if (devUI != null) {
             devUI.setListOfTasks(this.getTasks());
         }
-    } 
+    }
 
     /**
      *
@@ -524,8 +536,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
-        } catch (SocketTimeoutException tex) {
+        } catch (ConnectException | SocketTimeoutException tex) {
             Debugger.debug(tex);
+            this.exchangeServers();
         } catch (IOException io) {
             Debugger.debug(io);
         } catch (Exception e) {
@@ -573,6 +586,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
+        } catch (ConnectException | SocketTimeoutException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
         } catch (Exception io) {
             Debugger.debug(io);
         }
@@ -596,6 +612,10 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
+        } catch (ConnectException | SocketTimeoutException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
+            this.uploadUserToServer();
         } catch (Exception io) {
             Debugger.debug(io);
         }
@@ -631,11 +651,12 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 input.readObject();
                 socket.close();
                 displayInfo("Group " + group.getName() + " has been created.");
-            } catch (SocketTimeoutException tout) {
+            } catch (ConnectException | SocketTimeoutException tout) {
                 Debugger.debug("Group " + group.getName()
                         + " could not be created. Connection timeout.", tout);
                 displayInfo("Group " + group.getName()
                         + " could not be created. Connection timeout.");
+                this.exchangeServers();
             } catch (IOException io) {
                 Debugger.debug(group.getName()
                         + " could not be created. Connection lost.", io);
@@ -690,11 +711,12 @@ public class DeveloperViewerController extends Observable implements Runnable {
             this.displayInfo("A request to join " + groupName
                     + " was sent to its admin");
             // devGUI.closeJoinGroupDialog();
-        } catch (SocketTimeoutException tout) {
+        } catch (ConnectException | SocketTimeoutException tout) {
             Debugger.debug("Could not send request to join " + groupName
                     + ". Connection timeout.", tout);
             displayInfo("Could not send request to join " + groupName
                     + ". Connection timeout.");
+            this.exchangeServers();
         } catch (IOException io) {
             Debugger.debug("Could not send request to join " + groupName
                     + ". Connection can't be established.", io);
@@ -742,11 +764,11 @@ public class DeveloperViewerController extends Observable implements Runnable {
             // System.out.println("shutdown pela porta: "+socket.getLocalPort());
 
         } catch (SocketTimeoutException ste) {
-            // debug(ste);
+            Debugger.debug(ste);
         } catch (IOException io) {
-            // debug(io);
+            Debugger.debug(io);
         } catch (ClassNotFoundException exception) {
-            // debug(exception);
+            Debugger.debug(exception);
         }
 
         if (microServer != null) {
@@ -837,12 +859,13 @@ public class DeveloperViewerController extends Observable implements Runnable {
                         input.readObject();
                         socket.close();
                         return true;
+                    } catch (ConnectException | SocketTimeoutException se) {
+                        Debugger.debug(se);
+                        this.exchangeServers();
                     } catch (UnknownHostException uhe) {
                         Debugger.debug(uhe);
-                    } catch (IOException io) {
+                    } catch (IOException | ClassNotFoundException io) {
                         Debugger.debug(io);
-                    } catch (ClassNotFoundException cnfe) {
-                        Debugger.debug(cnfe);
                     }
                 }
             }// end if(contact.isOnline)
@@ -915,8 +938,9 @@ public class DeveloperViewerController extends Observable implements Runnable {
                 input.readObject();
                 socket.close();
 
-            } catch (SocketTimeoutException tout) {
-                Debugger.debug(tout);
+            } catch (ConnectException | SocketTimeoutException ex) {
+                Debugger.debug(ex);
+                this.exchangeServers();
             } catch (IOException io) {
                 Debugger.debug(io);
             } catch (ClassNotFoundException cnfe) {
@@ -942,6 +966,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
     }
 
     /**
+     * @todo download result talvez passe a se conectar ao superhost
+     *
      * Download a result from a host.
      *
      * @param ticket
@@ -1087,6 +1113,35 @@ public class DeveloperViewerController extends Observable implements Runnable {
     public int getServerPortNumber() {
         return this.serverPortNumber;
     }
+
+    public void reinitializeMicroServer() {
+        try {
+            microServer = new DevMicroServer(serverIPaddress, serverPortNumber);
+            Thread thr = new Thread(microServer);
+            thr.start();
+        } catch (DeveloperControllerInitializationException ex) {
+            Debugger.debug(ex);
+        }
+    }
+
+    /**
+     * Change to secondary server in case of the primary has failed (fault
+     * tolerance).
+     */
+    public void exchangeServers() {
+
+        String tempIP;
+        int tempPort;
+
+        tempIP = this.serverIPaddress;
+        tempPort = this.serverPortNumber;
+
+        this.serverIPaddress = this.secondaryServerIP;
+        this.serverPortNumber = this.secondaryServerPort;
+
+        this.secondaryServerIP = tempIP;
+        this.secondaryServerPort = tempPort;
+    }
     private static DeveloperViewerController devController = null;
     private boolean isDown;
     private final int timeout = 10000;
@@ -1094,6 +1149,8 @@ public class DeveloperViewerController extends Observable implements Runnable {
     private CollADeveloperViewerUI devUI;
     private int serverPortNumber;
     private String serverIPaddress;
+    private Integer secondaryServerPort;
+    private String secondaryServerIP;
     private CollAUser user;
     /*
      * Sending a Task

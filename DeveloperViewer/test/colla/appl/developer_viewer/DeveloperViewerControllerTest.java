@@ -58,10 +58,12 @@ public class DeveloperViewerControllerTest {
         String username = "username";
         CollAUser usr = new User();
         usr.setName(username);
-        int serverPort = 9999;
-        String serverIP = "127.0.0.1";
+
         HashMap<String, CollAUser> contacts = new HashMap<String, CollAUser>();
-        DeveloperViewerController result = DeveloperViewerController.setupDeveloperController(usr, serverPort, serverIP, contacts);
+        DeveloperViewerController result =
+                DeveloperViewerController.setupDeveloperController(
+                usr, serverPort, serverIP, secondaryServerPort,
+                secondaryServerIP, contacts);
         DeveloperViewerController expResult;
         try {
             expResult = DeveloperViewerController.getInstance();
@@ -80,10 +82,13 @@ public class DeveloperViewerControllerTest {
         DeveloperViewerController result;
         CollAUser usr = new User();
         try {
-            DeveloperViewerController devViewer = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+            DeveloperViewerController instance =
+                    DeveloperViewerController.setupDeveloperController(usr,
+                    this.serverPort, this.serverIP, this.secondaryServerPort,
+                    this.secondaryServerIP, new HashMap());
             result = DeveloperViewerController.getInstance();
-            assertEquals(devViewer, result);
-            devViewer.shutdown();
+            assertEquals(instance, result);
+            instance.shutdown();
         } catch (DeveloperControllerInitializationException ex) {
             fail(ex.getMessage());
         }
@@ -98,7 +103,10 @@ public class DeveloperViewerControllerTest {
         usr.setName("username");
         String groupName = "group";
         Set<String> group = new TreeSet<String>();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.refresh_a_group(groupName, group);
         instance.shutdown();
     }
@@ -110,7 +118,10 @@ public class DeveloperViewerControllerTest {
     public void testDisplayInfo() {
         String info = "display test";
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.displayInfo(info);
         instance.shutdown();
     }
@@ -120,8 +131,11 @@ public class DeveloperViewerControllerTest {
      */
     @Test
     public void testSetUser() {
-        CollAUser usr = new User();        
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        CollAUser usr = new User();
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         usr.setName("username");
         instance.setUser(usr);
         CollAUser result = instance.getUser();
@@ -135,7 +149,10 @@ public class DeveloperViewerControllerTest {
     @Test
     public void testGetUser() {
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         CollAUser expResult = usr;
         CollAUser result = instance.getUser();
         assertEquals(expResult, result);
@@ -148,7 +165,10 @@ public class DeveloperViewerControllerTest {
     @Test
     public void testShutdown() {
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.shutdown();
     }
 
@@ -160,7 +180,10 @@ public class DeveloperViewerControllerTest {
         String contact = "";
         String groupName = "";
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         CollAUser expResult = null;
         CollAUser result = instance.getContactByGroup(contact, groupName);
         assertEquals(expResult, result);
@@ -175,11 +198,14 @@ public class DeveloperViewerControllerTest {
         String sender = "";
         String message = "";
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.showChatMessage(sender, message);
         instance.shutdown();
     }
-    
+
     /**
      * Test of addGroup method, of class DeveloperViewerController.
      */
@@ -189,7 +215,10 @@ public class DeveloperViewerControllerTest {
         CollAGroup group = new Group(groupName);
         HashMap<String, CollAUser> usersMap = new HashMap();
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.addGroup(groupName, group, usersMap);
         usr = instance.getUser();
         CollAGroup temp = usr.getGroups().get(groupName);
@@ -205,13 +234,16 @@ public class DeveloperViewerControllerTest {
         CollAHost host = new Host();
         host.setName("host");
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.addHost(host);
-        usr  = instance.getUser();
+        usr = instance.getUser();
         CollAHost result = usr.getHost("host");
         assertEquals(host, result);
         instance.shutdown();
-        
+
     }
 
     /**
@@ -222,7 +254,10 @@ public class DeveloperViewerControllerTest {
         CollAUser contact = new User();
         contact.setName("contact");
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         instance.addContact(contact);
         CollAUser result = instance.getContact("contact");
         assertEquals(contact, result);
@@ -235,7 +270,10 @@ public class DeveloperViewerControllerTest {
     @Test
     public void testGetContact() {
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         CollAUser expResult = null;
         CollAUser result = instance.getContact("nonExistentContact");
         assertEquals(expResult, result);
@@ -248,7 +286,10 @@ public class DeveloperViewerControllerTest {
     @Test
     public void testGetServerIPAddress() {
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         String expResult = "127.0.0.1";
         String result = instance.getServerIPAddress();
         assertEquals(expResult, result);
@@ -261,10 +302,17 @@ public class DeveloperViewerControllerTest {
     @Test
     public void testGetServerPortNumber() {
         CollAUser usr = new User();
-        DeveloperViewerController instance = DeveloperViewerController.setupDeveloperController(usr, 9999, "127.0.0.1", new HashMap());
+        DeveloperViewerController instance =
+                DeveloperViewerController.setupDeveloperController(usr,
+                this.serverPort, this.serverIP, this.secondaryServerPort,
+                this.secondaryServerIP, new HashMap());
         int expResult = 9999;
         int result = instance.getServerPortNumber();
         assertEquals(expResult, result);
-        instance.shutdown();        
+        instance.shutdown();
     }
+    private int serverPort = 9999;
+    private String serverIP = "127.0.0.1";
+    private int secondaryServerPort = 9998;
+    private String secondaryServerIP = "127.0.0.1";
 }

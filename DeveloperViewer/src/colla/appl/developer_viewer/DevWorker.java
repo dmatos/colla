@@ -18,11 +18,10 @@ import java.util.*;
  */
 public class DevWorker extends Observable {
 
-    public void execute(CollAMessage collAMessage, DevMicroServer devMicroServer) throws DeveloperControllerInitializationException {
+    public void execute(CollAMessage collAMessage, DevMicroServer devMicroServer)
+            throws DeveloperControllerInitializationException {
         // Envia resposta pro cliente de que a mensagem foi recebida e que ele pode encerrar a conexão.        
         DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
-        this.serverIPaddress = devMicroServer.getServerIPaddress();
-        this.serverPortNumber = devMicroServer.getServerPortNumber();
 
         ClientOps operation;// operação a ser lida        
         try {
@@ -145,7 +144,5 @@ public class DevWorker extends Observable {
             Debugger.debug(devEx);
         }
     }
-    private final int timeout = 0;
-    String serverIPaddress;
-    int serverPortNumber;
+    private final int timeout = 10000;
 }// end of class DevWorker

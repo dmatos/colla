@@ -39,7 +39,7 @@ public class DeveloperViewerTaskTests {
         /*sign user up for the server*/
         devViewerLogin.setUser(user);
         try {
-            assertFalse(devViewerLogin.signUpForServer(password));
+            assertTrue(devViewerLogin.signUpForServer(password));
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -77,7 +77,7 @@ public class DeveloperViewerTaskTests {
         File taskFile = new File(testFilesDir + "testes.jar");
         ArrayList<File> args = new ArrayList<File>();
         ArrayList<File> attaches = new ArrayList<File>();
-        args.add(new File(testFilesDir + "entrada.txt"));
+        args.add(new File(testFilesDir + "testesinput.txt"));
         String classToExecute = "Fibonacci";
         String methodToExecute = "calculate";
 

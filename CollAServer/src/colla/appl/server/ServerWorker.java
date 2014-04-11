@@ -40,7 +40,7 @@ public class ServerWorker {
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             collAMessage = (CollAMessage) input.readObject();
             operation = (ServerOps) collAMessage.getOperation();
-            //System.err.println(operation.toString());
+            Debugger.debug(operation.toString());
             switch (operation) {
                 case GET_LIST_OF_ONLINE_HOSTS: {
                     RetrieveOnlineHostsMsg incomingMsg = (RetrieveOnlineHostsMsg) collAMessage;
@@ -90,6 +90,7 @@ public class ServerWorker {
                         output.flush();
                         this.sendHostUpdateToOwner(host, host.getNameUser());
                     } catch (NonExistentUser nExUsr) {
+                        Debugger.debug(nExUsr);
                         // TODO fazer caso em que houve falha na conexão do host
                     }
                 }// end of case HOST_LOGIN
@@ -124,9 +125,9 @@ public class ServerWorker {
                             this.recordActivities(host, ActivityID.SIGNUP, "");
                             server.updateHost(host);
                             server.notifyObservers();
-                            Debugger.debug("Host " + hostName +
-                                    ", owned by: " + userName +
-                                    ", was succefully registered");
+                            Debugger.debug("Host " + hostName
+                                    + ", owned by: " + userName
+                                    + ", was succefully registered");
                             this.sendHostUpdateToOwner(host, userName);
                         } catch (NonExistentUser nExUsr) {
                             outgoing.setHostName(null);
@@ -156,7 +157,7 @@ public class ServerWorker {
                         CollAUser usr = server.getUser(adminName);
                         this.addGroup(usr, groupName);
                     } catch (NonExistentUser nExUsr) {
-                        nExUsr.printStackTrace();
+                        Debugger.debug(nExUsr);
                     }
                 }// fim so case CREATE_GROUP
                 break;
@@ -190,12 +191,14 @@ public class ServerWorker {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                     output.writeObject(response);
                     output.flush();
-                    try {
-                        CollAUser user = server.getUser(userName);
-                        this.updateUser(user);
-                        this.sendMemberUpdateToGroups(userName);
-                    } catch (NonExistentUser nExUsr) {
-                        nExUsr.printStackTrace();
+                    if (((DeveloperViewerLoginAnswerMsg) response).getPassConfirmation()) {
+                        try {
+                            CollAUser user = server.getUser(userName);
+                            this.updateUser(user);
+                            this.sendMemberUpdateToGroups(userName);
+                        } catch (NonExistentUser nExUsr) {
+                            nExUsr.printStackTrace();
+                        }
                     }
                 }
                 break; //finishes LOGIN
@@ -207,8 +210,8 @@ public class ServerWorker {
                      * sockets for invalid IP's
                      */
                     MapConnection msg = (MapConnection) collAMessage;
-                    String nome = msg.getSender();
-                    server.mapConnection(nome, socket);
+                    String clientName = msg.getSender();
+                    server.mapConnection(clientName, socket);
                 }
                 ;
                 break; //finishes map the connection
@@ -221,7 +224,7 @@ public class ServerWorker {
                     CollAMessage answer = this.clientSignUp(user, pass);
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                     output.writeObject(answer);
-                    output.flush();                    
+                    output.flush();
                     this.recordActivities(user, ActivityID.SIGNUP, null);
                 }
                 break;//finishes SIGN_UP
@@ -249,7 +252,7 @@ public class ServerWorker {
                         CollAUser tempUser = server.getUser(user.getName());
                         this.clientDisconnect(user, tempUser);
                     } catch (NonExistentUser nExUsr) {
-                        nExUsr.printStackTrace();
+                        Debugger.debug(nExUsr);
                     }
                 }
                 break;//finishes DISCONNECT
@@ -981,7 +984,7 @@ public class ServerWorker {
         try {
             Server server = Server.getInstance();
             Set<String> userNames = server.getUsersSet();
-            Iterator<String> userNamesIt = userNames.iterator();            
+            Iterator<String> userNamesIt = userNames.iterator();
             while (userNamesIt.hasNext()) {
                 try {
                     CollAUser auxUser = server.getUser(userNamesIt.next());
@@ -1049,7 +1052,7 @@ public class ServerWorker {
             //wait ACK
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             input.readObject();
-            
+
             if (user.hasValidIP()) {
                 socket.close();
             }
@@ -1115,7 +1118,8 @@ public class ServerWorker {
      * @param socket an socket from client.
      * @return a message to send to client to confirm login
      */
-    private CollAMessage clientLogin(String userName, String password, String ipAsClientSeesIt, Socket socket) {
+    private CollAMessage clientLogin(String userName, String password,
+            String ipAsClientSeesIt, Socket socket) {
         DeveloperViewerLoginAnswerMsg answer = new DeveloperViewerLoginAnswerMsg();
         try {
             Server server = Server.getInstance();
@@ -1251,13 +1255,13 @@ public class ServerWorker {
                 response.nameAlreadyInUse(Boolean.FALSE);
                 try {
                     server.addUser(user);
+                    //reads crypted passaword
+                    server.setUserPassword(user.getName(), pass);
                 } catch (UserAlreadyExists usrAEx) {
                     //true if the name is not available
                     response.nameAlreadyInUse(Boolean.TRUE);
                     Debugger.debug(usrAEx);
                 }
-                //reads crypted passaword
-                server.setUserPassword(user.getName(), pass);
             }
         } catch (ServerInitializationException servInit) {
             Debugger.debug(servInit);
@@ -1301,9 +1305,10 @@ public class ServerWorker {
                 socket.close();
             }
 
-        } catch (Exception io) {
+        } catch (Exception ex) {
             Debugger.debug("Error while creating new group. Client: " + usr.getName() + "\n"
-                    + "Client IP Address: " + usr.getIp(), io);
+                    + "Client IP Address: " + usr.getIp());
+            Debugger.debug(ex);
         }
     }// end method
 
@@ -1339,7 +1344,7 @@ public class ServerWorker {
             if (user.hasValidIP()) {
                 socketAux.close();
             }
-        } catch (ServerInitializationException | IOException | ClassNotFoundException ex) {
+        } catch (Exception ex) {
             Debugger.debug("Error: couldn't send list of groups to client " + user.getName()
                     + " at " + user.getIp(), ex);
         }

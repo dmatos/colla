@@ -32,7 +32,6 @@ public class ServerStarter {
     public static void main(String[] args) {
 
         int timeout = 300000;
-        int portNumber = 9999;
         Server superServer;
         boolean useGUI = true;
         Debugger.setDebugger(false);
@@ -44,14 +43,6 @@ public class ServerStarter {
                     timeout = tout;
                 } catch (NumberFormatException ex) {
                     timeout = 300000;
-                }
-            }
-            if (args[i].equals("-p") && i + 1 < args.length - 1) {
-                try {
-                    Integer p = Integer.parseInt(args[i + 1]);
-                    portNumber = p;
-                } catch (NumberFormatException ex) {
-                    portNumber = 9999;
                 }
             }
             if (args[i].equals("-noX")) {

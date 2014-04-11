@@ -9,6 +9,7 @@ import colla.kernel.messages.toClient.TaskResultMsg;
 import colla.kernel.messages.toSecondary.UpdateGroupMsg;
 import colla.kernel.messages.toSecondary.UpdateHostMsg;
 import colla.kernel.messages.toSecondary.UpdateMsg;
+import colla.kernel.messages.toSecondary.UpdatePwordMsg;
 import colla.kernel.messages.toSecondary.UpdateUserMsg;
 import colla.kernel.messages.toSecondary.UpdateWeightedHostMsg;
 import colla.kernel.util.Debugger;
@@ -36,7 +37,7 @@ import org.xml.sax.SAXException;
  */
 public class Server extends Observable implements CollAServer, Runnable {
 
-    private Server(int timeOut, boolean isPrimaryServer) throws IOException {        
+    private Server(int timeOut, boolean isPrimaryServer) throws IOException {
         this.timeout = timeOut;
         this.isPrimaryServer = isPrimaryServer;
         this.hostWeightIncrement = 0L;
@@ -83,10 +84,11 @@ public class Server extends Observable implements CollAServer, Runnable {
             reader.parse("server_conf.xml");
             this.secondaryIPAddress = reader.getSecondaryIPAddressFromXML();
             this.secondaryPortNumber = reader.getSecondaryPortNumberFromXML();
-            if(this.isPrimaryServer)
+            if (this.isPrimaryServer) {
                 this.portNumber = reader.getPortNumberFromXML();
-            else
+            } else {
                 this.portNumber = reader.getSecondaryPortNumberFromXML();
+            }
         } catch (IOException | ParserConfigurationException | SAXException io) {
             Debugger.debug(io);
             return false;
@@ -140,7 +142,7 @@ public class Server extends Observable implements CollAServer, Runnable {
 
         try {
             this.serverSocket = new ServerSocket(portNumber);
-            Debugger.debug("Listening to port number "+portNumber);
+            Debugger.debug("Listening to port number " + portNumber);
             //this.portNumber = this.serverSocket.getLocalPort();
         } catch (IOException io) {
             Debugger.debug("Server couldn't be initialized. Please, check"
@@ -202,9 +204,10 @@ public class Server extends Observable implements CollAServer, Runnable {
     public synchronized void updateUser(CollAUser usr) throws NonExistentUser {
         if (this.isPrimaryServer && !usersMap.containsKey(usr.getName())) {
             throw new NonExistentUser(usr.getName() + "is not registered");
-        } else if(!this.isPrimaryServer) {
-            if(!this.usersMap.containsKey(usr.getName()))
+        } else if (!this.isPrimaryServer) {
+            if (!this.usersMap.containsKey(usr.getName())) {
                 this.usersMap.put(usr.getName(), usr);
+            }
         }
         /*
          * iterates over the groups of a user to update its status to each group
@@ -224,7 +227,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.updateSecondary(msg);
         } catch (IOException | ClassNotFoundException ex) {
-            //@todo treat catch
+            Debugger.debug(ex);
         }
         this.setChanged();
         this.notifyObservers();
@@ -238,11 +241,18 @@ public class Server extends Observable implements CollAServer, Runnable {
         output.writeObject(this.usersMap);
         output.flush();
 
+        for (String key : this.usersMap.keySet()) {
+            Debugger.debug("storing client: "+key);
+        }
+
         // store clients passwords
         f_out = new FileOutputStream("data/pwords.data");
         output = new ObjectOutputStream(f_out);
         output.writeObject(this.userPasswords);
         output.flush();
+        
+         for(String key : this.userPasswords.keySet())
+            Debugger.debug("storing pword for: "+key);
 
         // store groups
         f_out = new FileOutputStream("data/groups.data");
@@ -300,12 +310,19 @@ public class Server extends Observable implements CollAServer, Runnable {
         ObjectInputStream input = new ObjectInputStream(f_in);
         this.usersMap = (HashMap<String, CollAUser>) input
                 .readObject();
+        for (String key : this.usersMap.keySet()) {
+            Debugger.debug(key + " is registered");
+        }
 
         // restore clients passwords
         f_in = new FileInputStream("data/pwords.data");
         input = new ObjectInputStream(f_in);
         this.userPasswords = (HashMap<String, String>) input
                 .readObject();
+
+        for (String key : this.userPasswords.keySet()) {
+            Debugger.debug(key + " has a pword");
+        }
 
         // restore groups
         f_in = new FileInputStream("data/groups.data");
@@ -340,7 +357,6 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.updateSecondary(msg);
         } catch (IOException | ClassNotFoundException ex) {
-            //@todo treat catch
             Debugger.debug(ex);
         }
     }
@@ -423,6 +439,8 @@ public class Server extends Observable implements CollAServer, Runnable {
         String password = null;
         if (this.userPasswords.containsKey(userName)) {
             password = this.userPasswords.get(userName);
+        } else {
+            Debugger.debug("password not found for " + userName);
         }
         return password;
     }
@@ -432,6 +450,8 @@ public class Server extends Observable implements CollAServer, Runnable {
         this.userPasswords.put(userName, password);
         try {
             this.storeClientsData();
+            UpdateMsg msg = new UpdatePwordMsg(userName, password);
+            updateSecondary(msg);
         } catch (Exception e) {
             Debugger.debug(e);
         }
@@ -449,7 +469,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         try {
             this.updateSecondary(msg);
         } catch (IOException | ClassNotFoundException ex) {
-            //@todo treat ex
+            Debugger.debug(ex);
         }
     }
 

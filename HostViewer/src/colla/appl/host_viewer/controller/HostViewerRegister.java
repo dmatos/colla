@@ -53,9 +53,9 @@ public class HostViewerRegister implements Runnable {
         } catch (ParserConfigurationException ex) {
             Debugger.debug(ex);
         } catch (SAXException ex) {
-             Debugger.debug(ex);
+            Debugger.debug(ex);
         } catch (IOException ex) {
-             Debugger.debug(ex);
+            Debugger.debug(ex);
         }
     }
 
@@ -104,8 +104,9 @@ public class HostViewerRegister implements Runnable {
                 Thread thr = new Thread(hostViewer);
                 thr.start();
                 this.shutdown();
-                if(this.hostRegisterGUI != null)
+                if (this.hostRegisterGUI != null) {
                     this.hostRegisterGUI.dispose();
+                }
             }
             // System.err.println("register");
             // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
@@ -150,16 +151,15 @@ public class HostViewerRegister implements Runnable {
             this.hostRegisterGUI.dispose();
         }
     }
-    
-    
-    private CollAHost collAHost; //usuario que irá logar
-    private String serverIP;
-    private int serverPort;
-    private HostViewRegisterGUI hostRegisterGUI;
 
     @Override
     public void run() {
         hostRegisterGUI = new HostViewRegisterGUI(this);
         hostRegisterGUI.setVisible(true);
     }
+    
+    private CollAHost collAHost; //usuario que irá logar
+    private String serverIP;
+    private int serverPort;
+    private HostViewRegisterGUI hostRegisterGUI;
 }

@@ -13,6 +13,7 @@ import colla.kernel.util.Debugger;
 import colla.kernel.util.NetworkDevices;
 import colla.kernel.util.ServerConfReader;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -21,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.TimeoutException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -33,7 +35,7 @@ import org.xml.sax.SAXException;
 public class DevViewerLogin extends Observable {
 
     public DevViewerLogin() throws DeveloperConfigurationException {
-        this.timeout = 25000;
+        this.timeout = 10000;
         this.user = new User();
         this.user.setOffline();
         this.connected = false;
@@ -134,19 +136,24 @@ public class DevViewerLogin extends Observable {
      * @return true if username is available, false otherwise
      * @throws Exception
      */
-    public boolean signUpForServer(String password) throws Exception {
-        String crypt = this.byteArrayToHexString(this.computeHash(password));
-        ClientSignUpMsg signupMsg = new ClientSignUpMsg(user, crypt);
-        socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
-        socket.setSoTimeout(timeout);
-        output = new ObjectOutputStream(socket.getOutputStream());
-        output.writeObject(signupMsg);
-        output.flush();
+    public boolean signUpForServer(String password) throws IOException, ClassNotFoundException, Exception {
+        try {
+            String crypt = this.byteArrayToHexString(this.computeHash(password));
+            ClientSignUpMsg signupMsg = new ClientSignUpMsg(user, crypt);
+            socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
+            socket.setSoTimeout(timeout);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(signupMsg);
+            output.flush();
 
-        input = new ObjectInputStream(socket.getInputStream());
-        SignUpAnswerMsg incoming = (SignUpAnswerMsg) input.readObject();
-        socket.close();
-        return incoming.getConfirmation();
+            input = new ObjectInputStream(socket.getInputStream());
+            SignUpAnswerMsg incoming = (SignUpAnswerMsg) input.readObject();
+            socket.close();
+            return incoming.getConfirmation();
+        } catch (ConnectException | TimeoutException ce) {
+            this.exchangeServers();
+            throw ce;
+        }
     }
 
     public CollAUser getUser() {
@@ -162,7 +169,10 @@ public class DevViewerLogin extends Observable {
      * returns null.
      * @throws Exception
      */
-    public DeveloperViewerController logInServer(String userName, String password) throws Exception {
+    public DeveloperViewerController logInServer(String userName, 
+            String password) throws IOException, ClassNotFoundException,
+            Exception {
+        Debugger.debug("logInServer...");
         this.retrieveIPaddress();
         HashMap<String, CollAUser> groupMembers;
         /* sends IP address of the machine to let server check if the IP address
@@ -170,45 +180,57 @@ public class DevViewerLogin extends Observable {
          * outside connections. An invalid IP address means that the machine is
          * not reachable from outside.
          */
-        String crypt = this.byteArrayToHexString(this.computeHash(password));
-        DeveloperViewerLoginMsg outgoing = new DeveloperViewerLoginMsg(userName, crypt, machineIP);
-        Debugger.debug("Connecting to server at: "+serverIP);
-        socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
-        socket.setSoTimeout(timeout);
-        output = new ObjectOutputStream(socket.getOutputStream());
-        output.writeObject(outgoing);
-        output.flush();
+        try {
+            String crypt = this.byteArrayToHexString(this.computeHash(password));
+            DeveloperViewerLoginMsg outgoing = new DeveloperViewerLoginMsg(userName, crypt, machineIP);
+            Debugger.debug("Connecting to server at: " + serverIP+" "+serverPort);
+            socket = new Socket(InetAddress.getByName(this.serverIP), this.serverPort);
+            socket.setSoTimeout(timeout);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            output.writeObject(outgoing);
+            output.flush();
 
-        input = new ObjectInputStream(socket.getInputStream());
-        DeveloperViewerLoginAnswerMsg incoming = (DeveloperViewerLoginAnswerMsg) input.readObject();
-        socket.close();
-        //System.out.println("login pela porta: "+sock.getLocalPort());                
-        if (incoming.getNameConfirmation()) {
-            if (incoming.getPassConfirmation()) {
-                this.displayMessage("Receiving data from server.");
-                groupMembers = incoming.getContacts();
-                this.user = incoming.getUser();
-                this.user.setIp(this.machineIP);
-                DeveloperViewerController devViewer = DeveloperViewerController.setupDeveloperController(this.getUser(), this.getServerPort(), this.getServerIPaddress(), groupMembers);
-                for (Observer observer : this.devViewerObservers) {
-                    devViewer.addObserver(observer);
+            input = new ObjectInputStream(socket.getInputStream());
+            DeveloperViewerLoginAnswerMsg incoming = (DeveloperViewerLoginAnswerMsg) input.readObject();
+            socket.close();
+            //System.out.println("login pela porta: "+sock.getLocalPort());                
+            if (incoming.getNameConfirmation()) {
+                if (incoming.getPassConfirmation()) {
+                    this.displayMessage("Receiving data from server.");
+                    groupMembers = incoming.getContacts();
+                    this.user = incoming.getUser();
+                    this.user.setIp(this.machineIP);
+                    DeveloperViewerController devViewer = 
+                            DeveloperViewerController.setupDeveloperController(
+                            this.getUser(), this.getServerPort(), 
+                            this.getServerIPaddress(), this.secondaryServerPort, 
+                            this.secondaryServerIP, groupMembers);
+                    for (Observer observer : this.devViewerObservers) {
+                        devViewer.addObserver(observer);
+                    }
+                    if (this.useGUI) {
+                        DeveloperViewerGUI gui = DeveloperViewerGUI.getInstance(this.user.getName());
+                        this.setDeveloperViewerUI(gui);
+                        devViewer.addObserver(gui);
+                    }
+                    devViewer.setUI(this.devUI);
+                    Thread thr = new Thread(devViewer);
+                    thr.start();
+                    return devViewer;
+                }// fim do if
+                else {
+                    this.displayMessage("Error: incorrect username or password");
+                    Debugger.debug("incorrect password");
                 }
-                if (this.useGUI) {
-                    DeveloperViewerGUI gui = DeveloperViewerGUI.getInstance(this.user.getName());
-                    this.setDeveloperViewerUI(gui);
-                    devViewer.addObserver(gui);
-                }
-                devViewer.setUI(this.devUI);
-                Thread thr = new Thread(devViewer);
-                thr.start();
-                return devViewer;
-            }// fim do if
+            }//fim do if
             else {
                 this.displayMessage("Error: incorrect username or password");
+                Debugger.debug("incorrect username");
             }
-        }//fim do if
-        else {
-            this.displayMessage("Error: incorrect username or password");
+        } catch (ConnectException | TimeoutException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
+            throw ex;
         }
 
         return null;
@@ -227,7 +249,7 @@ public class DevViewerLogin extends Observable {
             this.secondaryServerIP = reader.getSecondaryIPAddressFromXML();
             this.secondaryServerPort = reader.getSecondaryPortNumberFromXML();
             this.serverIP = reader.getIPfromXML();
-            this.serverPort = reader.getPortNumberFromXML();  
+            this.serverPort = reader.getPortNumberFromXML();
         } catch (IOException io) {
             Debugger.debug(io);
             return false;
@@ -280,6 +302,21 @@ public class DevViewerLogin extends Observable {
     public void setUser(CollAUser user) {
         user.setIp(this.user.getIp());
         this.user = user;
+    }
+
+    private void exchangeServers() {
+
+        String tempIP;
+        int tempPort;
+
+        tempIP = this.serverIP;
+        tempPort = this.serverPort;
+
+        this.serverIP = this.secondaryServerIP;
+        this.serverPort = this.secondaryServerPort;
+
+        this.secondaryServerIP = tempIP;
+        this.secondaryServerPort = tempPort;
     }
     //Variables declaration
     private String serverIP;    //server IP addres read from server_conf.xml

@@ -15,6 +15,7 @@ import interfaces.kernel.JCL_facade;
 import java.io.*;
 import java.net.*;
 import java.util.Observable;
+import org.openide.util.Exceptions;
 
 /**
  * Initializes a micro server so the client will be available to receive
@@ -34,21 +35,29 @@ class DevMicroServer extends Observable implements Runnable {
      * @param ipAddress server ip adress.
      * @param portNumber the server port number.
      */
-    public DevMicroServer(String ipAddress, int portNumber) throws DeveloperControllerInitializationException {
-
-        DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
-
-        this.timeout = 90000;
-        this.serverIPaddress = ipAddress;
-        this.serverPortNumber = portNumber;
-        this.active = true;
-        this.shutdownCounter = 0;
+    public DevMicroServer(String ipAddress, int portNumber)
+            throws DeveloperControllerInitializationException {
+        DeveloperViewerController devViewer =
+                DeveloperViewerController.getInstance();
         CollAUser usr = devViewer.getUser();
-        this.serverSocket = null;
-        this.keepAlive = null;
-
         if (usr.hasValidIP()) {
             this.validIP = true;
+        } else {
+            this.validIP = false;
+        }
+        this.timeout = 10000;
+        this.active = true;
+        this.shutdownCounter = 0;
+        this.serverSocket = null;
+        this.keepAlive = null;
+        this.initialize(this.validIP);
+    }// end method
+
+    private void initialize(boolean validIP) throws DeveloperControllerInitializationException {
+        DeveloperViewerController devViewer =
+                DeveloperViewerController.getInstance();
+        CollAUser usr = devViewer.getUser();
+        if (validIP) {
             try {
                 if (devViewer.getUser().getPort() > 0) {
                     this.serverSocket = new ServerSocket(devViewer.getUser().getPort());
@@ -62,7 +71,6 @@ class DevMicroServer extends Observable implements Runnable {
                 Debugger.debug("Problema com criação do server socket do micro server", e);
             }
         } else {
-            this.validIP = false;
             try {
                 /*
                  * asks the server to store and keep this connection alive since
@@ -70,27 +78,33 @@ class DevMicroServer extends Observable implements Runnable {
                  * due to the fact that it is probably behind a NAT
                  */
                 MapConnection mapCon = new MapConnection(usr.getName());
-                this.keepAlive = new Socket(InetAddress.getByName(serverIPaddress), serverPortNumber);
+                this.keepAlive = new Socket(InetAddress.getByName(
+                        devViewer.getServerIPAddress()),
+                        devViewer.getServerPortNumber());
                 ObjectOutputStream output = new ObjectOutputStream(keepAlive.getOutputStream());
                 output.writeObject(mapCon);
                 output.flush();
                 // espera por ACK
                 ObjectInputStream input = new ObjectInputStream(keepAlive.getInputStream());
                 input.readObject();
+            } catch (SocketException | EOFException | SocketTimeoutException ex) {
+                Debugger.debug(ex);
+                this.shutdown();
+                devViewer.exchangeServers();
+                devViewer.reinitializeMicroServer();
             } catch (IOException ioEx) {
-                //debug("Problema com criação do server socket do micro server", e);
+                Debugger.debug("Problema com criação do server socket do micro server", ioEx);
                 this.notifyObservers("Error: DevMicroServer could not be initilized");
                 //System.exit(1);
                 devViewer.shutdown();
             } catch (ClassNotFoundException cnfEx) {
-                //debug("Problema com criação do server socket do micro server", e);
+                Debugger.debug("Problema com criação do server socket do micro server", cnfEx);
                 this.notifyObservers("Error: DevMicroServer could not be initilized");
                 //System.exit(1);
                 devViewer.shutdown();
             }
         }// end else
-
-    }// end method
+    }
 
     @Override
     public void run() {
@@ -119,6 +133,26 @@ class DevMicroServer extends Observable implements Runnable {
                 output.flush();
                 Object[] args = {collAMessage, this};
                 jcl.execute(DevWorker.class.getName(), args);
+            } catch (EOFException | ConnectException | SocketTimeoutException ex) {
+                Debugger.debug(ex);
+                try {
+                    DeveloperViewerController devViewer = DeveloperViewerController.getInstance();
+                    for (int i = 10; i > 0; i -= 2) {
+                        devViewer.displayInfo("Reconnecting to server in " + i + " seconds");
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException ex1) {
+                            Debugger.debug(ex1);
+                        }
+                    }
+                    Debugger.debug(ex);
+                    devViewer.displayInfo("Reconnecting now...");
+                    this.shutdown();
+                    devViewer.exchangeServers();
+                    devViewer.reinitializeMicroServer();
+                } catch (DeveloperControllerInitializationException ex1) {
+                    Debugger.debug(ex);
+                }
             } catch (Exception e) {
                 Debugger.debug(e);
             }
@@ -141,19 +175,7 @@ class DevMicroServer extends Observable implements Runnable {
             Debugger.debug(io);
         }
     }
-  
-
-    public String getServerIPaddress() {
-        return serverIPaddress;
-    }
-
-    public Integer getServerPortNumber() {
-        return serverPortNumber;
-    }
-    
     private Socket keepAlive;
-    private String serverIPaddress;
-    private Integer serverPortNumber;
     private boolean active;
     private final boolean validIP;
     private ServerSocket serverSocket;

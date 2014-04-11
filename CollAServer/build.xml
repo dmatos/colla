@@ -79,6 +79,7 @@
         -->
         <property name="store.jar.name" value="colla-server"/>
         <property name="store.jar.name.secondary" value="secondary-colla-server"/>
+         <property name="main.class" value="colla.appl.server.ServerStarter"/>
         <property name="main.class.secondary" value="colla.appl.server.secondary.SecondaryServer"/>
 
 

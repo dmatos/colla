@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,6 +72,10 @@ public class SecondaryServer {
                     WeightedHost wHost = (WeightedHost) updateMsg.getUpdate();
                     this.update(wHost);
                     break;
+                case SIGN_UP:
+                    List<String> updates = (List<String>) updateMsg.getUpdate();
+                    this.update(updates.get(0), updates.get(1));
+                    break;
             }
         } catch (Exception ex) {
             //treat ex
@@ -92,6 +97,12 @@ public class SecondaryServer {
         Debugger.debug("updating whost");
         Server server = Server.getInstance();
         server.updateWeightedHost(host);
+    }
+    
+    public void update(String username, String pword) throws Exception{
+        Debugger.debug("updating pword for: "+username);
+        Server server = Server.getInstance();
+        server.setUserPassword(username, pword);
     }
 
     public void update(CollAUser user) throws Exception {

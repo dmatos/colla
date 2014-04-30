@@ -5,10 +5,8 @@
 package colla.appl.host_viewer.controller;
 
 import colla.kernel.api.CollAHost;
-import colla.kernel.api.CollATask;
 import colla.kernel.impl.Host;
-import colla.kernel.messages.toHost.TaskMessage;
-import interfaces.kernel.JCL_result;
+import colla.kernel.util.ServerConfReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -41,6 +39,16 @@ public class HostViewerControllerTest {
 
     @Before
     public void setUp() {
+        ServerConfReader reader = new ServerConfReader();
+        try {
+            reader.parse("server_conf.xml");
+            this.serverIP = reader.getIPfromXML();
+            this.serverPort = reader.getPortNumberFromXML();
+            this.secondaryServerIP = reader.getSecondaryIPAddressFromXML();
+            this.secondaryServerPort = reader.getSecondaryPortNumberFromXML();
+        } catch (ParserConfigurationException | SAXException | IOException e){
+            e.printStackTrace();                   
+        }
     }
 
     @After
@@ -52,7 +60,8 @@ public class HostViewerControllerTest {
      */
     @Test
     public void testSetup() throws Exception {
-        HostViewerController result = HostViewerController.setup();
+        HostViewerController result = HostViewerController.setup(serverIP, serverPort,
+                secondaryServerIP, secondaryServerPort);
         assertNotNull(result);
         result.shutdown();
     }
@@ -62,7 +71,8 @@ public class HostViewerControllerTest {
      */
     @Test
     public void testGetInstance() throws Exception {
-        HostViewerController expResult = HostViewerController.setup();
+        HostViewerController expResult = HostViewerController.setup(serverIP, serverPort,
+                secondaryServerIP, secondaryServerPort);
         HostViewerController result = HostViewerController.getInstance();
         assertEquals(expResult, result);
         result.shutdown();
@@ -78,7 +88,8 @@ public class HostViewerControllerTest {
         CollAHost result = null;
         HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
             instance.updateHost(host);
             result = instance.getHost();
         } catch (Exception ex) {
@@ -96,7 +107,8 @@ public class HostViewerControllerTest {
     public void testDisplayStatus() {
         HostViewerController instance;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
             instance.displayStatus("display status test");
             instance.shutdown();
         } catch (Exception ex) {
@@ -114,7 +126,8 @@ public class HostViewerControllerTest {
         dir.mkdir();
         HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
         } catch (Exception ex) {
             fail(ex.toString());
         }
@@ -131,22 +144,24 @@ public class HostViewerControllerTest {
     public void testShutdown() {
         HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
         } catch (Exception ex) {
             fail(ex.toString());
         }
         instance.shutdown();
         assertNull(instance.getHost());
-    }    
+    }
 
     /**
      * Test of getHost method, of class HostViewerController.
      */
     @Test
     public void testGetHost() {
-       HostViewerController instance = null;
+        HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
         } catch (Exception ex) {
             fail(ex.toString());
         }
@@ -164,7 +179,8 @@ public class HostViewerControllerTest {
         System.out.println("getServerIPaddress");
         HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
         } catch (Exception ex) {
             fail(ex.toString());
         }
@@ -180,7 +196,8 @@ public class HostViewerControllerTest {
     public void testGetServerPortNumber() {
         HostViewerController instance = null;
         try {
-            instance = HostViewerController.setup();
+            instance = HostViewerController.setup(serverIP, serverPort,
+                    secondaryServerIP, secondaryServerPort);
         } catch (Exception ex) {
             fail(ex.toString());
         }
@@ -188,4 +205,8 @@ public class HostViewerControllerTest {
         int result = instance.getServerPortNumber();
         assertEquals(expResult, result);
     }
+    private String serverIP;
+    private int serverPort;
+    private String secondaryServerIP;
+    private int secondaryServerPort;
 }

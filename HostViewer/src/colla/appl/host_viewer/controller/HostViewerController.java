@@ -19,6 +19,8 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -31,28 +33,31 @@ import org.xml.sax.SAXException;
  */
 public class HostViewerController implements Runnable {
 
-    private HostViewerController() throws ParserConfigurationException, SAXException, IOException {        
-        this.storedResults = new HashMap<Integer, CollATask>();
-        // Read IP
-        ServerConfReader reader = new ServerConfReader();
-
-        reader.parse("server_conf.xml");
-        serverIPaddress = reader.getIPfromXML();
-        serverPortNumber = reader.getPortNumberFromXML();
+    private HostViewerController(String serverIP, int serverPort,
+            String secondaryServerIP, int secondaryServerPort)
+            throws ParserConfigurationException, SAXException, IOException {
+        this.storedResults = new HashMap<>();
         
-         // Call the GUI
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        this.secondaryServerIP = secondaryServerIP;
+        this.secondaryServerPort = secondaryServerPort;
+
+        // Call the GUI
         HostViewerGUI hostGUI = HostViewerGUI.getInstance();
         hostGUI.setVisible(true);
     }
 
-    public static synchronized HostViewerController setup() throws ParserConfigurationException, SAXException, IOException {
+    public static synchronized HostViewerController setup(String serverIP,
+            int serverPort, String secondaryServerIP, int secondaryServerPort) throws ParserConfigurationException, SAXException, IOException {
         if (instance == null) {
             synchronized (HostViewerController.class) {
                 if (instance == null) {
-                    instance = new HostViewerController();                    
+                    instance = new HostViewerController(serverIP, serverPort,
+                            secondaryServerIP, secondaryServerPort);
                 }
             }
-        }        
+        }
         return instance;
     }
 
@@ -64,7 +69,7 @@ public class HostViewerController implements Runnable {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public synchronized static HostViewerController getInstance() throws HostControllerInitializationException {       
+    public synchronized static HostViewerController getInstance() throws HostControllerInitializationException {
         if (instance == null) {
             throw new HostControllerInitializationException("HostViewer has not been initialized");
         }
@@ -84,9 +89,9 @@ public class HostViewerController implements Runnable {
             outgoing.setHostName(hostName);
             outgoing.setSender(collAHost.getNameUser());
             this.displayStatus("Contacting the server...");
-            Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
-                    serverPortNumber);
-            socket.setSoTimeout(40000);
+            Socket socket = new Socket(InetAddress.getByName(serverIP),
+                    serverPort);
+            socket.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
             output.writeObject(outgoing);
@@ -120,7 +125,11 @@ public class HostViewerController implements Runnable {
                 this.displayStatus("Conection couldn't be established");
             }
 
-        } catch (Exception e) {
+        } catch (IOException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
+            conexao_estabelecida = false;
+        } catch (ClassNotFoundException e) {
             Treater.treat(e);
             conexao_estabelecida = false;
         }
@@ -154,8 +163,8 @@ public class HostViewerController implements Runnable {
     public void uploadHostToServer() {
         try {
             HostUpdateMsg outgoing = new HostUpdateMsg(this.collAHost);
-            Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
-                    serverPortNumber);
+            Socket socket = new Socket(InetAddress.getByName(serverIP),
+                    serverPort);
             socket.setSoTimeout(10000);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
@@ -166,9 +175,12 @@ public class HostViewerController implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
-        } catch (Exception io) {
+        } catch (IOException ex) {
+            Debugger.debug(ex);
+            this.exchangeServers();
+        } catch (ClassNotFoundException io) {
             Debugger.debug(io);
-        }        
+        }
     }
 
     public boolean deleteDir(File dir) {
@@ -181,7 +193,7 @@ public class HostViewerController implements Runnable {
                 }
             }
         }
-        return dir.delete();        
+        return dir.delete();
     }
 
     /**
@@ -190,8 +202,8 @@ public class HostViewerController implements Runnable {
     public void shutdown() {
         try {
             CollAMessage outgoing = new HostDisconnectMsg(collAHost);
-            Socket socket = new Socket(InetAddress.getByName(serverIPaddress),
-                    serverPortNumber);
+            Socket socket = new Socket(InetAddress.getByName(serverIP),
+                    serverPort);
             socket.setSoTimeout(40000);
             ObjectOutputStream output = new ObjectOutputStream(
                     socket.getOutputStream());
@@ -202,20 +214,20 @@ public class HostViewerController implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
-            
+
 
         } catch (Exception tout) {
-           Debugger.debug(tout);
+            Debugger.debug(tout);
         }
-        try{
+        try {
             HostViewerMicroServer.getInstance().shutdown();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             Debugger.debug(ex);
         }
 
-        this.deleteDir(new File("../temp_files/"));            
-        
-        HostViewerController.instance = null;                
+        this.deleteDir(new File("../temp_files/"));
+
+        HostViewerController.instance = null;
     }
 
     /**
@@ -239,7 +251,7 @@ public class HostViewerController implements Runnable {
      * @return a CollATask containing task informations and the result
      */
     public CollATask getStoredResult(Integer ticket) {
-        return this.storedResults.get(ticket);         
+        return this.storedResults.get(ticket);
     }
 
     public CollAHost getHost() {
@@ -247,14 +259,14 @@ public class HostViewerController implements Runnable {
     }
 
     public String getServerIPaddress() {
-        return serverIPaddress;
+        return serverIP;
     }
 
     /*public void setServerIPaddress(String serverIPaddress) {
      this.serverIPaddress = serverIPaddress;
      }*/
     public int getServerPortNumber() {
-        return serverPortNumber;
+        return serverPort;
     }
 
     /*public void setServerPortNumber(int serverPortNumber) {
@@ -284,30 +296,58 @@ public class HostViewerController implements Runnable {
         try {
             HostViewerMicroServer.getInstance().scheduleTask(taskMessage);
         } catch (Exception ex) {
-           Debugger.debug(ex);
+            Debugger.debug(ex);
         }
     }
-    
-    public void updateHostWeight(Long taskTotalTime){
-         this.collAHost.increaseTaskCounter(taskTotalTime);
-         this.uploadHostToServer();
+
+    public void updateHostWeight(Long taskTotalTime) {
+        this.collAHost.increaseTaskCounter(taskTotalTime);
+        this.uploadHostToServer();
     }
-    
+
     @Override
     public void run() {
         try {
-            HostViewerMicroServer microServer =  HostViewerMicroServer.getInstance();
+            HostViewerMicroServer microServer = HostViewerMicroServer.getInstance();
             Thread thr = new Thread(microServer);
             thr.start();
         } catch (Exception ex) {
             Debugger.debug(ex);
         }
     }
+
+    public void reinitializeMicroServer() {
+        HostViewerMicroServer microServer;
+        try {
+            microServer = HostViewerMicroServer.getInstance();
+            Thread thr = new Thread(microServer);
+            thr.start();
+        } catch (HostControllerInitializationException ex) {
+            Debugger.debug(ex);
+        }
+    }
+
+    public void exchangeServers() {
+
+        String tempIP;
+        int tempPort;
+
+        tempIP = this.serverIP;
+        tempPort = this.serverPort;
+
+        this.serverIP = this.secondaryServerIP;
+        this.serverPort = this.secondaryServerPort;
+
+        this.secondaryServerIP = tempIP;
+        this.secondaryServerPort = tempPort;
+    }
     
     private static HostViewerController instance = null;
     private CollAHost collAHost;
-    private String serverIPaddress;
-    private int serverPortNumber;
+    private String serverIP;
+    private int serverPort;
+    private String secondaryServerIP;
+    private int secondaryServerPort;
     private boolean conexao_estabelecida;
     private Map<Integer, CollATask> storedResults;
     private final int timeout = 40000;

@@ -90,8 +90,22 @@ class HostViewerMicroServer implements Runnable {
                             keepAlive.getInputStream());
                     input.readObject();
                     // System.err.println("Conexão mapeada!");
-                } catch (Exception e) {
+                } catch (HostControllerInitializationException | ClassNotFoundException e) {
                     Debugger.debug(e);
+                } catch (IOException e) {
+                    Debugger.debug(e);
+                    this.shutdown();
+                    //countdown to reconnect to a secondary server
+                    for (int i = 10; i > 0; i--) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
+                            Debugger.debug(ex);
+                        }
+                    }
+                    HostViewerController controller = HostViewerController.getInstance();
+                    controller.exchangeServers();
+                    controller.reinitializeMicroServer();                    
                 }
             }
         } catch (HostControllerInitializationException hostEx) {
@@ -146,13 +160,23 @@ class HostViewerMicroServer implements Runnable {
                     serverR.putRegister(collAMessage);
 
                 } catch (EOFException eofe) {
-                    active = false;
-                } catch (Exception e) {
-                    //e.printStackTrace();
-                }
+                    Debugger.debug(eofe);
+                    this.shutdown();
+                    //countdown to reconnect to a secondary server
+                    for (int i = 10; i > 0; i--) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
+                            Debugger.debug(ex);
+                        }
+                    }
+                    HostViewerController controller = HostViewerController.getInstance();
+                    controller.exchangeServers();
+                    controller.reinitializeMicroServer(); 
+                } 
             }// end while
-        } catch (Exception e) {
-            //e.printStackTrace();
+        } catch (HostControllerInitializationException | IOException | ClassNotFoundException e) {
+            Debugger.debug(e);
         }
     }
 

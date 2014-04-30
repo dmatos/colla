@@ -30,8 +30,10 @@ public class HostViewerRegister implements Runnable {
             this.collAHost = new Host();
             ServerConfReader reader = new ServerConfReader();
             reader.parse("server_conf.xml");
-            serverIP = reader.getIPfromXML();
-            serverPort = reader.getPortNumberFromXML();
+            this.serverIP = reader.getIPfromXML();
+            this.serverPort = reader.getPortNumberFromXML();
+            this.secondaryServerIP = reader.getSecondaryIPAddressFromXML();
+            this.secondaryServerPort = reader.getSecondaryPortNumberFromXML();
 
             /*
              * loop que procura o endereço ip do usuário
@@ -50,11 +52,7 @@ public class HostViewerRegister implements Runnable {
                     }
                 }
             }
-        } catch (ParserConfigurationException ex) {
-            Debugger.debug(ex);
-        } catch (SAXException ex) {
-            Debugger.debug(ex);
-        } catch (IOException ex) {
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
             Debugger.debug(ex);
         }
     }
@@ -83,7 +81,7 @@ public class HostViewerRegister implements Runnable {
             outgoing.setHost(collAHost);
 
             Socket connect = new Socket(InetAddress.getByName(serverIP), serverPort);
-            connect.setSoTimeout(0);
+            connect.setSoTimeout(timeout);
             ObjectOutputStream output = new ObjectOutputStream(connect.getOutputStream());
             output.writeObject(outgoing);
             output.flush();
@@ -94,12 +92,13 @@ public class HostViewerRegister implements Runnable {
             connect.close();
 
             if (incoming.getHostName() == null) {
-                //System.err.println("Invalid username or password");
+                Debugger.debug("Invalid username or password");
                 return false;
             } else {
                 collAHost.setName(incoming.getHostName());
                 collAHost.setNameUser(userName);
-                HostViewerController hostViewer = HostViewerController.setup();
+                HostViewerController hostViewer = HostViewerController.setup(
+                        serverIP, serverPort, secondaryServerIP, secondaryServerPort);
                 hostViewer.login(collAHost);
                 Thread thr = new Thread(hostViewer);
                 thr.start();
@@ -108,9 +107,13 @@ public class HostViewerRegister implements Runnable {
                     this.hostRegisterGUI.dispose();
                 }
             }
-            // System.err.println("register");
-            // System.err.println("name: " + me.getName() + " nameUser: " + me.getNameUser());
+            Debugger.debug("register");
+            Debugger.debug("name: " + collAHost.getName() + " nameUser: " + collAHost.getNameUser());
 
+        }catch(SocketException | EOFException | SocketTimeoutException ex){
+            Debugger.debug(ex);
+            this.exchangeServers();
+            return false;
         } catch (Exception ex) {
             Debugger.debug(ex);
             return false;
@@ -158,8 +161,26 @@ public class HostViewerRegister implements Runnable {
         hostRegisterGUI.setVisible(true);
     }
     
+    private void exchangeServers() {
+
+        String tempIP;
+        int tempPort;
+
+        tempIP = this.serverIP;
+        tempPort = this.serverPort;
+
+        this.serverIP = this.secondaryServerIP;
+        this.serverPort = this.secondaryServerPort;
+
+        this.secondaryServerIP = tempIP;
+        this.secondaryServerPort = tempPort;
+    }
+    
+    private int timeout = 10000;
     private CollAHost collAHost; //usuario que irá logar
-    private String serverIP;
+    private String serverIP;    
     private int serverPort;
+    private String secondaryServerIP;
+    private int secondaryServerPort;
     private HostViewRegisterGUI hostRegisterGUI;
 }

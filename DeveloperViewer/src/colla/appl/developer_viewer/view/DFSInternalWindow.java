@@ -20,7 +20,7 @@ public class DFSInternalWindow extends javax.swing.JInternalFrame {
      * Creates new form DFSInternalWindow
      */
     public DFSInternalWindow() {
-        super("Distributed File System", true, true, true, true);
+        super("Search Files", true, true, true, true);
         initComponents();
         this.setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.jFileChooser = new JFileChooser();

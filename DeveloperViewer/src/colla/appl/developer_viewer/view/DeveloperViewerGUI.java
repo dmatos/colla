@@ -61,6 +61,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         this.setIconImage(new ImageIcon(getClass().getResource(BackGround.COLLA_LOGO_ICON.getPath())).getImage());
         UIManager.put("DesktopPaneUI", "javax.swing.plaf.basic.BasicDesktopPaneUI");
         this.chatWindow = new ChatWindow();
+        this.dfsWindow = new DFSInternalWindow();
         this.thisUserName = userName;
         this.taskFile = null;
         this.dependencyFiles = new ArrayList<File>();
@@ -199,6 +200,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jList_listJoinGroup.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         jDesktopPane_desktop.add(chatWindow);
         jDesktopPane_desktop.add(resultsWindow);
+        jDesktopPane_desktop.add(this.dfsWindow);
         jList_groupRequests.setModel(new DefaultListModel<String>());
         jList_acceptMembers.setModel(new DefaultListModel<String>());
         jList_refuse.setModel(new DefaultListModel<String>());
@@ -417,6 +419,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jMenuItem_manageGroups = new javax.swing.JMenuItem();
         jMenu_tools = new javax.swing.JMenu();
         jMenuItem_settings = new javax.swing.JMenuItem();
+        jMenuItemDFS = new javax.swing.JMenuItem();
 
         jDialog_creatGroup.setTitle(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jDialog_creatGroup.title")); // NOI18N
         jDialog_creatGroup.setMinimumSize(new java.awt.Dimension(449, 168));
@@ -1510,7 +1513,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
                 .addContainerGap()
                 .addComponent(jComboBox_hosts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1630,6 +1633,14 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         });
         jMenu_tools.add(jMenuItem_settings);
 
+        jMenuItemDFS.setText(org.openide.util.NbBundle.getMessage(DeveloperViewerGUI.class, "DeveloperViewerGUI.jMenuItemDFS.text")); // NOI18N
+        jMenuItemDFS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemDFSActionPerformed(evt);
+            }
+        });
+        jMenu_tools.add(jMenuItemDFS);
+
         jMenuBar1.add(jMenu_tools);
 
         setJMenuBar(jMenuBar1);
@@ -1642,7 +1653,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
+            .addComponent(jSplitPane_desktopAndContacts, javax.swing.GroupLayout.Alignment.TRAILING)
         );
 
         pack();
@@ -2449,6 +2460,10 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
         jDialog_creatGroup.setVisible(true);
     }//GEN-LAST:event_jMenuItem_createGroupActionPerformed
 
+    private void jMenuItemDFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemDFSActionPerformed
+        this.dfsWindow.setVisible(true);
+    }//GEN-LAST:event_jMenuItemDFSActionPerformed
+
     private void showScheduleOptions() {
         this.jCalendarSendTask.setEnabled(true);
         this.jButtonTime.setEnabled(true);
@@ -2615,6 +2630,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private HashMap<String, java.util.List<String>> refusedMembers;
     private HashMap<String, java.util.List<String>> waitingMembers;
     private ChatWindow chatWindow;
+    private DFSInternalWindow dfsWindow;
     private ResultsWindow resultsWindow;
     private Set<String> groupsName;
     private String thisUserName;
@@ -2628,7 +2644,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private ArrayList<File> argumentsFiles;
     private Date selectedDate;
     public static DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
-    //Variables to manage settings
+    //Variables used to manage settings
     private JFileChooser jFileChooser_resultDirectory;
     private final String generalSettings = "General settings";
     private ClientConfigurations config;
@@ -2705,6 +2721,7 @@ public class DeveloperViewerGUI extends javax.swing.JFrame implements Observer, 
     private javax.swing.JList<String> jList_refuse;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItemDFS;
     private javax.swing.JMenuItem jMenuItem_Results;
     private javax.swing.JMenuItem jMenuItem_SendTask;
     private javax.swing.JMenuItem jMenuItem_createGroup;

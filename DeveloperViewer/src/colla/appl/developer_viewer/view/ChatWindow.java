@@ -214,7 +214,6 @@ public class ChatWindow extends javax.swing.JInternalFrame {
                     jTextArea_inputMessage.setText("");
                     sendMessage(contactName, message);
                 }
-
             }
         }
     }//GEN-LAST:event_jButton_submitMouseClicked

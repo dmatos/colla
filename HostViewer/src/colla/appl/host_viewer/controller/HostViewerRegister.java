@@ -48,7 +48,23 @@ public class HostViewerRegister implements Runnable {
                     if (!inetAddress.isLoopbackAddress()
                             && !inetAddress.toString().substring(1).startsWith("127")
                             && inetAddress.toString().substring(1).contains(".")) {
+                        //setting host IP address
                         collAHost.setIp(inetAddress.toString().substring(1));
+
+                        //getting host MAC address 
+                        NetworkInterface network = NetworkInterface.
+                                getByInetAddress(inetAddress);
+
+                        byte[] mac = network.getHardwareAddress();
+
+                        System.out.print("Current MAC address : ");
+
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < mac.length; i++) {
+                            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));
+                        }
+                        collAHost.setMAC(sb.toString());
+                        Debugger.debug("MAC address: "+collAHost.getMAC());
                     }
                 }
             }
@@ -110,7 +126,7 @@ public class HostViewerRegister implements Runnable {
             Debugger.debug("register");
             Debugger.debug("name: " + collAHost.getName() + " nameUser: " + collAHost.getNameUser());
 
-        }catch(SocketException | EOFException | SocketTimeoutException ex){
+        } catch (SocketException | EOFException | SocketTimeoutException ex) {
             Debugger.debug(ex);
             this.exchangeServers();
             return false;
@@ -160,7 +176,7 @@ public class HostViewerRegister implements Runnable {
         hostRegisterGUI = new HostViewRegisterGUI(this);
         hostRegisterGUI.setVisible(true);
     }
-    
+
     private void exchangeServers() {
 
         String tempIP;
@@ -175,10 +191,9 @@ public class HostViewerRegister implements Runnable {
         this.secondaryServerIP = tempIP;
         this.secondaryServerPort = tempPort;
     }
-    
     private int timeout = 10000;
     private CollAHost collAHost; //usuario que irá logar
-    private String serverIP;    
+    private String serverIP;
     private int serverPort;
     private String secondaryServerIP;
     private int secondaryServerPort;

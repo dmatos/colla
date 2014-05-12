@@ -293,7 +293,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
     public JCL_result executeTask(CollATask cTask) {
         cTask.setStarted();
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
-
+        
         File[] jarsToRegister = new File[cTask.getDependencies().size() + 1];
 
         /*

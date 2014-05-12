@@ -6,10 +6,13 @@ import colla.kernel.api.CollAUser;
 import colla.kernel.exceptions.server.NonExistentUser;
 import colla.kernel.exceptions.server.ServerInitializationException;
 import colla.kernel.util.Debugger;
+import implementations.dm_kernel.user.JCL_FacadeImpl;
+import interfaces.kernel.JCL_facade;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.TimerTask;
 
 /**
@@ -34,13 +37,17 @@ public class ClientsConnectionMonitor extends TimerTask {
         Long totalOfHosts = 0L;
         colla.kernel.messages.toClient.Ping pingUser = new colla.kernel.messages.toClient.Ping(1);
         colla.kernel.messages.toHost.Ping pingHost = new colla.kernel.messages.toHost.Ping();
+
+        JCL_facade jcl = JCL_FacadeImpl.getInstance();
+        List<String> jclHosts = jcl.getHosts();
+
         try {
             Server server = Server.getInstance();
             for (String username : server.getUsersSet()) {
                 try {
                     user = server.getUser(username);
                     for (CollAHost host : user.getHosts()) {
-                        //first we try to contact user's hosts, even if user is offline
+                        //trying to reach online hosts from a list of a user
                         if (host.IsOnline()) {
                             try {
                                 if (host.hasValidIP()) {
@@ -57,7 +64,7 @@ public class ClientsConnectionMonitor extends TimerTask {
                                 output.writeObject(pingHost);
                                 output.flush();
                                 input = new ObjectInputStream(socket.getInputStream());
-                                input.readObject();    
+                                input.readObject();
                                 host.setRoundTripTime(System.nanoTime() - timestamp);
                                 server.updateWeightedHost(new WeightedHost(host));
                                 totalWeight += host.getWeight();
@@ -69,6 +76,20 @@ public class ClientsConnectionMonitor extends TimerTask {
                                 Debugger.debug(cnfe);
                             } catch (Exception ex) {
                                 host.setOffline();
+                                for (String h : jclHosts) {
+                                    //indexes of ':'
+                                    int index = h.indexOf(':');
+                                    int index2 = h.indexOf(':', index + 1);
+                                    //mac:ip:port
+                                    String mac = h.substring(0, index);
+                                    String ip = h.substring(index + 1, index2);
+                                    String port = h.substring(index2 + 1);
+                                    Debugger.debug("jcl host: " + mac + " " + ip + " " + port);                  
+                                    if (ip.equals(host.getIp())) {
+                                        Debugger.debug("removeHost " + mac + " " + ip + " " + port);
+                                        jcl.removeHost(mac, ip, port);
+                                    }
+                                }
                                 server.updateHost(host);
                             }
                         }
@@ -101,10 +122,10 @@ public class ClientsConnectionMonitor extends TimerTask {
                 } catch (NonExistentUser nonUser) {
                 }
             }
-            
+
             //increment given by average weight
-            server.setHostWeightIncrement(totalWeight / (totalOfHosts+ 1) );
-            Debugger.debug("Connections checked");            
+            server.setHostWeightIncrement(totalWeight / (totalOfHosts + 1));
+            Debugger.debug("Connections checked");
         } catch (ServerInitializationException ex) {
         }
     }

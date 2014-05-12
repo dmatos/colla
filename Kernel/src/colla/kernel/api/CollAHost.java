@@ -104,6 +104,18 @@ public interface CollAHost{
      * @return IP address previously set. 
      */
     public abstract String getIp();
+    
+    /**
+     * 
+     * @return MAC address of the host. 
+     */
+    public abstract String getMAC();
+    
+    /**
+     * MAC address must be registered manually on the host by this method.
+     * @param MAC MAC address of the host 
+     */
+    public abstract void setMAC(String MAC);
 
     /**
      *

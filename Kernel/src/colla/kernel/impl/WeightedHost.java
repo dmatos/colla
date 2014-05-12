@@ -5,15 +5,14 @@
 package colla.kernel.impl;
 
 import colla.kernel.api.CollAHost;
-import colla.kernel.impl.Host;
+import java.io.Serializable;
 import java.util.Objects;
-import java.util.PriorityQueue;
 
 /**
  *
  * @author dmatos
  */
-public class WeightedHost implements Comparable<WeightedHost> {
+public class WeightedHost implements Comparable<WeightedHost>, Serializable {
 
     private Long weight;
     private Long increment;

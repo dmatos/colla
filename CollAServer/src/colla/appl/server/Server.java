@@ -134,8 +134,8 @@ public class Server extends Observable implements CollAServer, Runnable {
     public void run() {
         System.out.println("starting server as primary...");
         ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor();
-        /* start in 5 minutes (delay) and repeat each 5 minutes (period) */
-        Long monitorDelayAndPeriod = new Long(300000);
+        /* start in 2 minutes (delay) and repeat each 2 minutes (period) */
+        Long monitorDelayAndPeriod = new Long(120000);
         this.checkOnlineUsers.schedule(connMonitor, monitorDelayAndPeriod,
                 monitorDelayAndPeriod);
         this.active = true;

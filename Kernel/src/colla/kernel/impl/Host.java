@@ -12,6 +12,7 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
     private String name;
     private String nameUser;
     private String ip;
+    private String MACAddress;
     private int port;
     private boolean online;
     private TimeAndDate tempoConexao;
@@ -293,5 +294,15 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
     @Override
     public Long getRoundTripTime() {
         return this.roundTrip;
+    }
+
+    @Override
+    public String getMAC() {
+        return this.MACAddress;
+    }
+
+    @Override
+    public void setMAC(String MAC) {
+        this.MACAddress = MAC;
     }
 }

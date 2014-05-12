@@ -66,7 +66,7 @@ public class DistributedTaskExecutor {
         //System.err.println("Conseguiu resultado para o ticket " + ticket);
         task.setFinished();
         jcl.removeResult(ticket);
-
+        
         return jclr;
     }   
 

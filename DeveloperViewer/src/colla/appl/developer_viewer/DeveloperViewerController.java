@@ -236,7 +236,6 @@ public class DeveloperViewerController extends Observable implements Runnable {
                     socket.getInputStream());
             input.readObject();
             socket.close();
-            Debugger.debug("Mensagem com pedido do host foi enviada ao servidor");
 
         } catch (ConnectException | SocketTimeoutException tex) {
             Debugger.debug(tex);
@@ -290,7 +289,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         if (this.sendTaskToHost(task, hosts, 0)) {
             // update the sent tasks table
             updateResults(sentTask.getGroup(), sentTask.getTaskName(), sentTask);
-            // System.err.println("task " + task.getTaskName() + " sent");
+            //Debugger.debug("task " + task.getTaskName() + " sent");
         } else if (this.getTaskResult(sentTask.getGroup(), sentTask.getTaskName()) != null) {
             try {
                 sentTask.setResult(null);
@@ -374,7 +373,7 @@ public class DeveloperViewerController extends Observable implements Runnable {
         outgoing.setGroupName(task.getGroup());
 
         // A host that has a valid IP address must receive a direct connection
-        Debugger.debug("abrindo comunicação para enviar tarefa para IP valido...");
+        Debugger.debug("enviando task para "+host.getIp()+":"+host.getPort());
         socket = new Socket(InetAddress.getByName(host.getIp()), host.getPort());
         socket.setSoTimeout(timeout);
         output = new ObjectOutputStream(socket.getOutputStream());

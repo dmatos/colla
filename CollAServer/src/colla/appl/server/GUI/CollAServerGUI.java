@@ -446,7 +446,7 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
                 CollAUser usr = server.getUser(nodeName);
 
                 jTextField_nome.setText(usr.getName());
-                jTextField_group.setText(usr.getIp());
+                jTextField_group.setText(usr.getIp()+":"+usr.getPort());
                 if (usr.isOnline()) {
                     jTextField_isOnline.setForeground(green);
                 } else {
@@ -493,7 +493,7 @@ public class CollAServerGUI extends javax.swing.JFrame implements Observer {
                         jTextField_email.setVisible(false);
                         jScrollPane5.setVisible(true);
                         jTextField_nome.setText(hst.getName());
-                        jTextField_group.setText(hst.getIp());
+                        jTextField_group.setText(hst.getIp()+":"+hst.getPort());
                         if (hst.IsOnline()) {
                             jTextField_isOnline.setForeground(green);
                         } else {

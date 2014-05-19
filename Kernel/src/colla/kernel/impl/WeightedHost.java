@@ -30,7 +30,7 @@ public class WeightedHost implements Comparable<WeightedHost>, Serializable {
     public int compareTo(WeightedHost wHost) {
         if(this.owner.equals(wHost.owner) && this.hostName.equals(wHost.hostName))
             return 0;
-        Long temp = this.weight + increment - wHost.weight - wHost.increment;
+        Long temp = this.weight + this.increment - wHost.weight - wHost.increment;
         int result = temp.intValue();        
         return result;        
     }

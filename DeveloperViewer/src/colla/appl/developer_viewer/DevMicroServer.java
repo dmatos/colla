@@ -15,7 +15,6 @@ import interfaces.kernel.JCL_facade;
 import java.io.*;
 import java.net.*;
 import java.util.Observable;
-import org.openide.util.Exceptions;
 
 /**
  * Initializes a micro server so the client will be available to receive

@@ -1028,12 +1028,15 @@ public class ServerWorker {
             if (wHost != null) {
                 primary =
                         server.getUser(wHost.getHostOwner()).getHost(wHost.getHostName());
+                Debugger.debug("sending primary " + primary.getIp());
             }
             //secondary
             wHost = server.poolWeightedHost();
             if (wHost != null) {
                 secondary =
                         server.getUser(wHost.getHostOwner()).getHost(wHost.getHostName());
+                Debugger.debug("sending secondary " + secondary.getIp());
+
             }
 
             outgoing.addHost(primary);

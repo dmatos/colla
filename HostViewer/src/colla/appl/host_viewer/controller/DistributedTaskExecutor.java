@@ -116,12 +116,12 @@ public class DistributedTaskExecutor {
             //close file streams
             dout.close();
             fout.close();
-
+            
             //registering task in javaCaLa
             if (jcl.register(jarsToRegister, classToExecute)) {
-                //System.err.println("jar registrado com sucesso");
+                Debugger.debug("jar registrado com sucesso");
             } else {
-                //System.err.println("jar nao foi registrado com sucesso");
+                Debugger.debug("jar nao foi registrado com sucesso");
             }
 
         } catch (Exception e) {

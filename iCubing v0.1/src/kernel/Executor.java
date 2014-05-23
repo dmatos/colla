@@ -164,9 +164,7 @@ public class Executor extends Thread
 		jcl = javaCaLa.getResultBlocking(ticket);
 		
 		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
-		
-		jcl = javaCaLa.getValue()
-		
+				
 		if(jcl.getErrorResult() == null)
 			result = (Map<String, Set<String>>) jcl.getCorrectResult();
 		

@@ -186,9 +186,17 @@ public class Attribute
 				{
 					pks = (Set<String>) jclr.getCorrectResult();
 					
+					System.out.println("Pks");
+					for(String a : pks)
+						System.out.print(" " + a);
+					System.out.println();
+					
 					tids.put(aux,pks);
 					all.addAll(pks);
 				}
+				
+				else
+					jclr.getErrorResult().printStackTrace();
 			}
 		}
 		
@@ -214,9 +222,16 @@ public class Attribute
 		JCL_result jclr = javaCaLa.getValueLocking(ticket);
 		
 		if(jclr.getErrorResult() == null)
-		{
 			result = (Map<String, Set<String>>) jclr.getCorrectResult();
-		}
+		
+		else
+			jclr.getErrorResult().printStackTrace();
+		
+		System.out.print("n1" + ": ");
+		Set<String> aux = result.get("n1");
+		for(String aux1 : aux)
+			System.out.println(" " + aux1);
+		System.out.println();
 		
 		return result;
 	}

@@ -168,7 +168,7 @@ public class SearchWords extends EditDistance {
 				String[] values = new String[2];
 				values[0] = "Yes";
 				values[1] = "No";
-//pesquisa aproximada
+				//pesquisa aproximada
 				valor = JOptionPane.showOptionDialog(null,
 						"You meant " + resul, "Search",
 						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,

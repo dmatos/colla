@@ -292,6 +292,7 @@ public class Worker
 			
 			//final...intersecoes e unioes
 			
+			System.out.println();
 			System.out.println("Interseção");
 			
 			String ticket = "resultIntersection";

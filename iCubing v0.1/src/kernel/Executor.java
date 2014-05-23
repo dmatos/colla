@@ -162,7 +162,7 @@ public class Executor extends Thread
 		String ticket = javaCaLa.execute("Worker","query",args1);
 		
 		jcl = javaCaLa.getResultBlocking(ticket);
-		
+		   
 		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
 				
 		if(jcl.getErrorResult() == null)

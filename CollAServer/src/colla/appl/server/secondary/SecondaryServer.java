@@ -42,6 +42,10 @@ public class SecondaryServer {
         
     }
     
+    /**
+     * Initialize Secondary Server
+     * @param hasBackup for future use with many secondary servers
+     */
     public SecondaryServer(boolean hasBackup) {        
         this.readServerConfigurations();
         this.hasBacukp = hasBackup;
@@ -148,9 +152,9 @@ public class SecondaryServer {
        
         SecondaryServer secondServer = new SecondaryServer(false);
         try {
+            //setting up server as not primary
             Server.setupServer(timeout, false);
         } catch (IOException ex) {
-            //Logger.getLogger(SecondaryServer.class.getName()).log(Level.SEVERE, null, ex);
             Debugger.debug(ex);
             System.err.println("Could not setup Server... shuting down...");
             System.exit(0);
@@ -205,7 +209,7 @@ public class SecondaryServer {
             thr.start();
             try {
                 server.storeAllServerData();
-                server.restoreServerData();
+                //server.restoreServerData();
                 server.restoreGUI();
                 serverGUI.updateClientsTree();
             } catch (Exception ex) {

@@ -100,4 +100,10 @@ public class main extends JFrame {
 		
 		SearchWords wc = new SearchWords(filePath, text);
 	}
+//	public static String Search() throws TikaException{
+//		String t = Word.getText();
+//		SearchWords aux = new SearchWords();
+//		String resul = aux.SearchWord(t);
+//		return resul;
+//	}
 }

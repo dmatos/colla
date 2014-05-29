@@ -35,11 +35,11 @@ public class Attribute
 	{
 		this.name = name;
 		
-		System.out.println(name);
+		/*System.out.println(name);
 		
 		for(String aux : values)
 			System.out.print(" " + aux);
-		System.out.println();
+		System.out.println(); */
 			
 		// maior, menor, entre, maior_igual, menor_igual, 
 		//entre_igual, igual, diferente, contem, similar.
@@ -139,20 +139,9 @@ public class Attribute
 		if(result == null) 
 			result = new LinkedList<String>();
 		
-		System.out.println("intersection");
-		for(String a : intersection)
-			System.out.print(" " + a);
-		System.out.println();
-		
 		result.add("all");
 		result.addAll(intersection);
-		
-		System.out.println("intersection1");
-		for(String a : result)
-			System.out.print(" " + a);
-		
-		System.out.println();
-		
+				
 		parciais.clear();
 		parciais = null;
 	}

@@ -273,6 +273,7 @@ public class Worker
 			}
 					
 			//executando query
+			System.out.println("Executing query...");
 			for (String whichFilter : filters.keySet())
 			{
 				Attribute atttribute = new Attribute();
@@ -299,25 +300,13 @@ public class Worker
 			for(Attribute attribute : attributes.values())
 				attribute.loadTids();
 			
-			String partialResult = new String("");
-			
-			for(Attribute attribute : attributes.values())
-			{
-				partialResult = attribute.getName();
-				
-				for(String aux : attribute.getAttributes())
-				{
-					partialResult += " ";
-					partialResult += aux;
-				}
-				
-				result.add(partialResult);
-			}
-			
 			String filen = null;
+			
 			for(Attribute att:attributes.values())
 			{
-				File tMAGOinputF = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+att.getName()+".txt");
+				System.out.println(att.getName());
+				
+				File tMAGOinputF = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/" + att.getName()+ ".txt");
 				
 				if(!tMAGOinputF.exists())
 					tMAGOinputF.createNewFile();
@@ -340,14 +329,16 @@ public class Worker
 					fileW.flush();
 					fileW.close();
 					fileW=null;
-					File f = new File("../"+filen+".txt");
-					f.delete();
 				}
 				
 				else
 				{
+					System.out.println("Entrou aqui");
 					for(String aux: att.getAttributes())
+					{
+						System.out.println(aux);
 						fileW.write(att.getName()+":"+aux+"\r\n");
+					}
 					
 					fileW.flush();
 					fileW.close();
@@ -357,7 +348,6 @@ public class Worker
 				filen = att.getName();
 			}
 			
-			//uashuahsuah
 			if(filen!=null)
 			{
 				File f = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+filen+".txt");

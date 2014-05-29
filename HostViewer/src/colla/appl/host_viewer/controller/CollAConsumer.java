@@ -197,6 +197,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             ListOnlineHostsMsg incomingMsg = (ListOnlineHostsMsg) input.readObject();
 
+            //distribute attachment files through hosts
             RegisterFileMsg registerFileMsg = new RegisterFileMsg(taskMsg);
             try {
                 for (CollAHost h : incomingMsg.getHosts()) {
@@ -293,7 +294,7 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
     public JCL_result executeTask(CollATask cTask) {
         cTask.setStarted();
         JCL_facade jcl = JCL_FacadeImpl.getInstance();
-        
+
         File[] jarsToRegister = new File[cTask.getDependencies().size() + 1];
 
         /*
@@ -304,7 +305,6 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         Map<String, byte[]> jars = cTask.getDependencies();
         String classToExecute = cTask.getClassToExecute();
         String methodToExecute = cTask.getMethodToExecute();
-
 
         //gathering files into array
         try {
@@ -353,7 +353,6 @@ public class CollAConsumer<S extends CollAMessage> extends GenericConsumer<S> {
         String ticket = "";
 
         //execute task
-
         JCL_result jclr;
 
         try {

@@ -373,6 +373,8 @@ public class Server extends Observable implements CollAServer, Runnable {
         user.addHost(host);
         if (!host.IsOnline()) {
             this.weightedHosts.remove(new WeightedHost(host));
+        } else {
+            this.updateWeightedHost(new WeightedHost(host));
         }
         this.updateUser(user);
         //update secondary
@@ -381,7 +383,6 @@ public class Server extends Observable implements CollAServer, Runnable {
             try {
                 this.updateSecondary(msg);
             } catch (IOException | ClassNotFoundException ex) {
-                //Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 //@todo tratar exceção em que secundário não responde
                 Debugger.debug(ex);
             }

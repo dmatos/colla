@@ -83,7 +83,7 @@ public class Executor extends Thread
 		long inicio = System.nanoTime();
 							
 		try
-		{
+		{			
 			long numberOfFiles = files.length;
 			
 			for(int i = 0; i < numberOfFiles; i++) 
@@ -96,7 +96,6 @@ public class Executor extends Thread
 				System.out.println("Processing " + files[i]);
 				
 				line = readFile.readLine();
-								
 				String [] columns = line.split(" ");
 				
 				Map<Integer,String> mapColumns = new HashMap<Integer, String>();
@@ -156,41 +155,27 @@ public class Executor extends Thread
 	{
 		//1000001_5;11_1
 		//ano:mes:rua$mes:entre:03;11$evento:count
-		String query = new String("n1$n1:maior:20$n1:count");
+		String query = new String("n1:n3:n5$n1:maior:21#n3:menor:7000#n5:entre:200000;800000$n1:count");
 		Object [] args1 = {query};
 		
 		String ticket = javaCaLa.execute("Worker","query",args1);
 		
 		jcl = javaCaLa.getResultBlocking(ticket);
 		   
-		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
-				
+		Set<String> result = new TreeSet<String>();
+		
 		if(jcl.getErrorResult() == null)
-			result = (Map<String, Set<String>>) jcl.getCorrectResult();
+			result = (Set<String>) jcl.getCorrectResult();
 		
 		else
 			jcl.getErrorResult().printStackTrace();
 		
+		System.out.println("Resultado\n");
+		for(String aux : result)
+			System.out.println(aux);
 		
-		System.out.println("Result query");
 		
-		String[] pivotTables = query.split("\\$");
 		
-		if(pivotTables[0] != null)
-		{
-			String[] pivotAt = pivotTables[0].split("\\:");
-			if (pivotAt!=null)
-			{
-				for(int i=0; i< pivotAt.length; i++)
-				{
-					System.out.print(pivotAt[i] + ": ");
-					Set<String> aux = result.get(pivotAt[i]);
-					for(String aux1 : aux)
-						System.out.println(" " + aux1);
-					System.out.println();
-				}
-			}
-		}
 	}
 	
 	public void startWork()

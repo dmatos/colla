@@ -31,13 +31,13 @@ public class Attribute
 	JCL_result jclr = null;
 	JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
 	
-	public void setAttributes (String name, Set<String> pks, List<Filter> filters)
+	public void setAttributes (String name, Set<String> values, List<Filter> filters)
 	{
 		this.name = name;
 		
 		System.out.println(name);
 		
-		for(String aux : pks)
+		for(String aux : values)
 			System.out.print(" " + aux);
 		System.out.println();
 			
@@ -52,7 +52,7 @@ public class Attribute
 			Filter filter = filters.get(i);
 									
 			if(filter.getType() == null)
-				aux.addAll(pks);
+				aux.addAll(values);
 			
 			else
 			{
@@ -60,63 +60,63 @@ public class Attribute
 				
 				if(filter.getType().equals("maior"))
 				{
-					Set<String> l = Maior.execute(pks, filter.getValues()[0]);
+					Set<String> l = Maior.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("menor"))
 				{
-					Set<String> l = Menor.execute(pks, filter.getValues()[0]);
+					Set<String> l = Menor.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("entre"))
 				{
-					Set<String> l = Entre.execute(pks, filter.getValues()[0], filter.getValues()[1]);
+					Set<String> l = Entre.execute(values, filter.getValues()[0], filter.getValues()[1]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("maior_igual"))
 				{
-					Set<String> l = MaiorIgual.execute(pks, filter.getValues()[0]);
+					Set<String> l = MaiorIgual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("menor_igual"))
 				{
-					Set<String> l = MenorIgual.execute(pks, filter.getValues()[0]);
+					Set<String> l = MenorIgual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("entre_igual"))
 				{
-					Set<String> l = EntreIgual.execute(pks, filter.getValues()[0], filter.getValues()[1]);
+					Set<String> l = EntreIgual.execute(values, filter.getValues()[0], filter.getValues()[1]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("igual"))
 				{
-					Set<String> l = Igual.execute(pks, filter.getValues()[0]);
+					Set<String> l = Igual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("diferente"))
 				{
-					Set<String> l = Diferente.execute(pks, filter.getValues()[0]);
+					Set<String> l = Diferente.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("contem"))
 				{
-					Set<String> l = Contem.execute(pks, filter.getValues()[0]);
+					Set<String> l = Contem.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
@@ -168,7 +168,7 @@ public class Attribute
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void loadTids(String ticket)
+	public void loadTids()
 	{
 		tids = new TreeMap<String, Set<String>>();
 		Set<String> all = new TreeSet<String>();
@@ -186,11 +186,6 @@ public class Attribute
 				{
 					pks = (Set<String>) jclr.getCorrectResult();
 					
-					System.out.println("Pks");
-					for(String a : pks)
-						System.out.print(" " + a);
-					System.out.println();
-					
 					tids.put(aux,pks);
 					all.addAll(pks);
 				}
@@ -201,39 +196,11 @@ public class Attribute
 		}
 		
 		tids.put("all", all);
-		
-		if(javaCaLa.instantiateGlobalVar(ticket, tids) == false)
-		{
-			Map<String, Set<String>> result = (Map<String, Set<String>>) jclr.getCorrectResult();
-			
-			if(result != null)
-			{
-				result.putAll(tids);
-				javaCaLa.setValue(ticket, result);
-			}			
-		}
 	} 
 	
-	@SuppressWarnings("unchecked")
-	public Map<String, Set<String>> getTids(String ticket)
+	public Map<String, Set<String>> getTids()
 	{
-		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
-		
-		JCL_result jclr = javaCaLa.getValueLocking(ticket);
-		
-		if(jclr.getErrorResult() == null)
-			result = (Map<String, Set<String>>) jclr.getCorrectResult();
-		
-		else
-			jclr.getErrorResult().printStackTrace();
-		
-		System.out.print("n1" + ": ");
-		Set<String> aux = result.get("n1");
-		for(String aux1 : aux)
-			System.out.println(" " + aux1);
-		System.out.println();
-		
-		return result;
+		return tids;
 	}
 
 	public void clear()

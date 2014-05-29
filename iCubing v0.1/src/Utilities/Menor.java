@@ -10,7 +10,7 @@ public class Menor
 		Set<String> which = new TreeSet<String>();
 		for(String aux:keys)
 		{
-			if(Double.parseDouble(aux)>Double.parseDouble(key))
+			if(Double.parseDouble(aux)<Double.parseDouble(key))
 				which.add(aux);
 		}
 		

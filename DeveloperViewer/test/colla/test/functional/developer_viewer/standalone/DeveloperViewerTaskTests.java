@@ -4,6 +4,7 @@
  */
 package colla.test.functional.developer_viewer.standalone;
 
+
 import colla.appl.developer_viewer.DevViewerLogin;
 import colla.appl.developer_viewer.DeveloperViewerController;
 import colla.appl.developer_viewer.exceptions.DeveloperConfigurationException;
@@ -38,14 +39,10 @@ public class DeveloperViewerTaskTests {
         /*sign user up for the server*/
         devViewerLogin.setUser(user);
         try {
-            assertFalse(devViewerLogin.signUpForServer(password));
+            assertTrue(devViewerLogin.signUpForServer(password));
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
-
-        //setup a host
-        hostRegister = new HostViewerRegister();
-        hostRegister.register(user.getName(), password, 0);
 
         try {
             devViewer = devViewerLogin.logInServer(user.getName(), password);
@@ -88,7 +85,7 @@ public class DeveloperViewerTaskTests {
         devViewer.getAvailableHostsOnServer(taskFile, attaches, args, classToExecute, methodToExecute, groupName, null, false);
 
         while (devViewer.getTasks().isEmpty()) {
-            Debugger.debug("waiting parallel task");
+            Debugger.debug("waiting task");
             try {
                 //wait until it has a result from a host (30 seconds)
                 Thread.sleep(10000);
@@ -102,8 +99,6 @@ public class DeveloperViewerTaskTests {
         assertNotNull(task);
         assertEquals("O número de fibonacci posição 6 é 8", task.getResult());
 
-        Debugger.debug("no testes o tamanho de getTask eh " + devViewer.getTasks().size());
-
         /* Sending task to multicore host.
          * Given that any File sent as argument for a task will
          * be write by a CollAHost, the JCLHost MUST be started
@@ -111,23 +106,23 @@ public class DeveloperViewerTaskTests {
          */
         devViewer.getAvailableHostsOnServer(taskFile, attaches, args, classToExecute, methodToExecute, groupName, null, true);
 
-
-        Debugger.debug("waiting distributed task for 30 seconds");
-        try {
-            //wait until it has a result from a host (30 seconds)
-            Thread.sleep(30000);
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
+        while (devViewer.getTasks().size() == 1) {
+            Debugger.debug("waiting task");
+            try {
+                //wait until it has a result from a host (30 seconds)
+                Thread.sleep(10000);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
-
 
         task = devViewer.getTaskResult(groupName, "[2]testes.jar");
         assertNotNull(task);
         assertEquals("O número de fibonacci posição 6 é 8", task.getResult());
 
         devViewer.shutdown();
-    }  
-
+    }
+    
     private static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
@@ -143,16 +138,7 @@ public class DeveloperViewerTaskTests {
 
     @BeforeClass
     public static void setUpClass() {
-        Debugger.setDebugger(true);
-        try {
-            /* at this point all server data should have been wiped out.*/
-            deleteDir(new File("data/"));
-            collaServer = Server.setupServer(40000, true);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        Thread thr = new Thread(collaServer);
-        thr.start();
+        Debugger.setDebugger(true);        
     }
 
     @Before
@@ -176,6 +162,4 @@ public class DeveloperViewerTaskTests {
     private DevViewerLogin devViewerLogin;
     private CollAUser user;
     private final String password = "password";
-    private HostViewerRegister hostRegister;
-    private static Server collaServer;
 }

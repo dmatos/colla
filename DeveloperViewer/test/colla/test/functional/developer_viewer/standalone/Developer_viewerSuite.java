@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
  * @author dmatos
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({colla.test.functional.developer_viewer.standalone.DevViewerLoginTest.class, colla.test.functional.developer_viewer.standalone.DeveloperViewerTaskTests.class})
+@Suite.SuiteClasses({colla.test.functional.developer_viewer.standalone.DevViewerLoginTest.class, /*bkp.DeveloperViewerTaskTests.class*/})
 public class Developer_viewerSuite {
 
     @BeforeClass

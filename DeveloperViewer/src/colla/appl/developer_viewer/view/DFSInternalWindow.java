@@ -4,7 +4,6 @@
  */
 package colla.appl.developer_viewer.view;
 
-import colla.dfs.app.SearchWords;
 import colla.kernel.util.Debugger;
 import java.io.File;
 import javax.swing.JFileChooser;
@@ -133,12 +132,12 @@ public class DFSInternalWindow extends javax.swing.JInternalFrame {
 
     private void jTextFieldWordToSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldWordToSearchKeyTyped
         if(evt.getKeyChar() == '\n'){
-            this.executeSearch();
+            //this.executeSearch();
         }
     }//GEN-LAST:event_jTextFieldWordToSearchKeyTyped
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        this.executeSearch();
+        //this.executeSearch();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void openFileChooser() {
@@ -153,7 +152,7 @@ public class DFSInternalWindow extends javax.swing.JInternalFrame {
         this.jTextFieldFileChooser.setText(fileToSearch.getPath());
     }
     
-    private void executeSearch(){
+    /*private void executeSearch(){
         String result = "";
         String filePath = "";
         if(fileToSearch != null)
@@ -169,7 +168,7 @@ public class DFSInternalWindow extends javax.swing.JInternalFrame {
                 Debugger.debug(ex);
             }
         }
-    }
+    }*/
 
     /**
      * @param args the command line arguments

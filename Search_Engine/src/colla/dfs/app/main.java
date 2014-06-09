@@ -3,6 +3,8 @@ package colla.dfs.app;
 import java.awt.EventQueue;
 
 
+
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -15,13 +17,17 @@ import javax.swing.JTextField;
 import java.awt.Font;
 
 import javax.swing.SwingConstants;
-
 import javax.swing.JButton;
 
 //import appl.privateG.PrivateGAppl;
 
+
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Set;
+
 import org.apache.tika.exception.TikaException;
 //import appl.privateG.PrivateGAppl;
 

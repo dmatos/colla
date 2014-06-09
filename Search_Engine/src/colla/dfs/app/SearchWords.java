@@ -5,8 +5,14 @@ import interfaces.kernel.JCL_result;
 
 import java.io.BufferedReader;
 import java.io.File;
+//import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+//import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,180 +21,72 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
+import org.apache.tika.*;
+import org.apache.tika.exception.TikaException;
+//import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
+//import org.apache.log4j.*;
+
+
 
 import colla.dfs.util.EditDistance;
 
+import javax.swing.JOptionPane;
+
+//import src.colla.dfs.util.*;
+
 public class SearchWords extends EditDistance {
-
-	public SearchWords(){}
 	
-	public SearchWords(String filePath, String texto) {
+	public SearchWords() {
 
-		long time1 = System.nanoTime();
+	}
 
+	public String SearchWord(String texto) throws TikaException {	
+		
 		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-		File f = new File("../usefull_jars/WordFilesIndexer.jar");
-		File[] args = { f };
-		javaCaLa.register(args, "WordFilesIndexer");
-
-		Set<String> s = new HashSet<String>();
-
-		index(filePath, s);
-		for (String aux : s) {
-			javaCaLa.getResultBlocking(aux);
-		}
-
-		long time2 = System.nanoTime();
-		System.err.println("indexing time: " + (time2 - time1));
 		String CurLine = texto;
-
+		String r = null;
 		try {
-
-			if (!(CurLine.equals("quit"))) {
-
-				boolean testAspas = false;
-				if (CurLine.contains("\"")) {
-					CurLine = CurLine.replaceAll("[\"\']", "");
-					testAspas = true;
-				}
-
-				String[] words = CurLine.split("\"");
-				words = CurLine.split(" ");
-				String[] auxWordStrings = new String[words.length];
-				for (int i = 0; i < words.length; i++) {
-					JCL_result jclr = javaCaLa.getValue(words[0]
-							.substring(0, 1));
-					Set<String> aux = new HashSet<String>();
-					if (jclr.getCorrectResult() != null) {
-						aux.addAll((HashSet<String>) jclr.getCorrectResult());
-						String name = Levenshtein(words[i], aux);
-						if (name != "") {
-							auxWordStrings[i] = name;
-						} else {
-							auxWordStrings[i] = words[i];
-						}
-					} else
-						auxWordStrings = null;
-				}
-				if (auxWordStrings != null) {
-					boolean diferente = false;
-					String resul = "";
-					for (int i = 0; i < auxWordStrings.length; i++) {
-						resul = resul + auxWordStrings[i] + " ";
-						if (!auxWordStrings[i].equals(words[i])) {
-							diferente = true;
-						}
-					}
-					int valor = -1;
-					if (diferente) {
-						String[] values = new String[2];
-						values[0] = "Yes";
-						values[1] = "No";
-
-						valor = JOptionPane.showOptionDialog(null, "You meant "
-								+ resul, "Search", JOptionPane.YES_NO_OPTION,
-								JOptionPane.PLAIN_MESSAGE, null, values, "");
-					}
-					if (valor == 0) {
-						searchWords(auxWordStrings, testAspas, texto);
-
+			boolean testAspas = CurLine.contains("\"");
+			CurLine = CurLine.replaceAll("[\"\']", "");
+			String[] words = CurLine.split(" ");
+			words = CurLine.split(" ");
+			String[] auxwords = new String[words.length];// variavel que vai auxiliar na aproximação de string
+			for (int i = 0; i < words.length; i++) {
+				
+				JCL_result jclr = javaCaLa.getValue(words[0].substring(0, 1));
+				Set<String> aux = new HashSet<String>();
+				if (jclr.getCorrectResult() != null) {
+					aux.addAll((HashSet<String>) jclr.getCorrectResult());
+					String name = Levenshtein(words[i], aux);
+					if (name != "") {
+						auxwords[i] = name;
 					} else {
-						searchWords(words, testAspas, texto);
+						auxwords[i] = words[i];
 					}
-				} else {
-					searchWords(words, testAspas, texto);
 				}
+			}
+			for (int j = 0; j < auxwords.length; j++) {
+				if(!auxwords[j].equals(words[j])){
+					diferente = true;
+				}	
+			}
+			
+			if (diferente) {
+				r = searchWords(auxwords, testAspas, texto);
 
 			} else {
-				javaCaLa.destroy();
+				r =  searchWords(words, testAspas, texto);
 			}
-
+				
 		} catch (Exception e) {
 			System.err.println("problem in query");
 			e.printStackTrace();
 		}
-
-	}
-
-	public String executeSearch(String filePath, String texto) throws Exception{
-		String result = "";
-		long time1 = System.nanoTime();
-
-		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-		File f = new File("../usefull_jars/WordFilesIndexer.jar");
-		File[] args = { f };
-		javaCaLa.register(args, "WordFilesIndexer");
-
-		Set<String> s = new HashSet<String>();
-
-		index(filePath, s);
-		for (String aux : s) {
-			javaCaLa.getResultBlocking(aux);
-		}
-
-		long time2 = System.nanoTime();
-		System.err.println("indexing time: " + (time2 - time1));
-		String CurLine = texto;
-
-		boolean testAspas = false;
-		if (CurLine.contains("\"")) {
-			CurLine = CurLine.replaceAll("[\"\']", "");
-			testAspas = true;
-		}
-
-		String[] words = CurLine.split("\"");
-		words = CurLine.split(" ");
-		String[] auxWordStrings = new String[words.length];
-		for (int i = 0; i < words.length; i++) {
-			JCL_result jclr = javaCaLa.getValue(words[0].substring(0, 1));
-			Set<String> aux = new HashSet<String>();
-			if (jclr.getCorrectResult() != null) {
-				aux.addAll((HashSet<String>) jclr.getCorrectResult());
-				String name = Levenshtein(words[i], aux);
-				if (name != "") {
-					auxWordStrings[i] = name;
-				} else {
-					auxWordStrings[i] = words[i];
-				}
-			} else
-				auxWordStrings = null;
-		}
-		if (auxWordStrings != null) {
-			boolean diferente = false;
-			String resul = "";
-			for (int i = 0; i < auxWordStrings.length; i++) {
-				resul = resul + auxWordStrings[i] + " ";
-				if (!auxWordStrings[i].equals(words[i])) {
-					diferente = true;
-				}
-			}
-			int valor = -1;
-			if (diferente) {
-				String[] values = new String[2];
-				values[0] = "Yes";
-				values[1] = "No";
-				//pesquisa aproximada
-				valor = JOptionPane.showOptionDialog(null,
-						"You meant " + resul, "Search",
-						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-						null, values, "");
-			}
-			if (valor == 0) {
-				result = searchWords(auxWordStrings, testAspas, texto);
-
-			} else {
-				result = searchWords(words, testAspas, texto);
-			}
-		} else {
-			result = searchWords(words, testAspas, texto);
-		}
-
-		return result;
-
+		return r;
 	}
 
 	public String searchWords(String[] words, boolean aspas, String text) {
+		
 		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
 		Map<String, Set<String>> mainFile = new HashMap<String, Set<String>>();
 		HashMap<String, LinkedList<Integer>> mainFileResult = new HashMap<String, LinkedList<Integer>>();
@@ -198,8 +96,7 @@ public class SearchWords extends EditDistance {
 			JCL_result jclr = javaCaLa.getValue(words[0]);
 			if (jclr.getCorrectResult() != null) {
 				if (jclr.getCorrectResult() != null) {
-					mainFile.putAll((HashMap<String, Set<String>>) jclr
-							.getCorrectResult());
+					mainFile.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
 					result = ResultOneWord(mainFile);
 				}
 			}
@@ -208,31 +105,29 @@ public class SearchWords extends EditDistance {
 
 			JCL_result jclr = javaCaLa.getValue(words[0]);
 			if (jclr.getCorrectResult() != null) {
-				mainFile.putAll((HashMap<String, Set<String>>) jclr
-						.getCorrectResult());
+				mainFile.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
 				Map<String, Set<String>> File = new HashMap<String, Set<String>>();
 
 				for (int i = 1; i < words.length; i++) {
 					jclr = javaCaLa.getValue(words[i]);
 					if (jclr.getCorrectResult() != null) {
-						File.putAll((HashMap<String, Set<String>>) jclr
-								.getCorrectResult());
+						File.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
 						interMaps(mainFile, File, mainFileResult);
-
 					}
 					File.clear();
 				}
 				result = ResultSomeWords(mainFileResult, aspas);
 			}
 		}
-
-		if (mainFile.isEmpty()) {
-			result = "\"" + text + "\" not found.";
+		
+		if (!mainFile.isEmpty()) {
+			return "The word(s) \"" + text + "\" found in the file(s):" + result;
+		} else {
+			return  "The word(s) \"" + text + "\" not found in the file(s)!";
 		}
-		return result;
 	}
 
-	// Funcao que gera a resposta para uma palavra
+	// Fução que gera a resposta para uma palavra
 	public String ResultOneWord(Map<String, Set<String>> map) {
 		String result = "\n";
 		for (String aux : map.keySet()) {
@@ -242,9 +137,8 @@ public class SearchWords extends EditDistance {
 		return result;
 	}
 
-	// Funcao que gera a resposta para mais de uma palavra
-	public String ResultSomeWords(
-			HashMap<String, LinkedList<Integer>> mapResult, boolean aspas) {
+	// Função que gera a resposta para mais de uma palavra
+	public String ResultSomeWords(HashMap<String, LinkedList<Integer>> mapResult, boolean aspas) {
 		Set<String> result = new HashSet<String>();
 		LinkedList<Integer> distWords = new LinkedList<Integer>();
 		for (String nameArq : mapResult.keySet()) {
@@ -269,10 +163,8 @@ public class SearchWords extends EditDistance {
 		return r;
 	}
 
-	// Calcula a distï¿½ncia entre as palavra
-	public void interMaps(Map<String, Set<String>> mapFistWord,
-			Map<String, Set<String>> mapNextWord,
-			HashMap<String, LinkedList<Integer>> mapResult) {
+	// Calcula a distância entre as palavra
+	public void interMaps(Map<String, Set<String>> mapFistWord, Map<String, Set<String>> mapNextWord, HashMap<String, LinkedList<Integer>> mapResult) {
 
 		for (String nameFile : mapFistWord.keySet()) {
 			if (mapNextWord.containsKey(nameFile)) {
@@ -284,14 +176,10 @@ public class SearchWords extends EditDistance {
 					String v[] = cord.split(",");
 					for (String cord2 : setM1) {
 						String v2[] = cord2.split(",");
-
-						int a = Integer.parseInt(v[0]);
-						int b = Integer.parseInt(v2[0]);
-						int disL = Math.abs(a - b);
-						a = Integer.parseInt(v[1]);
-						b = Integer.parseInt(v2[1]);
-						int disC = Math.abs(a - b);
-						int dis = disL + disC;
+					
+						Integer disL = Math.abs(Integer.parseInt(v[0]) - Integer.parseInt(v2[0]));	
+						Integer disC = Math.abs(Integer.parseInt(v[1]) - Integer.parseInt(v2[1]));
+						Integer dis = disL + disC;
 						LinkedList<Integer> dist = new LinkedList<Integer>();
 						dist.add(dis);
 						if (mapResult.containsKey(nameFile)) {
@@ -308,11 +196,10 @@ public class SearchWords extends EditDistance {
 		}
 	}
 
-	public void index(String dir, Set<String> s) {
+
+	public void index(String dir, Set<String> s) throws TikaException {
 
 		File f = new File(dir);
-		LinkedList<String> allText = new LinkedList<String>();
-		String readAux = null;
 
 		if (!textIndexer.contains(dir)) {
 			textIndexer.add(dir);
@@ -323,31 +210,70 @@ public class SearchWords extends EditDistance {
 
 			} else {
 				try {
+					if (f.getAbsolutePath().endsWith(".pdf")
+							|| f.getAbsolutePath().endsWith(".odt")
+							|| f.getAbsolutePath().endsWith(".doc")
+							|| f.getAbsolutePath().endsWith(".docx")
+							|| f.getAbsolutePath().endsWith(".ppt")
+							|| f.getAbsolutePath().endsWith(".pptx")
+							|| f.getAbsolutePath().endsWith(".xls")
+							|| f.getAbsolutePath().endsWith(".txt")
+							|| f.getAbsolutePath().endsWith(".rtf")) {
+					    text = null;
+						text = getTika().parseToString(f);
+						indexFile(f.getAbsolutePath(), s);
 
-					if (f.getAbsolutePath().endsWith("txt")) {
-
-						JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-						BufferedReader input = new BufferedReader(
-								new FileReader(f));
-						while ((readAux = input.readLine()) != null) {
-							allText.add(readAux);
-						}
-						input.close();
-
-						Object[] args = { allText,
-								f.getAbsoluteFile().toString() };
-						s.add(javaCaLa.execute("WordFilesIndexer", args));
-					} else
-						System.err.println("cannot index "
-								+ f.getAbsolutePath());
+					} else {
+						System.err.println("cannot read the file!");
+					}
 				} catch (IOException e) {
-
 					System.err.println("cannot open the file!");
-
 				}
 			}
 		}
 	}
 
+	public Tika getTika() {
+		if (tika == null) {
+			tika = new Tika();
+		}
+		return tika;
+	}
+
+	public void indexFile(String FilePath, Set<String> s) throws IOException {
+
+		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
+		String readAux = null;
+		ArrayList<byte[]> allText = new ArrayList<byte[]>();
+		BufferedReader input = null;
+		
+		try {
+			File f2 = new File("txtIndexer.txt");
+			f2.createNewFile();
+			FileOutputStream resul = new FileOutputStream(f2);
+			resul.flush();
+			resul.write(text.getBytes());
+			input = new BufferedReader(new FileReader(f2));
+			while ((readAux = input.readLine()) != null) {
+				allText.add(readAux.getBytes());
+			}
+			f2.delete();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		if (!allText.isEmpty()) {
+
+			Object[] args = { allText, FilePath };
+			s.add(javaCaLa.execute("WordFilesIndexer", args));
+			allText.clear();
+		}
+		input.close();
+		
+	}
+
 	public static TreeSet<String> textIndexer = new TreeSet<String>();
+	private Tika tika;
+	private String text;
+	private boolean diferente = false;
 }

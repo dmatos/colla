@@ -1,0 +1,10 @@
+mensagens colla serão subclasses de MessageImpl (extends)
+
+cada mensagem deve enviar que tipo de comando executará no servidor
+
+os comandos são classes que devem ser inseridas no config.properties e que serão executadas no servidor
+
+exemplo:
+
+config.properties
+"LOGIN_CLIENTE" = server.appl.command.ClientLogin

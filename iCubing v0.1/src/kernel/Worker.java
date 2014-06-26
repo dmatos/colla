@@ -1,9 +1,14 @@
 package kernel;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
@@ -106,6 +111,7 @@ public class Worker
 				Set<String> keysColumn = new TreeSet<String>();
 				for(String key : partialCube[i-1].keySet())
 				{
+					keys.add(key);
 					keysColumn.add(key);
 					
 					if(javaCaLa.instantiateGlobalVar(key, partialCube[i-1].get(key)) == false)
@@ -126,11 +132,8 @@ public class Worker
 				{
 					JCL_result jclr = javaCaLa.getValueLocking(whichCol);
 					Set<String> pks = (Set<String>) jclr.getCorrectResult();
-					if(pks != null)
-					{
-						pks.addAll(keysColumn);
-						javaCaLa.setValue(whichCol, pks);
-					}
+					pks.addAll(keysColumn);
+					javaCaLa.setValue(whichCol, pks);
 				}
 				
 				keysColumn.clear();
@@ -166,7 +169,7 @@ public class Worker
 		
 		//System.out.println("Imprimindo...");
 		
-		/*if(keys != null)
+		if(keys != null)
 			Collections.sort(keys);
 		
 		for(String e : keys)
@@ -178,29 +181,27 @@ public class Worker
 			if(jclr.getErrorResult() == null)
 			{
 				@SuppressWarnings("unchecked")
-				Set<Long> pks = (Set<Long>) jclr.getCorrectResult();
+				Set<String> pks = (Set<String>) jclr.getCorrectResult();
 				
-				for(Long a : pks)
+				for(String a : pks)
 					System.out.print(" " + a);
 				System.out.println();
 			}
-		}		*/
+		}		
 	}
 	
-	@SuppressWarnings({ "unchecked", "unused" })
-	public Map<String, Set<String>> query(String wordsQuery)
+	@SuppressWarnings("unchecked")
+	public Set<String> query(String wordsQuery)
 	{		
 		System.out.println("Preparing Query...");
 		
 		Map<String, List<Filter>> filters = new TreeMap<String, List<Filter>>();
 		Map<String, List<Measure>> measures = new TreeMap<String, List<Measure>>();
 		Map<String, Attribute> attributes = new TreeMap<String, Attribute>();
-		Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
+		Set<String> result = new TreeSet<String>();
 		
 		String[] slicedQuery = wordsQuery.split("\\$");
-		
-		Set<String> interPks = null;
-		
+				
 		try
 		{
 			if(slicedQuery[0] != null)
@@ -270,41 +271,192 @@ public class Worker
 					}
 				}
 			}
-			
+					
 			//executando query
+			System.out.println("Executing query...");
 			for (String whichFilter : filters.keySet())
 			{
 				Attribute atttribute = new Attribute();
 				
 				JCL_result jclr = null;
 				
-				Set<String> pks = new TreeSet<String>();
+				Set<String> values = new TreeSet<String>();
 				
 				jclr = javaCaLa.getValue(whichFilter);
 					
 				if(jclr.getErrorResult() == null)
 				{
-					pks = (Set<String>) jclr.getCorrectResult();
-					atttribute.setAttributes(whichFilter, pks, filters.get(whichFilter));
+					values = (Set<String>) jclr.getCorrectResult();
+					atttribute.setAttributes(whichFilter, values, filters.get(whichFilter));
 					attributes.put(whichFilter, atttribute);				
 				}
+				
+				else
+					jclr.getErrorResult().printStackTrace();
 			}
 			
 			//final...intersecoes e unioes
-			
-			System.out.println();
-			System.out.println("Interseção");
-			
-			String ticket = "resultIntersection";
-									
+																		
 			for(Attribute attribute : attributes.values())
-				attribute.loadTids(ticket);
+				attribute.loadTids();
 			
-			System.out.println("Ok");
+			String filen = null;
+			
+			for(Attribute att:attributes.values())
+			{
+				System.out.println(att.getName());
+				
+				File tMAGOinputF = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/" + att.getName()+ ".txt");
+				
+				if(!tMAGOinputF.exists())
+					tMAGOinputF.createNewFile();
+				
+				BufferedReader fileR;
+				BufferedWriter fileW = new BufferedWriter(new FileWriter(tMAGOinputF,true));
+											
+				if(filen!=null)
+				{
+				
+					for(String aux: att.getAttributes()){
+						fileR = new BufferedReader(new FileReader("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+filen+".txt"));
+						String str = null;
+						while((str = fileR.readLine())!=null)
+							fileW.write(str+"$"+att.getName()+":"+aux+"\r\n");
+											
+						fileR.close();
+						fileR = null;
+					}
+					fileW.flush();
+					fileW.close();
+					fileW=null;
+				}
+				
+				else
+				{
+					System.out.println("Entrou aqui");
+					for(String aux: att.getAttributes())
+					{
+						System.out.println(aux);
+						fileW.write(att.getName()+":"+aux+"\r\n");
+					}
+					
+					fileW.flush();
+					fileW.close();
+					fileW=null;
+				}
+				
+				filen = att.getName();
+			}
+			
+			if(filen!=null)
+			{
+				File f = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+filen+".txt");
+				BufferedReader fileR= new BufferedReader(new FileReader(f));
+				String aux=null;
+				
+				long time1= System.nanoTime();
+				Set<String> mainCache = new TreeSet<String>();
+				
+				while((aux = fileR.readLine()) != null)
+				{
+					String[] r = aux.split("\\$");
+					String[][] rr = new String[r.length][];
+					
+					for(int i = 0; i< r.length; i++)
+						rr[i] = r[i].split("\\:");
+					
+					int tidsMin = obtainMinTids(rr, attributes);
+					
+					Set<String> s = new TreeSet<String>();
+					
+					s.addAll(attributes.get(rr[tidsMin][0]).getTids().get(rr[tidsMin][1]));
+					
+					String cache = "";
+					
+					for(int i = 0; i < r.length; i++)
+					{
+						cache += r[i];
 						
-			Attribute attribute = new Attribute();
+						if(i != tidsMin)
+						{
+							if(!s.isEmpty() && !mainCache.contains(cache))
+								s.retainAll(attributes.get(rr[i][0]).getTids().get(rr[i][1]));
+							
+							else mainCache.add(cache);
+							
+						}
+					}
+					
+					String oneR = "";
+					
+					if(s.size()!=0)
+					{
+						for(int i=0; i<r.length; i++)
+						{							
+							oneR += rr[i][0]+":"+rr[i][1]+"$";							
+						}
+						
+						oneR += "evento:" +s.size();
+						result.add(oneR);
+					}
+					
+					for(String r_aux : r)
+						r_aux = null;
+					
+					for(String[] rr_aux : rr)
+					{
+						for(String r_aux:rr_aux)
+							r_aux = null;
+						rr_aux = null;
+					}
+					
+					s.clear();
+				}
+				
+				//System.err.println("tempo intersecoes ..... " + (System.nanoTime()-time1));
+				fileR.close();
+				fileR=null;
+				
+				mainCache.clear();
+				mainCache = null;
+			}
+
 			
-			result = attribute.getTids(ticket);
+			for (List<Filter> l: filters.values())
+			{
+				for(Filter f: l)
+					f = null;
+				
+				l.clear();
+				l = null;
+			}
+			
+			filters.clear();
+			filters = null;
+			
+			for (List<Measure> ms: measures.values())
+			{
+				for(Measure m : ms)
+					m = null;
+				
+				ms.clear();
+				ms=null;
+			}
+			
+			measures.clear();
+			measures = null;
+			
+			for (Attribute att: attributes.values())
+			{
+				att.clear();
+				att = null;
+			}
+				
+			attributes.clear();
+			attributes = null;
+			
+			return result;
+			
 		}	
 		
 		catch(Exception e)
@@ -312,7 +464,30 @@ public class Worker
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	private int obtainMinTids(String[][] rr, Map<String, Attribute> attributes)
+	{
+		int id = 0;
+		int size = -1;
+		for (int i=0; i<rr.length; i++)
+		{
+			if (i==0)
+			{
+				size = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
+			}
+			
+			else
+			{
+				int size1 = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
+				if (size1<size)
+				{
+					id = i;
+					size = size1;
+				}
+			}
+		}
 		
-		return result;
+		return id;
 	}
 }

@@ -23,12 +23,12 @@ import java.util.TimerTask;
 public class ClientsConnectionMonitor extends TimerTask {
 
     public ClientsConnectionMonitor() {
-        this.timeout = 5000;
+        this.timeout = 10000;
     }
 
     @Override
     public void run() {
-        //System.err.println("Checking connections");
+        Debugger.debug("Checking connections");
         CollAUser user;
         Socket socket;
         ObjectInputStream input;
@@ -65,6 +65,7 @@ public class ClientsConnectionMonitor extends TimerTask {
                                 output.flush();
                                 input = new ObjectInputStream(socket.getInputStream());
                                 input.readObject();
+                                //setting ping time of host as a factor of its weight
                                 host.setRoundTripTime(System.nanoTime() - timestamp);
                                 server.updateWeightedHost(new WeightedHost(host));
                                 totalWeight += host.getWeight();

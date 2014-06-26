@@ -274,10 +274,10 @@ public class Host implements Serializable, Comparable<CollAHost>, CollAHost {
 
     @Override
     public void increaseTaskCounter(Long taskTotalTime) {
-        /* Task total time of execution comes in nanos
-         */
+        // Task total time of execution in nanos        
         this.tasksTotalTime += taskTotalTime / 1000000000L;
         this.taskCounter += 1L;
+        //weight is the mean of execution time of all tasks sent to the host
         this.weight = this.tasksTotalTime / this.taskCounter;
     }
 

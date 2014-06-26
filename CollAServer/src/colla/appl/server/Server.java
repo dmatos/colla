@@ -100,10 +100,10 @@ public class Server extends Observable implements CollAServer, Runnable {
      * Sets up a Singleton instance of a Server with the given port number to
      * listen and a timeout value. Should be called only once.
      *
-     * @param portNumber number to which the server must listen.
      * @param timeOut time, in miliseconds, to set for connection timeout.
-     * @return an unique Server instance.
-     * @throws IOException if the Server couldn't be set online.
+     * @param isPrimaryServer True to start server as primary, false otherwise.
+     * @return an unique instance of server.
+     * @throws IOException if the Server couldn't be started.
      */
     public static synchronized Server setupServer(int timeOut,
             boolean isPrimaryServer)
@@ -116,11 +116,12 @@ public class Server extends Observable implements CollAServer, Runnable {
     }
 
     /**
-     * Returns a Singleton instance of the Server, but setupServer must be
+     * Returns a single instance of the Server. Note that setupServer must be
      * called prior to this method, otherwise it will throw a
      * ServerInitializationException.
      *
-     * @return a Server instance if it has already been made, null otherwise.
+     * @return a single instance of Server
+     * if setupServer has already been called, null otherwise.
      */
     public static Server getInstance() throws ServerInitializationException {
         if (serverInstance == null) {
@@ -132,7 +133,7 @@ public class Server extends Observable implements CollAServer, Runnable {
 
     @Override
     public void run() {
-        System.out.println("starting server as primary...");
+        System.out.println("Starting server as primary...");        
         ClientsConnectionMonitor connMonitor = new ClientsConnectionMonitor();
         /* start in 2 minutes (delay) and repeat each 2 minutes (period) */
         Long monitorDelayAndPeriod = new Long(120000);
@@ -170,7 +171,7 @@ public class Server extends Observable implements CollAServer, Runnable {
                 Object[] args = {socketAccept};
                 jcl.execute(ServerWorker.class.getName(), args);
             } catch (IOException io) {
-                // treat( "ex! Problema com socket passado pro jcl", io );
+                Debugger.debug(io);
             }
         }
     }// fim do método run
@@ -208,14 +209,12 @@ public class Server extends Observable implements CollAServer, Runnable {
             if (!this.usersMap.containsKey(usr.getName())) {
                 this.usersMap.put(usr.getName(), usr);
             }
-        }
-        /*
-         * iterates over the groups of a user to update its status to each group
-         */
+        }             
 
         CollAUser temp = this.usersMap.get(usr.getName());
         usr.setActivities(temp.getActivities());
-
+        for(CollAHost h : temp.getHosts())
+            usr.addHost(h);
         this.usersMap.put(usr.getName(), usr);
 
         try {
@@ -223,12 +222,15 @@ public class Server extends Observable implements CollAServer, Runnable {
         } catch (Exception e) {
             Debugger.debug(e);
         }
+        
         UpdateMsg msg = new UpdateUserMsg(usr);
         try {
             this.updateSecondary(msg);
         } catch (IOException | ClassNotFoundException ex) {
             Debugger.debug(ex);
         }
+        
+        //Observer design pattern
         this.setChanged();
         this.notifyObservers();
     }
@@ -300,7 +302,7 @@ public class Server extends Observable implements CollAServer, Runnable {
         f_out.close();
     }
 
-    public void restoreServerData() throws Exception {
+    private void restoreServerData() throws Exception {
 
         // create data directory if it does not alredy exist
         new File("data/").mkdir();
@@ -371,6 +373,8 @@ public class Server extends Observable implements CollAServer, Runnable {
         user.addHost(host);
         if (!host.IsOnline()) {
             this.weightedHosts.remove(new WeightedHost(host));
+        } else {
+            this.updateWeightedHost(new WeightedHost(host));
         }
         this.updateUser(user);
         //update secondary
@@ -379,7 +383,6 @@ public class Server extends Observable implements CollAServer, Runnable {
             try {
                 this.updateSecondary(msg);
             } catch (IOException | ClassNotFoundException ex) {
-                //Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 //@todo tratar exceção em que secundário não responde
                 Debugger.debug(ex);
             }
@@ -651,6 +654,7 @@ public class Server extends Observable implements CollAServer, Runnable {
     public synchronized void setHostWeightIncrement(long weightIncrement) {
         this.hostWeightIncrement = weightIncrement;
     }
+    
     private String secondaryIPAddress;
     private int secondaryPortNumber;
     private boolean isPrimaryServer;

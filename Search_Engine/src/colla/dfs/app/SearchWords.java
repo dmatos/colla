@@ -5,58 +5,47 @@ import interfaces.kernel.JCL_result;
 
 import java.io.BufferedReader;
 import java.io.File;
-//import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-//import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
-
 import org.apache.tika.*;
 import org.apache.tika.exception.TikaException;
-//import org.apache.pdfbox.pdfparser.PDFObjectStreamParser;
-//import org.apache.log4j.*;
+import colla.dfs.util.*;
 
-
-
-import colla.dfs.util.EditDistance;
-
-import javax.swing.JOptionPane;
-
-//import src.colla.dfs.util.*;
 
 public class SearchWords extends EditDistance {
-	
+
 	public SearchWords() {
 
 	}
 
-	public String SearchWord(String texto) throws TikaException {	
-		
+	public Set<String> SearchWord(String texto) throws TikaException {
+
 		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
 		String CurLine = texto;
+		Set<String> result = new TreeSet<String>();
 		String r = null;
 		try {
-			boolean testAspas = CurLine.contains("\"");
+			testAspas = CurLine.contains("\"");
 			CurLine = CurLine.replaceAll("[\"\']", "");
+			CurLine = CurLine.toLowerCase();
 			String[] words = CurLine.split(" ");
 			words = CurLine.split(" ");
-			String[] auxwords = new String[words.length];// variavel que vai auxiliar na aproximação de string
+			// Verifica se a palavra ou setença esta escrita corretamente ou
+			// existe no arquivos indexado
+
+			String[] auxwords = new String[words.length];
 			for (int i = 0; i < words.length; i++) {
-				
 				JCL_result jclr = javaCaLa.getValue(words[0].substring(0, 1));
-				Set<String> aux = new HashSet<String>();
+				Set<String> aux = new TreeSet<String>();
 				if (jclr.getCorrectResult() != null) {
-					aux.addAll((HashSet<String>) jclr.getCorrectResult());
+					aux.addAll((Set<String>) jclr.getCorrectResult());
 					String name = Levenshtein(words[i], aux);
 					if (name != "") {
 						auxwords[i] = name;
@@ -66,136 +55,131 @@ public class SearchWords extends EditDistance {
 				}
 			}
 			for (int j = 0; j < auxwords.length; j++) {
-				if(!auxwords[j].equals(words[j])){
-					diferente = true;
-				}	
+				if (!auxwords[j].equals(words[j])) {
+					words = auxwords;
+					break;
+				}
 			}
-			
-			if (diferente) {
-				r = searchWords(auxwords, testAspas, texto);
+			texto = "";
+			for (String a : words) {
+				texto = texto + " " + a;
+			}
 
-			} else {
-				r =  searchWords(words, testAspas, texto);
+			Map<String, Map<String, Set<String>>> resp = new TreeMap<String, Map<String, Set<String>>>();
+
+			for (String word : words) {
+				if (word.length() > 2) {
+					JCL_result jclr = javaCaLa.getValue(word);
+					if (jclr.getCorrectResult() != null) {
+						resp.put(word, (Map<String, Set<String>>) jclr.getCorrectResult());
+					} else
+						control = false;
+				}
 			}
-				
+			if(resp == null){
+				return null;
+			}
+			if (words.length == 1) {
+				result = ResultSearchOne(resp, words[0]);
+			} else {
+				result = ResultSearch(resp, words);
+			}
+
 		} catch (Exception e) {
 			System.err.println("problem in query");
 			e.printStackTrace();
 		}
-		return r;
-	}
 
-	public String searchWords(String[] words, boolean aspas, String text) {
-		
-		JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-		Map<String, Set<String>> mainFile = new HashMap<String, Set<String>>();
-		HashMap<String, LinkedList<Integer>> mainFileResult = new HashMap<String, LinkedList<Integer>>();
-
-		String result = "";
-		if (words.length < 2) {
-			JCL_result jclr = javaCaLa.getValue(words[0]);
-			if (jclr.getCorrectResult() != null) {
-				if (jclr.getCorrectResult() != null) {
-					mainFile.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
-					result = ResultOneWord(mainFile);
-				}
-			}
-
-		} else {
-
-			JCL_result jclr = javaCaLa.getValue(words[0]);
-			if (jclr.getCorrectResult() != null) {
-				mainFile.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
-				Map<String, Set<String>> File = new HashMap<String, Set<String>>();
-
-				for (int i = 1; i < words.length; i++) {
-					jclr = javaCaLa.getValue(words[i]);
-					if (jclr.getCorrectResult() != null) {
-						File.putAll((HashMap<String, Set<String>>) jclr.getCorrectResult());
-						interMaps(mainFile, File, mainFileResult);
-					}
-					File.clear();
-				}
-				result = ResultSomeWords(mainFileResult, aspas);
-			}
-		}
-		
-		if (!mainFile.isEmpty()) {
-			return "The word(s) \"" + text + "\" found in the file(s):" + result;
-		} else {
-			return  "The word(s) \"" + text + "\" not found in the file(s)!";
-		}
-	}
-
-	// Fução que gera a resposta para uma palavra
-	public String ResultOneWord(Map<String, Set<String>> map) {
-		String result = "\n";
-		for (String aux : map.keySet()) {
-			result = result + aux + "\n";
-
-		}
 		return result;
 	}
 
-	// Função que gera a resposta para mais de uma palavra
-	public String ResultSomeWords(HashMap<String, LinkedList<Integer>> mapResult, boolean aspas) {
-		Set<String> result = new HashSet<String>();
-		LinkedList<Integer> distWords = new LinkedList<Integer>();
-		for (String nameArq : mapResult.keySet()) {
-			distWords.clear();
-			distWords = mapResult.get(nameArq);
-
-			if (aspas == true) {
-				Collections.sort(distWords);
-				for (Integer aux : distWords) {
-					if (aux == 1) {
-						result.add(nameArq);
-					}
-				}
-			} else {
-				result.add(nameArq);
+	public Set<String> ResultSearchOne(Map<String, Map<String, Set<String>>> resp, String word) {
+		if (resp.size() > 0) {
+			Set<String> result = new TreeSet<String>();
+			Map<String, Set<String>> aux = resp.get(word);
+			for (String path : aux.keySet()) {
+				result.add(path);
 			}
+			return result;
 		}
-		String r = "\n";
-		for (String a : result) {
-			r = r + a + "\n";
-		}
-		return r;
+		return null;
 	}
 
-	// Calcula a distância entre as palavra
-	public void interMaps(Map<String, Set<String>> mapFistWord, Map<String, Set<String>> mapNextWord, HashMap<String, LinkedList<Integer>> mapResult) {
+	public Set<String> ResultSearch(Map<String, Map<String, Set<String>>> resp,
+			String[] words) {
+		if (resp.size()>0) {
+			Set<String> result = new TreeSet<String>();
+			Map<String, Set<String>> R = new TreeMap<String, Set<String>>();
+			Map<String, Set<String>> aux = new TreeMap<String, Set<String>>();
+			for (int i = 0; i < words.length; i++) {
+				if (words[i].length() > 2) {
+					R = resp.get(words[i]);
+					break;
+				}
+			}
+			// Seleciona os arquivos comuns entre as palavras
+			if (control) {
 
-		for (String nameFile : mapFistWord.keySet()) {
-			if (mapNextWord.containsKey(nameFile)) {
+				for (int i = 1; i < words.length; i++) {
 
-				Set<String> setM2 = mapNextWord.get(nameFile);
-				Set<String> setM1 = mapFistWord.get(nameFile);
+					if (words[i].length() > 2) {
 
-				for (String cord : setM2) {
-					String v[] = cord.split(",");
-					for (String cord2 : setM1) {
-						String v2[] = cord2.split(",");
-					
-						Integer disL = Math.abs(Integer.parseInt(v[0]) - Integer.parseInt(v2[0]));	
-						Integer disC = Math.abs(Integer.parseInt(v[1]) - Integer.parseInt(v2[1]));
-						Integer dis = disL + disC;
-						LinkedList<Integer> dist = new LinkedList<Integer>();
-						dist.add(dis);
-						if (mapResult.containsKey(nameFile)) {
-							dist.addAll(mapResult.get(nameFile));
+						aux = resp.get(words[i]);
+						for (String path : aux.keySet()) {
+							if (R.containsKey(path)) {
+								result.add(path);
+							} else {
+								R.remove(path);
+								result.remove(path);
+							}
+
 						}
-						mapResult.put(nameFile, dist);
-
 					}
-
+					aux.clear();
 				}
+			}
+			// seleciona somente os arquivos onde as palavras estão em sequencia
+			if (testAspas && result.isEmpty()) {
+				Set<String> result2 = new TreeSet<String>();
+				Set<String> LC1 = new TreeSet<String>();
+				Set<String> LC2 = new TreeSet<String>();
+				for (String path : result) {
+					for (int i = 1; i < words.length; i++) {
+						if (words[i].length() > 2) {
+							aux = resp.get(words[i]);
+							LC1.addAll(R.get(path));
+							LC2.addAll(aux.get(path));
+							for (String cord1 : LC1) {
+								String c1[] = cord1.split(",");
+								boolean seq = true; // verifica se a palavra é
+													// sequencia da outra
+								for (String cord2 : LC2) {
+									String c2[] = cord2.split(",");
+									Integer disL = Math.abs(Integer
+											.parseInt(c1[0])
+											- Integer.parseInt(c2[0]));
+									if (disL == i - 1) {
+										result2.add(path);
+										seq = false;
+										break;
+									}
+
+								}
+								if (seq) {
+									result.remove(path);
+								}
+							}
+							aux.clear();
+						}
+					}
+				}
+				return result2;
 
 			}
-
+			return result;
 		}
+		return null;
 	}
-
 
 	public void index(String dir, Set<String> s) throws TikaException {
 
@@ -219,7 +203,7 @@ public class SearchWords extends EditDistance {
 							|| f.getAbsolutePath().endsWith(".xls")
 							|| f.getAbsolutePath().endsWith(".txt")
 							|| f.getAbsolutePath().endsWith(".rtf")) {
-					    text = null;
+						text = null;
 						text = getTika().parseToString(f);
 						indexFile(f.getAbsolutePath(), s);
 
@@ -246,7 +230,7 @@ public class SearchWords extends EditDistance {
 		String readAux = null;
 		ArrayList<byte[]> allText = new ArrayList<byte[]>();
 		BufferedReader input = null;
-		
+		int linha = 0;
 		try {
 			File f2 = new File("txtIndexer.txt");
 			f2.createNewFile();
@@ -254,8 +238,19 @@ public class SearchWords extends EditDistance {
 			resul.flush();
 			resul.write(text.getBytes());
 			input = new BufferedReader(new FileReader(f2));
+			int cont = 0;
+			
 			while ((readAux = input.readLine()) != null) {
 				allText.add(readAux.getBytes());
+				cont++;
+				if(cont == 100){
+					cont = 0;
+					Object[] args = { allText, FilePath, linha};
+					s.add(javaCaLa.execute("WordFilesIndexer", args));
+					linha = linha+100;
+					allText.clear();
+				}
+				
 			}
 			f2.delete();
 
@@ -264,16 +259,17 @@ public class SearchWords extends EditDistance {
 		}
 		if (!allText.isEmpty()) {
 
-			Object[] args = { allText, FilePath };
+			Object[] args = { allText, FilePath , linha};
 			s.add(javaCaLa.execute("WordFilesIndexer", args));
 			allText.clear();
 		}
 		input.close();
-		
+
 	}
 
-	public static TreeSet<String> textIndexer = new TreeSet<String>();
+	private static TreeSet<String> textIndexer = new TreeSet<String>();
+	private boolean testAspas;
+	private boolean control = true;
 	private Tika tika;
 	private String text;
-	private boolean diferente = false;
 }

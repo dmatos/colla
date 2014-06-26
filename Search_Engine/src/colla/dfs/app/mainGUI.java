@@ -4,22 +4,17 @@ package colla.dfs.app;
 import implementations.dm_kernel.user.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
-
-import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.JTextComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 
 import org.apache.tika.exception.TikaException;
@@ -31,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class main extends JFrame {
+public class mainGUI extends JFrame {
 
 	private JPanel contentPane;
 	private static JTextField Path;
@@ -47,7 +42,7 @@ public class main extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					main frame = new main();
+					mainGUI frame = new mainGUI();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -59,7 +54,7 @@ public class main extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public main() {
+	public mainGUI() {
 		setTitle("JCL-Search Engine");
 		setBackground(new Color(102, 255, 255));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,18 +91,26 @@ public class main extends JFrame {
 		Word.setColumns(10);
 		
 		JButton btnPesquisar = new JButton("Search");
+        
 		btnPesquisar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+	
 				try {
-					String r = Search();
-					resultTextArea.setText(r);
+					Set<String> r = Search();
+					if(r==null){
 					
+						resultTextArea.setText( "The Word(s)  \""+ words +"\"  was not found in the file(s)");
+					}else{
+						String resp = "";
+						for(String rs:r){
+							resp = resp + rs+"\n";
+						}
+						resultTextArea.setText( "The Word(s)  \""+ words +"\" was found in the file(s):\n"+ resp);
+					}
+							
 				} catch (TikaException e) {
 					e.printStackTrace();
-				}
-
-				
+				}			
 			}
 	
 		});
@@ -123,9 +126,6 @@ public class main extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				String pF = ChooseFile();
 				if(pF!=""){
-					if(!pF.endsWith("\\")){
-						pF = pF + "\\";
-					}
 				 	Path.setText(pF);
 				}
 			}
@@ -177,13 +177,15 @@ public class main extends JFrame {
 		
 	}
 	
-	public static String Search() throws TikaException{
+	public static Set<String> Search() throws TikaException{
 		
 		long time1 = System.nanoTime();
 		
 		String t = Word.getText();
 		SearchWords aux = new SearchWords();
-		String resul = aux.SearchWord(t);
+		
+		Set<String> resul = aux.SearchWord(t);
+		words = t;
 		
 		long time2 = System.nanoTime();
 		System.err.println("Search time: " + (time2 - time1));
@@ -192,19 +194,20 @@ public class main extends JFrame {
 	}
 	
 	 public static String ChooseFile(){   
-       
-       String chooseFlile;      
-       JFileChooser arquivo = new JFileChooser();      
-       arquivo.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);    
          
-       if(arquivo.showOpenDialog(arquivo) == JFileChooser.APPROVE_OPTION){   
-           chooseFlile = arquivo.getSelectedFile().getPath();   
-       }          
-         
-       else{   
-           chooseFlile = "";   
-             
-       }   
-       return chooseFlile;   
-       } 
+         String chooseFlile;      
+         JFileChooser arquivo = new JFileChooser();      
+         arquivo.setFileSelectionMode(JFileChooser.CUSTOM_DIALOG);    
+           
+         if(arquivo.showOpenDialog(arquivo) == JFileChooser.APPROVE_OPTION){   
+             chooseFlile = arquivo.getSelectedFile().getPath();   
+         }          
+           
+         else{   
+             chooseFlile = "";   
+               
+         }   
+         return chooseFlile;   
+         } 
+	 static String words = "";
 }

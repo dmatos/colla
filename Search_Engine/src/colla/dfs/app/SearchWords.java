@@ -37,9 +37,9 @@ public class SearchWords extends EditDistance {
 			CurLine = CurLine.toLowerCase();
 			String[] words = CurLine.split(" ");
 			words = CurLine.split(" ");
+			
 			// Verifica se a palavra ou setença esta escrita corretamente ou
 			// existe no arquivos indexado
-
 			String[] auxwords = new String[words.length];
 			for (int i = 0; i < words.length; i++) {
 				JCL_result jclr = javaCaLa.getValue(words[0].substring(0, 1));

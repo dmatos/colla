@@ -18,43 +18,45 @@ import java.util.Map;
  *
  * @author dmatos
  */
-public class SentTask implements CollATask{
-    
-    public SentTask(CollATask task){
+public class SentTask implements CollATask {
+
+    public SentTask(CollATask task) {
         this.task = task;
         this.hosts = new ArrayList<CollAHost>(5);
-    }        
-    
-    public void addHosts(List<CollAHost> hostList){
+    }
+
+    public void addHosts(List<CollAHost> hostList) {
         this.hosts.addAll(hostList);
     }
-    
-    public List<CollAHost> getHostsList(){
+
+    public List<CollAHost> getHostsList() {
         return this.hosts;
     }
-    
-    public CollATask getEmbededTask(){
+
+    public CollATask getEmbededTask() {
         return this.task;
     }
-    
+
     /**
-     * 
+     *
      * @return last host to which this task has been sent to.
      */
-    public CollAHost getActualHost(){
-        CollAHost host = this.hosts.get(0);
-        return host;
+    public CollAHost getActualHost() {
+        if (hosts.size() > 0) {
+            return (this.hosts.get(0));
+        }
+        return null;
     }
-    
+
     /**
-     * 
+     *
      * @return next available host to send this task.
      */
-    public CollAHost getNextHost(){
+    public CollAHost getNextHost() {
         CollAHost host = null;
         this.hosts.remove(0);
-        host= this.hosts.get(0);                
-        return host;        
+        host = this.hosts.get(0);
+        return host;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class SentTask implements CollATask{
 
     @Override
     public String getTaskName() {
-       return task.getTaskName();
+        return task.getTaskName();
     }
 
     @Override
@@ -99,7 +101,7 @@ public class SentTask implements CollATask{
 
     @Override
     public void addDependency(File file) throws Exception {
-       this.task.addDependency(file);
+        this.task.addDependency(file);
     }
 
     @Override
@@ -119,7 +121,7 @@ public class SentTask implements CollATask{
 
     @Override
     public void setStarted() {
-       this.task.setStarted();
+        this.task.setStarted();
     }
 
     @Override
@@ -134,12 +136,12 @@ public class SentTask implements CollATask{
 
     @Override
     public String getTotalTime() {
-       return this.task.getTotalTime();
+        return this.task.getTotalTime();
     }
 
     @Override
     public String getInitialTime() {
-       return this.task.getInitialTime();
+        return this.task.getInitialTime();
     }
 
     @Override
@@ -194,7 +196,7 @@ public class SentTask implements CollATask{
 
     @Override
     public boolean removeTicket() {
-       return this.task.removeTicket();
+        return this.task.removeTicket();
     }
 
     @Override
@@ -231,9 +233,9 @@ public class SentTask implements CollATask{
     public boolean isDistributed() {
         return this.task.isDistributed();
     }
-    
+
     @Override
-    public String getGroup(){
+    public String getGroup() {
         return this.task.getGroup();
     }
 
@@ -242,9 +244,9 @@ public class SentTask implements CollATask{
         this.task.clear();
         this.task = null;
         this.hosts.clear();
-    }        
-    
-    private CollATask task;    
+    }
+
+    private CollATask task;
     private List<CollAHost> hosts;
-    
+
 }

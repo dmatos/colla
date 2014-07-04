@@ -174,6 +174,7 @@ public class SecondaryServer {
         JCL_result jclr = null;      
         try {
             serverSocket = new ServerSocket(SecondaryServer.portNumber);
+            serverSocket.setSoTimeout(0);
             Socket socketAccept;
             while (primaryIsAlive) {
                 try {

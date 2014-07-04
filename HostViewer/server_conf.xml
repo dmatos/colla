@@ -1,6 +1,6 @@
 <server_configuration>
     <!--IP address of server-->
-    <IPAddress ip="192.168.0.12" secondaryIP="192.168.0.12"> </IPAddress>
+    <IPAddress ip="192.168.1.105" secondaryIP="192.168.1.105"> </IPAddress>
     <!--port that server uses for this application-->
     <portNumber port="9999" secondaryPort="9998"> </portNumber>    
 </server_configuration>

@@ -1,13 +1,13 @@
 package Utilities;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MenorIgual 
 {
-	public static Set<String> execute(Set<String> keys, String key)
+	public static List<String> execute(List<String> keys, String key)
 	{
-		Set<String> which = new TreeSet<String>();
+		List<String> which = new LinkedList<String>();
 		for(String aux:keys)
 		{
 			if(Double.parseDouble(aux)<=Double.parseDouble(key))

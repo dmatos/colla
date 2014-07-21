@@ -1,8 +1,7 @@
 package kernel;
 
-import implementations.dm_kernel.user.JCL_FacadeImpl;
-import interfaces.kernel.JCL_facade;
-import interfaces.kernel.JCL_result;
+//import interfaces.kernel.JCL_facade;
+//import interfaces.kernel.JCL_result;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,21 +27,10 @@ public class Attribute
 	private List<String> result;
 	private Map<String, Set<String>> tids;
 	private List<String> aux; 
-	JCL_result jclr = null;
-	JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
 	
-	public void setAttributes (String name, Set<String> values, List<Filter> filters)
+	public void setAttributes (String name, List<String> values, List<Filter> filters)
 	{
 		this.name = name;
-		
-		/*System.out.println(name);
-		
-		for(String aux : values)
-			System.out.print(" " + aux);
-		System.out.println(); */
-			
-		// maior, menor, entre, maior_igual, menor_igual, 
-		//entre_igual, igual, diferente, contem, similar.
 		
 		List<List<String>> parciais = new LinkedList<List<String>>();
 		
@@ -60,63 +48,63 @@ public class Attribute
 				
 				if(filter.getType().equals("maior"))
 				{
-					Set<String> l = Maior.execute(values, filter.getValues()[0]);
+					List<String> l = Maior.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("menor"))
 				{
-					Set<String> l = Menor.execute(values, filter.getValues()[0]);
+					List<String> l = Menor.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("entre"))
 				{
-					Set<String> l = Entre.execute(values, filter.getValues()[0], filter.getValues()[1]);
+					List<String> l = Entre.execute(values, filter.getValues()[0], filter.getValues()[1]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("maior_igual"))
 				{
-					Set<String> l = MaiorIgual.execute(values, filter.getValues()[0]);
+					List<String> l = MaiorIgual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("menor_igual"))
 				{
-					Set<String> l = MenorIgual.execute(values, filter.getValues()[0]);
+					List<String> l = MenorIgual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("entre_igual"))
 				{
-					Set<String> l = EntreIgual.execute(values, filter.getValues()[0], filter.getValues()[1]);
+					List<String> l = EntreIgual.execute(values, filter.getValues()[0], filter.getValues()[1]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("igual"))
 				{
-					Set<String> l = Igual.execute(values, filter.getValues()[0]);
+					List<String> l = Igual.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("diferente"))
 				{
-					Set<String> l = Diferente.execute(values, filter.getValues()[0]);
+					List<String> l = Diferente.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
 				
 				if(filter.getType().equals("contem"))
 				{
-					Set<String> l = Contem.execute(values, filter.getValues()[0]);
+					List<String> l = Contem.execute(values, filter.getValues()[0]);
 					aux.addAll(l);
 					sentinel = false;
 				}
@@ -156,34 +144,31 @@ public class Attribute
 		return name;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void loadTids()
+	public void loadTids(Map<String, Integer> reverseColumns)
 	{
 		tids = new TreeMap<String, Set<String>>();
 		Set<String> all = new TreeSet<String>();
-				
+						
 		for(String aux: result)
 		{
 			if(aux != "all")
-			{
-				JCL_result jclr = null;
-				jclr = javaCaLa.getValue(aux);
-				
-				Set<String> pks = new TreeSet<String>();
-					
-				if(jclr.getErrorResult() == null)
-				{
-					pks = (Set<String>) jclr.getCorrectResult();
+			{				
+				try
+				{					
+					Set<String> pks = new TreeSet<String>();
+					Map<String, Set<String>> auxPartialCube = Worker.partialCube.get(reverseColumns.get(getName()) - 1).get(Worker.getCubeName());
+					pks = auxPartialCube.get(aux);
 					
 					tids.put(aux,pks);
-					all.addAll(pks);
+					all.addAll(pks);						
 				}
 				
-				else
-					jclr.getErrorResult().printStackTrace();
+				catch(Exception e)
+				{
+					System.out.println("Não foi possível locarlizar o valor: " + aux);
+				}
 			}
-		}
-		
+		}								
 		tids.put("all", all);
 	} 
 	
@@ -195,7 +180,7 @@ public class Attribute
 	public void clear()
 	{
 		result.clear();
-		result=null;
+		result = null;
 				
 		tids.clear();
 		tids=null;

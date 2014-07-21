@@ -1,13 +1,13 @@
 package Utilities;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Entre 
 {
-	public static Set<String> execute(Set<String> keys, String key, String key1)
+	public static List<String> execute(List<String> keys, String key, String key1)
 	{
-		Set<String> which = new TreeSet<String>();
+		List<String> which = new LinkedList<String>();
 		for(String aux:keys)
 		{
 			if(Double.parseDouble(key)<Double.parseDouble(aux))

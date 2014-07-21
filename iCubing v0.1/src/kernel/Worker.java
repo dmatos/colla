@@ -3,6 +3,7 @@ package kernel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -16,37 +17,70 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import kernel.Attribute;
 import kernel.Measure;
 import kernel.Filter;
-import implementations.dm_kernel.user.JCL_FacadeImpl;
-import interfaces.kernel.JCL_facade;
-import interfaces.kernel.JCL_result;
+//import implementations.dm_kernel.user.JCL_FacadeImpl;
+//import interfaces.kernel.JCL_facade;
+//import interfaces.kernel.JCL_result;
 import drivers.ConnectionText;
 
 public class Worker 
 {
-	static List <String> keys = new LinkedList<String>();
 	private FileOutputStream finalTempFile;
-	private JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-
-	@SuppressWarnings("unchecked")
-	public Boolean index(String fileName, int numofColumns,Map<Integer,String> mapColumns,TreeSet<Integer> measures,ArrayList<byte[]> byteList) throws IOException
+	private static int numberOfColumns;
+	private static String cubeName;
+	private static Vector <Map<String,Map<String, List<String>> >> columnsItens;
+	public  static Vector <Map<String,Map<String, Set<String>>  >> partialCube;
+	public  static Map<String, Integer> reverseColumns;
+	
+	public static String getCubeName()
 	{
-		System.err.println("Reading tuples...!");
-		try
+		return cubeName;
+	}
+	
+	public static void setCubeName(String cName)
+	{
+		cubeName = cName;
+	}
+	
+	public static void inicializateWorker(String cName,int numofColumns,Map<Integer,String> mapColumns)
+	{
+		setCubeName(cName);
+		columnsItens = new Vector<Map<String,Map<String, List<String>> >>();
+		partialCube = new Vector<Map<String,Map<String, Set<String>>  >>();
+		
+		for(int i = 0; i < numofColumns; i++)
 		{
-			String[] tuple = null;
-			
-			Map<String, Set<String> >[] partialCube = new HashMap[numofColumns];
-			HashMap<String, List<Double> > partialMeasure;
-			
-			for(int i = 0; i < numofColumns; i++)
-				partialCube[i] = new HashMap<String, Set<String> >();
+			Map<String,Map<String, List<String>> > auxMap = new TreeMap<String,Map<String, List<String>> >();
+			columnsItens.add(auxMap);
+		}
+		
+		for(int i = 0; i < numofColumns; i++)
+		{
+			Map<String,Map<String, Set<String>> > auxMap = new TreeMap<String,Map<String, Set<String>> >();
+			partialCube.add(auxMap);
+		}
+		
+		numberOfColumns = numofColumns;
 				
-			partialMeasure = new HashMap<String, List<Double>>();
-			
+		reverseColumns = new HashMap<String, Integer>();
+		
+		for(int i = 1; i <= numberOfColumns; i++)
+			reverseColumns.put(mapColumns.get(i), i);
+	}
+	
+	public Boolean index(String fileName, int numofColumns,Map<Integer,String> mapColumns,ArrayList<byte[]> byteList,String host) throws IOException
+	{
+		
+		System.out.println("Processing" + fileName + "...!");
+		
+		try
+		{			
+			String[] tuple = null;
+							
 			File tempDir = new File(System.getProperty("java.io.tmpdir"));
 		    File tempFile = File.createTempFile("auxFile", ".tmp", tempDir);
 		    
@@ -63,82 +97,82 @@ public class Worker
 			ct.configure(tempFile.getAbsolutePath());
 			ct.connect(); 
 			
+			System.err.println("Reading tuples...!");
+			
 			while((tuple = ct.next()) != null)
-			{				
+			{
 				for (int i = 1; i < tuple.length; i++) 
 				{
-					if(measures.contains(i)) // se for measure
-					{					
-						List<Double> setMeasures =  partialMeasure.get(new Long(tuple[0]));
+					Map<String, List<String>> auxColumnsItens = columnsItens.get(i-1).get(getCubeName());
+					
+					if(auxColumnsItens == null)
+					{
+						Map<String,Map<String, List<String>> > auxMap = new TreeMap<String,Map<String, List<String>> >();
+						auxColumnsItens = new TreeMap <String, List<String>>();
+						auxMap.put(getCubeName(), auxColumnsItens);
+						columnsItens.set(i-1, auxMap);
 						
-						if(setMeasures == null) 
+						List<String> values = new LinkedList<String>();
+						auxColumnsItens.put(mapColumns.get(i), values);
+					
+						if (!values.contains(tuple[i])) 
+							values.add(tuple[i]);
+					}
+					
+					else
+					{	
+						List<String> values = auxColumnsItens.get(mapColumns.get(i));
+						
+						if(values == null)
 						{
-							setMeasures= new LinkedList<Double>();//cria um set para as measures de uma linha
-							partialMeasure.put(tuple[0], setMeasures);
+							values = new LinkedList<String>();
+							auxColumnsItens.put(mapColumns.get(i), values);
+							Map<String,Map<String, List<String>> > auxMap = new TreeMap<String,Map<String, List<String>> >();
+							auxMap.put(getCubeName(), auxColumnsItens);
+							columnsItens.set(i-1, auxMap);
 						}
 						
-						setMeasures.add(new Double(tuple[i])); 								
-						
+						if (!values.contains(tuple[i])) 
+							values.add(tuple[i]);
+					}
+					
+					String pk = tuple[0]; 
+					Map<String, Set<String>> auxPartialCube = partialCube.get(i-1).get(getCubeName());
+					
+					if(auxPartialCube == null)
+					{
+						Map<String,Map<String, Set<String>> > auxMap = new TreeMap<String,Map<String, Set<String>> >();
+						auxPartialCube = new TreeMap<String, Set<String>>();
+						Set<String> pks = new TreeSet<String>();
+						auxPartialCube.put(tuple[i], pks);
+						auxMap.put(getCubeName(), auxPartialCube);
+						partialCube.set(i-1, auxMap);
+					
+						if (!pks.contains(pk)) 
+							pks.add(pk);
 					}
 					
 					else
 					{
-						String pk = tuple[0]; 
-						Set<String> pks = partialCube[i-1].get(tuple[i]);
+						Set<String> pks = auxPartialCube.get(tuple[i]);
 						
-						if (pks == null) 
+						if(pks == null)
 						{
 							pks = new TreeSet<String>();
-							partialCube[i-1].put(tuple[i], pks);
+							auxPartialCube.put(tuple[i], pks);
+							Map<String,Map<String, Set<String>> > auxMap = new TreeMap<String,Map<String, Set<String>> >();
+							auxMap.put(getCubeName(), auxPartialCube);
+							partialCube.set(i-1,auxMap);
 						}
 						
 						if (!pks.contains(pk)) 
 							pks.add(pk);
 					}
-												
-				}//end for
-				
+				}
+																				
 				tuple = null;
 										
 			}//end while	
-						
-			System.err.println("Creating global vars...");
-			
-			JCL_facade javaCaLa = JCL_FacadeImpl.getInstance();
-								
-			for(int i = 1; i < numofColumns; i++)
-			{
-				Set<String> keysColumn = new TreeSet<String>();
-				for(String key : partialCube[i-1].keySet())
-				{
-					keys.add(key);
-					keysColumn.add(key);
-					
-					if(javaCaLa.instantiateGlobalVar(key, partialCube[i-1].get(key)) == false)
-					{
-						JCL_result jclr = javaCaLa.getValueLocking(key);
-						Set<String> pks = (Set<String>) jclr.getCorrectResult();
-						if(pks != null)
-						{
-							pks.addAll(partialCube[i-1].get(key));
-							javaCaLa.setValue(key, pks);
-						}
-					}
-				}
-				
-				String whichCol = mapColumns.get(i);
-				
-				if(javaCaLa.instantiateGlobalVar(whichCol, keysColumn) == false)
-				{
-					JCL_result jclr = javaCaLa.getValueLocking(whichCol);
-					Set<String> pks = (Set<String>) jclr.getCorrectResult();
-					pks.addAll(keysColumn);
-					javaCaLa.setValue(whichCol, pks);
-				}
-				
-				keysColumn.clear();
-				keysColumn = null;
-			}			
 		}
 		
 		catch (Exception e)
@@ -149,62 +183,34 @@ public class Worker
 		return true;
 	} 
 	
-	public void imprime()
-	{
-		for(int i = 1; i <= 5; i++)
+	public void imprime(String [] columns)
+	{ 
+		for(int i = 1; i < columns.length; i++)
 		{
-			String var = "n" + i;
-			JCL_result jclr = null;
-			jclr = javaCaLa.getValue(var);
-			if(jclr.getErrorResult() == null)
-			{
-				@SuppressWarnings("unchecked")
-				Set<String> pks = (Set<String>) jclr.getCorrectResult();
-				System.out.println("Coluna " + i + ":");
-				for(String a : pks)
-					System.out.print(" " + a);
-				System.out.println();
-			}
-		}
-		
-		//System.out.println("Imprimindo...");
-		
-		if(keys != null)
-			Collections.sort(keys);
-		
-		for(String e : keys)
-		{
-			System.out.println(e);
-			JCL_result jclr = null;
-			jclr = javaCaLa.getValue(e);
-				
-			if(jclr.getErrorResult() == null)
-			{
-				@SuppressWarnings("unchecked")
-				Set<String> pks = (Set<String>) jclr.getCorrectResult();
-				
-				for(String a : pks)
-					System.out.print(" " + a);
-				System.out.println();
-			}
-		}		
+			String whichCol = columns[i];
+			Map<String, List<String>> auxColumnsItens = columnsItens.get(i-1).get(getCubeName());
+			System.out.println(whichCol);
+			for(String a : auxColumnsItens.get(whichCol))
+				System.err.print(" " + a);
+			System.out.println(); 
+		}	
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Set<String> query(String wordsQuery)
-	{		
-		System.out.println("Preparing Query...");
-		
+	@SuppressWarnings({"unused" })
+	public List<String> query(String wordsQuery)
+	{	
+		System.out.println("Starting query...");
 		Map<String, List<Filter>> filters = new TreeMap<String, List<Filter>>();
-		Map<String, List<Measure>> measures = new TreeMap<String, List<Measure>>();
+		Map<String, List<FilterMeasure>> filtersMeasures = new TreeMap<String, List<FilterMeasure>>();
+		Map<String, Measure> measures = new TreeMap<String, Measure>();
 		Map<String, Attribute> attributes = new TreeMap<String, Attribute>();
-		Set<String> result = new TreeSet<String>();
-		
-		String[] slicedQuery = wordsQuery.split("\\$");
+		List<String> result = new LinkedList<String>();
 				
+		String[] slicedQuery = wordsQuery.split("\\$");
+						
 		try
 		{
-			if(slicedQuery[0] != null)
+			if(!slicedQuery[0].equals("null"))
 			{
 				String[] pivotAt = slicedQuery[0].split("\\:");
 				if (pivotAt!=null)
@@ -215,7 +221,7 @@ public class Worker
 						filter.setName(pivotAt[i]);
 						filter.setPivotTable(true);
 						
-						if(slicedQuery[1] != null)
+						if(!slicedQuery[1].equals("null"))
 						{
 							String[] secondFilters = slicedQuery[1].split("\\#");
 							
@@ -243,7 +249,7 @@ public class Worker
 				}
 			}
 			
-			if(slicedQuery[2] != null)
+			if(!slicedQuery[2].equals("null"))
 			{
 				String[] thirdFilters = slicedQuery[2].split("\\#");
 				
@@ -252,61 +258,86 @@ public class Worker
 					for(int i=0; i< thirdFilters.length; i++)
 					{
 						String[] oneM = thirdFilters[i].split("\\:");
-						Measure measure = new Measure();
-						measure.setFunction(oneM[1]);
-						measure.setName(oneM[0]);
+						FilterMeasure filter = new FilterMeasure();
+						filter.setName(oneM[0]);
+						filter.setFunction(oneM[1]);
 						
-						if (oneM.length>=3)
-							measure.setValues(oneM[2].split("\\;"));
+						if (oneM.length >= 3)
+							filter.setValues(oneM[2].split("\\;"));
 						
-						List<Measure> listMeasure = measures.get(oneM[0]);
-						
-						if (listMeasure == null)
-						{
-							listMeasure = new LinkedList<Measure>();
-							measures.put(oneM[0], listMeasure);
-						}
-						
-						listMeasure.add(measure);
+						List<FilterMeasure> listFilter = new LinkedList<FilterMeasure>();
+						listFilter.add(filter);
+						filtersMeasures.put(oneM[0], listFilter);
 					}
 				}
 			}
 					
-			//executando query
+			/*
+			 * Executing Query
+			 */
 			System.out.println("Executing query...");
+			System.out.println("Filters...");
 			for (String whichFilter : filters.keySet())
 			{
 				Attribute atttribute = new Attribute();
 				
-				JCL_result jclr = null;
-				
-				Set<String> values = new TreeSet<String>();
-				
-				jclr = javaCaLa.getValue(whichFilter);
-					
-				if(jclr.getErrorResult() == null)
+				try
 				{
-					values = (Set<String>) jclr.getCorrectResult();
+					List<String> values = new LinkedList<String>();
+					Map<String, List<String>> auxColumnsItens = columnsItens.get(reverseColumns.get(whichFilter) - 1).get(getCubeName());
+					values = auxColumnsItens.get(whichFilter);
+					for(String a : values)
+						System.out.print(" " + a);
 					atttribute.setAttributes(whichFilter, values, filters.get(whichFilter));
-					attributes.put(whichFilter, atttribute);				
+					attributes.put(whichFilter, atttribute);
+				
 				}
 				
-				else
-					jclr.getErrorResult().printStackTrace();
+				catch(Exception e)
+				{
+					System.out.println("Não foi possível localizar os valores da coluna: " + whichFilter);
+				}
 			}
+			System.out.println();
 			
-			//final...intersecoes e unioes
-																		
+			/*
+			 * Executing Measures
+			 */			
+			System.out.println("Measures");
+			for(String whichMeasure : filtersMeasures.keySet())
+			{
+				Measure measure = new Measure();
+					
+				try
+				{										
+					List<String> values = new LinkedList<String>();
+					Map<String, List<String>> auxColumnsItens = columnsItens.get(reverseColumns.get(whichMeasure) - 1).get(getCubeName());
+					values = auxColumnsItens.get(whichMeasure);
+					for(String a : values)
+						System.out.print(" " + a);
+					measure.setMeasures(whichMeasure,values,filtersMeasures.get(whichMeasure));
+					measures.put(whichMeasure, measure);
+				}
+				
+				catch(Exception e)
+				{
+					
+				}
+
+			}
+			System.out.println();
+			
+			/*
+			 * Intersections and Unions
+			 */																		
 			for(Attribute attribute : attributes.values())
-				attribute.loadTids();
+				attribute.loadTids(reverseColumns);
 			
 			String filen = null;
 			
-			for(Attribute att:attributes.values())
+			for(Attribute att: attributes.values())
 			{
-				System.out.println(att.getName());
-				
-				File tMAGOinputF = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/" + att.getName()+ ".txt");
+				File tMAGOinputF = new File("../" + att.getName()+ ".txt");
 				
 				if(!tMAGOinputF.exists())
 					tMAGOinputF.createNewFile();
@@ -317,8 +348,9 @@ public class Worker
 				if(filen!=null)
 				{
 				
-					for(String aux: att.getAttributes()){
-						fileR = new BufferedReader(new FileReader("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+filen+".txt"));
+					for(String aux: att.getAttributes())
+					{
+						fileR = new BufferedReader(new FileReader("../"+filen+".txt"));
 						String str = null;
 						while((str = fileR.readLine())!=null)
 							fileW.write(str+"$"+att.getName()+":"+aux+"\r\n");
@@ -326,6 +358,7 @@ public class Worker
 						fileR.close();
 						fileR = null;
 					}
+					
 					fileW.flush();
 					fileW.close();
 					fileW=null;
@@ -333,12 +366,8 @@ public class Worker
 				
 				else
 				{
-					System.out.println("Entrou aqui");
 					for(String aux: att.getAttributes())
-					{
-						System.out.println(aux);
 						fileW.write(att.getName()+":"+aux+"\r\n");
-					}
 					
 					fileW.flush();
 					fileW.close();
@@ -347,14 +376,15 @@ public class Worker
 				
 				filen = att.getName();
 			}
-			
-			if(filen!=null)
+									
+			if(filen != null)
 			{
-				File f = new File("/home/joaovq/workspace/iCubing/iCubing v0.1/lib/"+filen+".txt");
-				BufferedReader fileR= new BufferedReader(new FileReader(f));
-				String aux=null;
+				filen = orderFile(filen);
+
+				File f = new File("../"+filen+".txt");
+				BufferedReader fileR = new BufferedReader(new FileReader(f));
+				String aux = null;
 				
-				long time1= System.nanoTime();
 				Set<String> mainCache = new TreeSet<String>();
 				
 				while((aux = fileR.readLine()) != null)
@@ -364,12 +394,13 @@ public class Worker
 					
 					for(int i = 0; i< r.length; i++)
 						rr[i] = r[i].split("\\:");
-					
+										
 					int tidsMin = obtainMinTids(rr, attributes);
 					
 					Set<String> s = new TreeSet<String>();
 					
-					s.addAll(attributes.get(rr[tidsMin][0]).getTids().get(rr[tidsMin][1]));
+					if(attributes.get(rr[tidsMin][0]).getTids().get(rr[tidsMin][1]) != null)
+						s.addAll(attributes.get(rr[tidsMin][0]).getTids().get(rr[tidsMin][1]));
 					
 					String cache = "";
 					
@@ -389,14 +420,42 @@ public class Worker
 					
 					String oneR = "";
 					
+					
 					if(s.size()!=0)
-					{
-						for(int i=0; i<r.length; i++)
-						{							
-							oneR += rr[i][0]+":"+rr[i][1]+"$";							
+					{						
+						for(int i=0; i< r.length; i++)	
+							oneR += rr[i][0]+":"+rr[i][1]+"#";	
+						
+						oneR = Separate.separate(oneR,"#");
+												
+						if(measures.size() != 0)
+							oneR+= "$";	
+						
+						Boolean condition = false;
+					
+						for(String m : measures.keySet())
+						{
+							System.out.println("Measure" + m);
+							Set<String> valuesIntersection = new TreeSet<String>();
+							
+							for(String aux1 : s)
+								valuesIntersection.add(aux1);		
+							
+							System.out.println("Values intersection");
+							for(String a : valuesIntersection)
+								System.out.print(" " + a);
+							System.out.println();
+							
+							Measure measure = measures.get(m);
+							measure.processMeasures(valuesIntersection);
+														
+							condition = true;
+							oneR += measure.getName() + ":" + measure.getFunction() + ":" + measure.getResult() + "#";
 						}
 						
-						oneR += "evento:" +s.size();
+						if(condition)
+							oneR = Separate.separate(oneR,"#");
+						
 						result.add(oneR);
 					}
 					
@@ -413,15 +472,22 @@ public class Worker
 					s.clear();
 				}
 				
-				//System.err.println("tempo intersecoes ..... " + (System.nanoTime()-time1));
 				fileR.close();
 				fileR=null;
 				
 				mainCache.clear();
 				mainCache = null;
 			}
-
 			
+			//deleting files
+			File folder = new File("../"); 
+			if (folder.isDirectory()) 
+			{
+			    File[] sun = folder.listFiles();  
+			    for (File toDelete : sun) 
+			        toDelete.delete();  
+			} 
+						
 			for (List<Filter> l: filters.values())
 			{
 				for(Filter f: l)
@@ -433,16 +499,7 @@ public class Worker
 			
 			filters.clear();
 			filters = null;
-			
-			for (List<Measure> ms: measures.values())
-			{
-				for(Measure m : ms)
-					m = null;
-				
-				ms.clear();
-				ms=null;
-			}
-			
+						
 			measures.clear();
 			measures = null;
 			
@@ -466,21 +523,70 @@ public class Worker
 		}
 	}
 	
+	private String orderFile(String nameFile) throws IOException
+	{
+		String file = nameFile + "1";
+		
+		try 
+		{
+			BufferedReader 	fileR = new BufferedReader(new FileReader("../"+nameFile+".txt"));
+			List<String> fileValues = new LinkedList<String>();
+			String line = null; 
+			
+			while((line = fileR.readLine()) != null)
+				fileValues.add(line);
+			
+			fileR.close();
+			fileR = null;
+			
+			Collections.sort(fileValues);
+			
+			File inputF = new File("../" + file + ".txt");
+			
+			inputF.createNewFile();
+			
+			BufferedWriter fileW = new BufferedWriter(new FileWriter(inputF,true));
+			
+			for(String aux : fileValues)
+			{
+				fileW.write(aux);
+				fileW.write("\n");
+			}
+			
+			fileW.flush();
+			fileW.close();
+			fileW=null;
+		} 
+		
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return file;
+	}
+	
 	private int obtainMinTids(String[][] rr, Map<String, Attribute> attributes)
 	{
 		int id = 0;
 		int size = -1;
+		
 		for (int i=0; i<rr.length; i++)
 		{
 			if (i==0)
-			{
-				size = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
+			{				
+				if(attributes.get(rr[i][0]).getTids().get(rr[i][1]) != null)
+					size = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
 			}
 			
 			else
 			{
-				int size1 = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
-				if (size1<size)
+				int size1 = -1;
+		
+				if(attributes.get(rr[i][0]).getTids().get(rr[i][1]) != null)
+					size1 = attributes.get(rr[i][0]).getTids().get(rr[i][1]).size();
+				
+				if (size1 < size)
 				{
 					id = i;
 					size = size1;

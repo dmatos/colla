@@ -1,186 +1,321 @@
 package kernel;
 
-import implementations.dm_kernel.user.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
 
+import java.util.List;
+import java.awt.TextArea;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class Executor extends Thread
 {
 	private float time;
 	private String input;
+	private String labelInput;
+	private String cubeName; 
 	private int numofColumns;
-	private TreeSet <Integer> measures;
 	private File fileRegister;
-	private BufferedReader readFile;
-	private final int BLOCK_SIZE = 12;
-	ArrayList<byte[]> byteList;
-	ArrayList<String> tickets;
-	JCL_facade javaCaLa;
-	JCL_result jcl;
-	
-	public Executor(String input, int numofColumns, TreeSet <Integer> measures)
+	private final int BLOCK_SIZE = 8;
+	private ArrayList<String> tickets;
+	private JCL_result jcl;
+	private Set<String> hostSet;
+	private BufferedReader readLabels;
+
+	public Executor()
 	{
-		this.input = input;
-		this.numofColumns = numofColumns;
-		this.measures = measures;
 		this.fileRegister = null;
-		this.readFile = null;
-		this.byteList = new ArrayList<byte[]>();
+		this.time = 0;
+		this.numofColumns = 0;
 		this.tickets = new ArrayList<String>();
-		this.javaCaLa = JCL_FacadeImpl.getInstance();
 		this.jcl = null;
-		
-		try
-		{
-																
-			fileRegister = new File("../useful_jars/Worker1.jar");
-		}
-		
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-			
-	public float getTime() 
-	{
-		return time;
+		this.hostSet = new TreeSet<String>();		
 	}
 
-	/*
-	 * Executes the files in directory that was passed 
-	 * It reads the files and for which file it processes one
-	 */
-	private void executeIndex()
+	public String getInput() 
 	{
-		File file = null; 
-		try 
-		{
-			 file = new File(input); 
-		}
+		return input;
+	}
+
+	public void setInput(String input) 
+	{
+		this.input = input;
+	}
+
+	public String getLabelInput()
+	{
+		return labelInput;
+	}
+
+	public void setLabelInput(String labelInput) 
+	{
+		this.labelInput = labelInput;
+	}
+
+	public String getCubeName()
+	{
+		return cubeName;
+	}
+
+	public void setCubeName(String cubeName)
+	{
+		this.cubeName = cubeName;
+	}
+
+	public File getFileRegister()
+	{
+		return fileRegister;
+	}
+
+	public void setFileRegister(File fileRegister)
+	{
+		this.fileRegister = fileRegister;
+	}
+
+	@SuppressWarnings({ "resource", "unchecked"})
+	private Boolean executeIndex(TextArea areaCube, JCL_facade javaCaLa)
+	{
+		Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
 		
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-		String[] files = file.list();		
-		
-		//registering...
-		File[] args = {fileRegister};
-		javaCaLa.register(args, "Worker");
-				
-		long inicio = System.nanoTime();
-							
 		try
-		{			
-			long numberOfFiles = files.length;
-			
-			for(int i = 0; i < numberOfFiles; i++) 
-			{
-				int countBlock = 0;
-				File fileInput = new File(input + files[i]);
-				readFile = new BufferedReader(new FileReader(fileInput)); 
-				String line = null;
+		{
+			jcl = javaCaLa.getValue("Cubes");
+			auxCubes = (Map<String,Set<String>>) jcl.getCorrectResult();
+		}
+		
+		catch(Exception e){ };
+		
+		if(!auxCubes.containsKey(getCubeName()))
+		{
+			areaCube.append("Indexing " + getCubeName() + "\n");
+			long inicio = System.nanoTime();
+								
+			try
+			{		
+				File file = new File(input); 
 				
-				System.out.println("Processing " + files[i]);
+				String[] files = file.list();
 				
-				line = readFile.readLine();
-				String [] columns = line.split(" ");
+				long numberOfFiles = files.length;
 				
+				//registering...
+				File[] args = {fileRegister};
+				javaCaLa.register(args, "Worker");
+							
+				ArrayList<String> host = (ArrayList<String>) javaCaLa.getHosts();
+				
+				int numberOfHosts = host.size();
+							
+				File labelsColumns = new File(getLabelInput());
+				readLabels = new BufferedReader(new FileReader(labelsColumns)); 
+				
+				String auxLine = readLabels.readLine();
+				
+				String [] columns = auxLine.split(" ");
+				
+				numofColumns = columns.length;
+							
 				Map<Integer,String> mapColumns = new HashMap<Integer, String>();
 				
 				for(int j = 0; j < numofColumns ; j++)
-					mapColumns.put(j, columns[j]);
-								
-				while((line = readFile.readLine()) != null)
+					mapColumns.put(j, columns[j]);			
+				
+				for(String aux : host)
 				{
-					byteList.add(line.getBytes());
-					countBlock++;
-					if(countBlock == BLOCK_SIZE)
+					Object[] args1 = {getCubeName(),numofColumns,mapColumns};
+					javaCaLa.executeOnHost(aux, "Worker", "inicializateWorker", args1);
+				}
+				
+				int countHost = 0;
+				
+				for(int i = 0; i < numberOfFiles; i++) 
+				{
+					ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+					int countBlock = 0;
+					String whichHost = new String();
+					
+					File fileInput = new File(input + files[i]);
+					BufferedReader readFile = new BufferedReader(new FileReader(fileInput)); 
+					String line = null;
+										
+					if(countHost < numberOfHosts)
 					{
-						Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,measures,byteList};
-						tickets.add(javaCaLa.execute("Worker","index", args1));	
-						
-						countBlock = 0;
-						byteList.clear(); 
+						whichHost = host.get(countHost);
+						hostSet.add(whichHost);
 					}
-				}
+					
+					else
+					{
+						countHost = 0;
+						whichHost = host.get(countHost);
+					}	
+					
+					while((line = readFile.readLine()) != null)
+					{
+						byteList.add(line.getBytes());
+						countBlock++;
+						
+						if(countBlock == BLOCK_SIZE)
+						{
+							Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
+							tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
+							
+							countBlock = 0;
+							byteList.clear(); 
+						}
+					}
+					
+					if(byteList.size() != 0)
+					{
+						Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
+						tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
+					}
+					
+					countHost++;
+						
+					areaCube.append("Relation indexed: " + files[i] + "\n");
+					
+					for(String ticket : tickets)
+					{
+						jcl = javaCaLa.getResultBlocking(ticket);
+						if(jcl.getErrorResult()!=null)
+							jcl.getErrorResult().printStackTrace();
+					}
+					
+					tickets.clear();
+					
+				}//end for 	
 				
-				if(byteList.size() != 0)
-				{
-					Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,measures,byteList};
-					tickets.add(javaCaLa.execute("Worker","index", args1));	
-				}
-				
-				byteList.clear(); 
-				
-				System.out.println("Relation indexed: " + files[i]);
-				
-				for(String ticket : tickets)
-				{
-					jcl = javaCaLa.getResultBlocking(ticket);
-					if(jcl.getErrorResult()!=null)
-						jcl.getErrorResult().printStackTrace();
-				}
-				
-				tickets.clear();
-				
-			}//end for 
-		} //end try
+			} //end try
+			
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			} //end catch
+			
+			Map<String,Set<String>> thisCube = new TreeMap<String, Set<String>>();
+			thisCube.put(cubeName, hostSet);
+			
+			try
+			{
+				jcl = javaCaLa.getValueLocking("Cubes");
+				Map<String,Set<String>> aux = (Map<String,Set<String>>) jcl.getCorrectResult();
+				aux.putAll(thisCube);
+				javaCaLa.setValueUnlocking("Cubes", aux);
+			}
+			
+			catch(Exception e){};
+								
+			time = 	(System.nanoTime() - inicio)/1000000000;	
+			
+			areaCube.append(getCubeName() + " indexed" + "\n");
+			areaCube.append("Time : " + time +" seconds" + "\n");
+			
+			return true;			
+		}
 		
-		catch (Exception e)
+		else
 		{
-			System.out.println("Exception");
-			e.printStackTrace();
-		} //end catch
-		
-		time = 	(System.nanoTime() - inicio)/1000000000;	
-		
-		System.err.println("Time :\t" + time +" seconds");								
+			areaCube.append(getCubeName() + " already exists!");
+			return false;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void executeQuery()
-	{
-		//1000001_5;11_1
-		//ano:mes:rua$mes:entre:03;11$evento:count
-		String query = new String("n1:n3:n5$n1:maior:21#n3:menor:7000#n5:entre:200000;800000$n1:count");
+	public Set<String> executeQuery(String query, String whichCube, JCL_facade javaCaLa) 
+	{	
+		Boolean containsAverage = checkAverage(query);
+	
 		Object [] args1 = {query};
 		
-		String ticket = javaCaLa.execute("Worker","query",args1);
+		ArrayList<String> tickets = new ArrayList<String>();
 		
-		jcl = javaCaLa.getResultBlocking(ticket);
-		   
+		Set<String> hostsExecute = new TreeSet<String>();
+		
+		Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
+		
+		try
+		{
+			jcl = javaCaLa.getValue("Cubes");
+			auxCubes = (Map<String,Set<String>>) jcl.getCorrectResult();
+		}
+		
+		catch(Exception e){ };
+		
+		if(auxCubes.containsKey(whichCube))
+			hostsExecute = auxCubes.get(whichCube);
+		
+				
+		for(String aux : hostsExecute)
+			tickets.add(javaCaLa.executeOnHost(aux,"Worker","query",args1));
+		
 		Set<String> result = new TreeSet<String>();
+		List<List<String>> allResults = new LinkedList<List<String>>();
 		
-		if(jcl.getErrorResult() == null)
-			result = (Set<String>) jcl.getCorrectResult();
+		for(String aux : tickets)
+		{
+			jcl = javaCaLa.getResultBlocking(aux);		   
 		
+			if(jcl.getErrorResult() == null)
+			{
+				List<String> aux1 = (List<String>) jcl.getCorrectResult();
+				allResults.add(aux1);
+			} 
+											
+			else
+				jcl.getErrorResult().printStackTrace();
+		}
+		
+		if(containsAverage)
+			result = ProcessMeasure.executeWithAverage(allResults);
 		else
-			jcl.getErrorResult().printStackTrace();
-		
-		System.out.println("Resultado\n");
-		for(String aux : result)
-			System.out.println(aux);
-		
-		
-		
+			result = ProcessMeasure.execute(allResults);
+				
+		return result;
 	}
 	
-	public void startWork()
+	public Boolean startWork(TextArea areaCube, JCL_facade javaCaLa)
 	{
-		this.executeIndex();	
-		this.executeQuery();
+		return executeIndex(areaCube,javaCaLa);	
 	}
 	
+	public Set<String> startQuery(String query, String whichCube,JCL_facade javaCaLa) 
+	{
+		Set<String> result = this.executeQuery(query,whichCube,javaCaLa);
+		return result;
+	}
+
+	public Boolean checkAverage(String query)
+	{
+		Boolean existAverage = false; 
+		
+		String[] slicedQuery = query.split("\\$");
+		
+		if(!slicedQuery[2].equals("null"))
+		{
+			String[] thirdFilters = slicedQuery[2].split("\\#");
+			
+			if (thirdFilters!=null)
+			{
+				for(int i=0; i< thirdFilters.length; i++)
+				{
+					String[] oneM = thirdFilters[i].split("\\:");
+					if(oneM[1].equals("Average"))
+						existAverage = true;
+				}
+			}
+		}
+		
+		return existAverage;
+
+		
+	}
 }

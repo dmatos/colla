@@ -114,9 +114,8 @@ public class Worker
 						
 						List<String> values = new LinkedList<String>();
 						auxColumnsItens.put(mapColumns.get(i), values);
-					
-						if (!values.contains(tuple[i])) 
-							values.add(tuple[i]);
+						
+						values.add(tuple[i]);
 					}
 					
 					else
@@ -132,8 +131,7 @@ public class Worker
 							columnsItens.set(i-1, auxMap);
 						}
 						
-						if (!values.contains(tuple[i])) 
-							values.add(tuple[i]);
+						values.add(tuple[i]);
 					}
 					
 					String pk = tuple[0]; 
@@ -258,6 +256,7 @@ public class Worker
 					for(int i=0; i< thirdFilters.length; i++)
 					{
 						String[] oneM = thirdFilters[i].split("\\:");
+						System.out.print(" " + oneM[1]);
 						FilterMeasure filter = new FilterMeasure();
 						filter.setName(oneM[0]);
 						filter.setFunction(oneM[1]);
@@ -267,8 +266,18 @@ public class Worker
 						
 						List<FilterMeasure> listFilter = new LinkedList<FilterMeasure>();
 						listFilter.add(filter);
-						filtersMeasures.put(oneM[0], listFilter);
+						
+						if(!filtersMeasures.containsKey(oneM[0]))
+							filtersMeasures.put(oneM[0], listFilter);
+						
+						else
+						{
+							List<FilterMeasure> listFilterAux = filtersMeasures.get(oneM[0]);
+							listFilter.addAll(listFilterAux);
+							filtersMeasures.put(oneM[0], listFilter);
+						}
 					}
+					System.out.println();
 				}
 			}
 					
@@ -430,12 +439,10 @@ public class Worker
 												
 						if(measures.size() != 0)
 							oneR+= "$";	
-						
-						Boolean condition = false;
-					
+											
 						for(String m : measures.keySet())
 						{
-							System.out.println("Measure" + m);
+							System.out.println("Measure: " + m);
 							Set<String> valuesIntersection = new TreeSet<String>();
 							
 							for(String aux1 : s)
@@ -449,12 +456,8 @@ public class Worker
 							Measure measure = measures.get(m);
 							measure.processMeasures(valuesIntersection);
 														
-							condition = true;
 							oneR += measure.getName() + ":" + measure.getFunction() + ":" + measure.getResult() + "#";
 						}
-						
-						if(condition)
-							oneR = Separate.separate(oneR,"#");
 						
 						result.add(oneR);
 					}

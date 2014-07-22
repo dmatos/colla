@@ -1,4 +1,4 @@
-package kernel;
+package interfaceViewKernel;
 
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;

@@ -234,7 +234,7 @@ public class Executor extends Thread
 	{	
 		Set<String> result = new TreeSet<String>();
 
-		/*try
+		try
 		{
 			Boolean containsAverage = checkAverage(query);
 		
@@ -283,41 +283,7 @@ public class Executor extends Thread
 				result = ProcessMeasure.execute(allResults);
 		}
 		
-		catch(Exception e){ areaCube.append("No result!\n\n");}; */
-		
-		List<Set<String>> allResults = new LinkedList<Set<String>>();
-		Set<String> host1 = new TreeSet<String>();
-		host1.add("n1:32#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host1.add("n1:32#n2:45#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
-		host1.add("n1:32#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
-		host1.add("n1:32#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host1.add("n1:32#n2:all#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
-		host1.add("n1:32#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
-		host1.add("n1:all#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host1.add("n1:all#n2:45#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
-		host1.add("n1:all#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
-		host1.add("n1:all#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host1.add("n1:all#n2:all#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
-		host1.add("n1:all#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
-
-		Set<String> host2 = new TreeSet<String>(); 
-		host2.add("n1:32#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host2.add("n1:32#n2:45#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
-		host2.add("n1:32#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
-		host2.add("n1:32#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host2.add("n1:32#n2:all#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
-		host2.add("n1:32#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
-		host2.add("n1:all#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host2.add("n1:all#n2:45#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
-		host2.add("n1:all#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
-		host2.add("n1:all#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
-		host2.add("n1:all#n2:all#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
-		host2.add("n1:all#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
-		
-		allResults.add(host1);
-		allResults.add(host2);
-
-		result = ProcessMeasure.execute(allResults);
+		catch(Exception e){ areaCube.append("No result!\n\n");}; 
 		
 		return result;
 	}

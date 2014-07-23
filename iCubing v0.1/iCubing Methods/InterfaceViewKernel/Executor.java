@@ -1,4 +1,4 @@
-package interfaceViewKernel;
+package InterfaceViewKernel;
 
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
@@ -224,61 +224,101 @@ public class Executor extends Thread
 		
 		else
 		{
-			areaCube.append(getCubeName() + " already exists!");
+			areaCube.append(getCubeName() + " already exists!\n\n");
 			return false;
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Set<String> executeQuery(String query, String whichCube, JCL_facade javaCaLa) 
+	public Set<String> executeQuery(TextArea areaCube,String query, String whichCube, JCL_facade javaCaLa) 
 	{	
-		Boolean containsAverage = checkAverage(query);
-	
-		Object [] args1 = {query};
-		
-		ArrayList<String> tickets = new ArrayList<String>();
-		
-		Set<String> hostsExecute = new TreeSet<String>();
-		
-		Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
-		
-		try
-		{
-			jcl = javaCaLa.getValue("Cubes");
-			auxCubes = (Map<String,Set<String>>) jcl.getCorrectResult();
-		}
-		
-		catch(Exception e){ };
-		
-		if(auxCubes.containsKey(whichCube))
-			hostsExecute = auxCubes.get(whichCube);
-		
-				
-		for(String aux : hostsExecute)
-			tickets.add(javaCaLa.executeOnHost(aux,"Worker","query",args1));
-		
 		Set<String> result = new TreeSet<String>();
-		List<List<String>> allResults = new LinkedList<List<String>>();
-		
-		for(String aux : tickets)
+
+		/*try
 		{
-			jcl = javaCaLa.getResultBlocking(aux);		   
+			Boolean containsAverage = checkAverage(query);
 		
-			if(jcl.getErrorResult() == null)
+			Object [] args1 = {query};
+			
+			ArrayList<String> tickets = new ArrayList<String>();
+			
+			Set<String> hostsExecute = new TreeSet<String>();
+			
+			Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
+			
+			try
 			{
-				List<String> aux1 = (List<String>) jcl.getCorrectResult();
-				allResults.add(aux1);
-			} 
-											
+				jcl = javaCaLa.getValue("Cubes");
+				auxCubes = (Map<String,Set<String>>) jcl.getCorrectResult();
+			}
+			
+			catch(Exception e){ };
+			
+			if(auxCubes.containsKey(whichCube))
+				hostsExecute = auxCubes.get(whichCube);
+			
+					
+			for(String aux : hostsExecute)
+				tickets.add(javaCaLa.executeOnHost(aux,"Worker","query",args1));
+			
+			List<Set<String>> allResults = new LinkedList<Set<String>>();
+			
+			for(String aux : tickets)
+			{
+				jcl = javaCaLa.getResultBlocking(aux);		   
+			
+				if(jcl.getErrorResult() == null)
+				{
+					Set<String> aux1 = (Set<String>) jcl.getCorrectResult();
+					allResults.add(aux1);
+				} 
+												
+				else
+					jcl.getErrorResult().printStackTrace();
+			}
+			
+			if(containsAverage)
+				result = ProcessMeasure.executeWithAverage(allResults);
 			else
-				jcl.getErrorResult().printStackTrace();
+				result = ProcessMeasure.execute(allResults);
 		}
 		
-		if(containsAverage)
-			result = ProcessMeasure.executeWithAverage(allResults);
-		else
-			result = ProcessMeasure.execute(allResults);
-				
+		catch(Exception e){ areaCube.append("No result!\n\n");}; */
+		
+		List<Set<String>> allResults = new LinkedList<Set<String>>();
+		Set<String> host1 = new TreeSet<String>();
+		host1.add("n1:32#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host1.add("n1:32#n2:45#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
+		host1.add("n1:32#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
+		host1.add("n1:32#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host1.add("n1:32#n2:all#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
+		host1.add("n1:32#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
+		host1.add("n1:all#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host1.add("n1:all#n2:45#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
+		host1.add("n1:all#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
+		host1.add("n1:all#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host1.add("n1:all#n2:all#n4:88$n1:count:1#n2:max:45#n4:sum:88.0");
+		host1.add("n1:all#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:174.0");
+
+		Set<String> host2 = new TreeSet<String>(); 
+		host2.add("n1:32#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host2.add("n1:32#n2:45#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
+		host2.add("n1:32#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
+		host2.add("n1:32#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host2.add("n1:32#n2:all#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
+		host2.add("n1:32#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
+		host2.add("n1:all#n2:45#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host2.add("n1:all#n2:45#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
+		host2.add("n1:all#n2:45#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
+		host2.add("n1:all#n2:all#n4:86$n1:count:1#n2:max:45#n4:sum:86.0");
+		host2.add("n1:all#n2:all#n4:93$n1:count:1#n2:max:45#n4:sum:93.0");
+		host2.add("n1:all#n2:all#n4:all$n1:count:2#n2:max:45#n4:sum:179.0");
+		
+		allResults.add(host1);
+		allResults.add(host2);
+
+		result = ProcessMeasure.execute(allResults);
+		
 		return result;
 	}
 	
@@ -287,9 +327,9 @@ public class Executor extends Thread
 		return executeIndex(areaCube,javaCaLa);	
 	}
 	
-	public Set<String> startQuery(String query, String whichCube,JCL_facade javaCaLa) 
+	public Set<String> startQuery(TextArea areaCube,String query, String whichCube,JCL_facade javaCaLa) 
 	{
-		Set<String> result = this.executeQuery(query,whichCube,javaCaLa);
+		Set<String> result = this.executeQuery(areaCube,query,whichCube,javaCaLa);
 		return result;
 	}
 

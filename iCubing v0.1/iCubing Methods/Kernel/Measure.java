@@ -1,16 +1,16 @@
-package kernel;
+package Kernel;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import Kernel.Worker;
 import Utilities.Avg;
 import Utilities.Count;
 import Utilities.Max;
 import Utilities.Min;
 import Utilities.Sum;
-import kernel.Worker;
 
 public class Measure 
 {
@@ -65,6 +65,10 @@ public class Measure
 				{
 					this.setFunction("count");
 					List<String> finalValues = filterValues(pks);
+					System.out.println("Final values");
+					for(String a : finalValues)
+						System.out.print(" " + a);
+					System.out.println();
 					result = Count.execute(finalValues);
 					sentinel = false;
 				}
@@ -77,7 +81,8 @@ public class Measure
 					for(String a : finalValues)
 						System.out.print("" + a);
 					System.out.println();
-					result = Min.execute(finalValues);
+					if(finalValues != null)
+						result = Min.execute(finalValues);
 					sentinel = false;
 				}
 				
@@ -126,8 +131,11 @@ public class Measure
 			for(String a : tIDs)
 				System.out.print(" " + a);
 			System.out.println();
-			if(orginalTIDs.containsAll(tIDs))
-				finalValues.add(aux);
+			for(String eachtID : tIDs)
+			{
+				if(orginalTIDs.contains(eachtID))
+					finalValues.add(aux);
+			}
 		}
 		System.out.println();
 		

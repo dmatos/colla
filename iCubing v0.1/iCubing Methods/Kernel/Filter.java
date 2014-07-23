@@ -1,4 +1,4 @@
-package kernel;
+package Kernel;
 
 public class Filter 
 {	

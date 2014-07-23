@@ -1,4 +1,4 @@
-package kernel;
+package Kernel;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,13 +19,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import kernel.Attribute;
-import kernel.Measure;
-import kernel.Filter;
+import Drivers.ConnectionText;
+import Kernel.Attribute;
+import Kernel.Filter;
+import Kernel.Measure;
 //import implementations.dm_kernel.user.JCL_FacadeImpl;
 //import interfaces.kernel.JCL_facade;
 //import interfaces.kernel.JCL_result;
-import drivers.ConnectionText;
 
 public class Worker 
 {
@@ -115,7 +115,8 @@ public class Worker
 						List<String> values = new LinkedList<String>();
 						auxColumnsItens.put(mapColumns.get(i), values);
 						
-						values.add(tuple[i]);
+						if(!values.contains(tuple[i]))
+							values.add(tuple[i]);
 					}
 					
 					else
@@ -131,7 +132,8 @@ public class Worker
 							columnsItens.set(i-1, auxMap);
 						}
 						
-						values.add(tuple[i]);
+						if(!values.contains(tuple[i]))
+							values.add(tuple[i]);
 					}
 					
 					String pk = tuple[0]; 
@@ -195,14 +197,14 @@ public class Worker
 	}
 	
 	@SuppressWarnings({"unused" })
-	public List<String> query(String wordsQuery)
+	public Set<String> query(String wordsQuery)
 	{	
 		System.out.println("Starting query...");
 		Map<String, List<Filter>> filters = new TreeMap<String, List<Filter>>();
 		Map<String, List<FilterMeasure>> filtersMeasures = new TreeMap<String, List<FilterMeasure>>();
 		Map<String, Measure> measures = new TreeMap<String, Measure>();
 		Map<String, Attribute> attributes = new TreeMap<String, Attribute>();
-		List<String> result = new LinkedList<String>();
+		Set<String> result = new TreeSet<String>();
 				
 		String[] slicedQuery = wordsQuery.split("\\$");
 						
@@ -500,8 +502,20 @@ public class Worker
 				l = null;
 			}
 			
+			for(List<FilterMeasure> l : filtersMeasures.values())
+			{
+				for(FilterMeasure f: l)
+					f = null;
+				
+				l.clear();
+				l = null;
+			}
+			
 			filters.clear();
 			filters = null;
+			
+			filtersMeasures.clear();
+			filtersMeasures = null;
 						
 			measures.clear();
 			measures = null;

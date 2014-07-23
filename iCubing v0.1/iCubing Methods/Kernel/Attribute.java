@@ -1,4 +1,4 @@
-package kernel;
+package Kernel;
 
 //import interfaces.kernel.JCL_facade;
 //import interfaces.kernel.JCL_result;

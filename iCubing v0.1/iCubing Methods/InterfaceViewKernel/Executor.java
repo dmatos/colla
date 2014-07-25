@@ -18,17 +18,28 @@ import java.util.TreeSet;
 
 public class Executor extends Thread
 {
-	private float time;
-	private String input;
-	private String labelInput;
-	private String cubeName; 
-	private int numofColumns;
-	private File fileRegister;
-	private final int BLOCK_SIZE = 8;
-	private ArrayList<String> tickets;
-	private JCL_result jcl;
-	private Set<String> hostSet;
-	private BufferedReader readLabels;
+	private 	String 	input;
+	private 	String 	labelInput;
+	private 	String 	cubeName;
+	
+	private 	int 	numofColumns;
+	private 	int 	waitType;
+	private 	final 	int 	BLOCK_SIZE = 1;
+	
+	private 	File 	fileRegister;
+	
+	private 	float 	time;
+	
+	private 	ArrayList<String> 	tickets;
+	
+	private 	JCL_result 	jcl;
+	
+	private 	Set<String> 	hostSet;
+	
+	private 	BufferedReader 	readLabels;
+	
+	private 	static boolean 	isFinished = false;
+
 
 	public Executor()
 	{
@@ -38,6 +49,17 @@ public class Executor extends Thread
 		this.tickets = new ArrayList<String>();
 		this.jcl = null;
 		this.hostSet = new TreeSet<String>();		
+		this.waitType = 0;
+	}
+	
+	public int getWaitType() 
+	{
+		return waitType;
+	}
+
+	public void setWaitType(int waitType)
+	{
+		this.waitType = waitType;
 	}
 
 	public String getInput() 
@@ -80,8 +102,13 @@ public class Executor extends Thread
 		this.fileRegister = fileRegister;
 	}
 
+	public void setFinished ()
+	{
+		isFinished = true;
+	}
+	
 	@SuppressWarnings({ "resource", "unchecked"})
-	private Boolean executeIndex(TextArea areaCube, JCL_facade javaCaLa)
+	private Boolean executeIndex(TextArea areaCube, JCL_facade javaCaLa, Boolean isSchedule)
 	{
 		Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
 		
@@ -92,7 +119,7 @@ public class Executor extends Thread
 		}
 		
 		catch(Exception e){ };
-		
+
 		if(!auxCubes.containsKey(getCubeName()))
 		{
 			areaCube.append("Indexing " + getCubeName() + "\n");
@@ -288,9 +315,9 @@ public class Executor extends Thread
 		return result;
 	}
 	
-	public Boolean startWork(TextArea areaCube, JCL_facade javaCaLa)
+	public Boolean startWork(TextArea areaCube, JCL_facade javaCaLa, Boolean isSchedule)
 	{
-		return executeIndex(areaCube,javaCaLa);	
+		return executeIndex(areaCube,javaCaLa,isSchedule);	
 	}
 	
 	public Set<String> startQuery(TextArea areaCube,String query, String whichCube,JCL_facade javaCaLa) 

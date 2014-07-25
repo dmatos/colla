@@ -65,10 +65,6 @@ public class Measure
 				{
 					this.setFunction("count");
 					List<String> finalValues = filterValues(pks);
-					System.out.println("Final values");
-					for(String a : finalValues)
-						System.out.print(" " + a);
-					System.out.println();
 					result = Count.execute(finalValues);
 					sentinel = false;
 				}
@@ -77,10 +73,6 @@ public class Measure
 				{
 					this.setFunction("min");
 					List<String> finalValues = filterValues(pks);
-					System.out.println("Final values");
-					for(String a : finalValues)
-						System.out.print("" + a);
-					System.out.println();
 					if(finalValues != null)
 						result = Min.execute(finalValues);
 					sentinel = false;
@@ -121,23 +113,16 @@ public class Measure
 	{
 		List<String> finalValues = new LinkedList<String>();
 		
-		System.out.println("Values");
 		for(String aux : values)
 		{
-			System.out.println(aux);
 			Map<String, Set<String>> auxPartialCube = Worker.partialCube.get(Worker.reverseColumns.get(getName()) - 1).get(Worker.getCubeName());
 			Set<String> tIDs = auxPartialCube.get(aux);
-			System.out.println("Tids");
-			for(String a : tIDs)
-				System.out.print(" " + a);
-			System.out.println();
 			for(String eachtID : tIDs)
 			{
 				if(orginalTIDs.contains(eachtID))
 					finalValues.add(aux);
 			}
 		}
-		System.out.println();
 		
 		return finalValues;
 	}

@@ -258,7 +258,6 @@ public class Worker
 					for(int i=0; i< thirdFilters.length; i++)
 					{
 						String[] oneM = thirdFilters[i].split("\\:");
-						System.out.print(" " + oneM[1]);
 						FilterMeasure filter = new FilterMeasure();
 						filter.setName(oneM[0]);
 						filter.setFunction(oneM[1]);
@@ -279,7 +278,6 @@ public class Worker
 							filtersMeasures.put(oneM[0], listFilter);
 						}
 					}
-					System.out.println();
 				}
 			}
 					
@@ -287,7 +285,6 @@ public class Worker
 			 * Executing Query
 			 */
 			System.out.println("Executing query...");
-			System.out.println("Filters...");
 			for (String whichFilter : filters.keySet())
 			{
 				Attribute atttribute = new Attribute();
@@ -297,8 +294,6 @@ public class Worker
 					List<String> values = new LinkedList<String>();
 					Map<String, List<String>> auxColumnsItens = columnsItens.get(reverseColumns.get(whichFilter) - 1).get(getCubeName());
 					values = auxColumnsItens.get(whichFilter);
-					for(String a : values)
-						System.out.print(" " + a);
 					atttribute.setAttributes(whichFilter, values, filters.get(whichFilter));
 					attributes.put(whichFilter, atttribute);
 				
@@ -309,12 +304,10 @@ public class Worker
 					System.out.println("Não foi possível localizar os valores da coluna: " + whichFilter);
 				}
 			}
-			System.out.println();
 			
 			/*
 			 * Executing Measures
 			 */			
-			System.out.println("Measures");
 			for(String whichMeasure : filtersMeasures.keySet())
 			{
 				Measure measure = new Measure();
@@ -324,8 +317,6 @@ public class Worker
 					List<String> values = new LinkedList<String>();
 					Map<String, List<String>> auxColumnsItens = columnsItens.get(reverseColumns.get(whichMeasure) - 1).get(getCubeName());
 					values = auxColumnsItens.get(whichMeasure);
-					for(String a : values)
-						System.out.print(" " + a);
 					measure.setMeasures(whichMeasure,values,filtersMeasures.get(whichMeasure));
 					measures.put(whichMeasure, measure);
 				}
@@ -336,7 +327,6 @@ public class Worker
 				}
 
 			}
-			System.out.println();
 			
 			/*
 			 * Intersections and Unions
@@ -444,16 +434,10 @@ public class Worker
 											
 						for(String m : measures.keySet())
 						{
-							System.out.println("Measure: " + m);
 							Set<String> valuesIntersection = new TreeSet<String>();
 							
 							for(String aux1 : s)
 								valuesIntersection.add(aux1);		
-							
-							System.out.println("Values intersection");
-							for(String a : valuesIntersection)
-								System.out.print(" " + a);
-							System.out.println();
 							
 							Measure measure = measures.get(m);
 							measure.processMeasures(valuesIntersection);

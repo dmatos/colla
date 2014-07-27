@@ -1,0 +1,467 @@
+
+ 1
+
+UNIVERSIDADE FEDERAL DE OURO PRETO 
+ 
+Disciplina: MTM151 – Estatística e Probabilidade 
+Professor: Maria Cláudia  
+ 
+
+Lista de Exercícios 
+ 
+
+1) O tempo, em minutos, de digitação de um texto por secretárias experientes é uma variável aleatória 
+contínua X, sua densidade é apresentada a seguir. 
+
+     
+. ,0
+
+;62 ,20/3
+;20 ,5/1
+
+)(
+?
+?
+
+?
+?
+
+?
+??
+
+??
+
+?
+
+cc
+xse
+
+xse
+xf  
+
+Determine: 
+a) A função de distribuição acumulada de X 
+b) P(x<1); P(X>3) e P(1<X<4), utilizando a função definida em (a). 
+c) P(X<3 | X>1). 
+d) O número b tal que P(X>b)= 0,6; 
+e) O valor esperado, a variância e a mediana. (a mediana será igual a Md, tal que P(X < Md) = 0,5. 
+
+Você deverá achar o valor de Md). 
+Resp.: (b) 1/5;  9/20; 0,5  (c) 7/16  (d) 2  (e) 2,8; 4,16; 2,67 
+
+ 
+
+2) Uma variável aleatória tem a distribuição de probabilidade dada pela seguinte fórmula: P(x)=c/x para x=1, 
+3, 5, 7. 
+a) Determine c. 
+b) Calcular P(2 ? x ? 6) 
+c) Quanto vale F(5)? 
+
+Resp: (a) c=105/176   (b) 7/22  (c) 161/176 
+ 
+
+3) O tempo T, em minutos, necessário para um operário processar uma peça é uma v.a. discreta com a 
+seguinte distribuição de probabilidade: 
+
+t 2 3 4 5 6 7 
+f(t) 0,1 0,1 0,3 0,2 0,2 0,1 
+
+a) Calcule o tempo médio de processamento. 
+b) Para cada peça processada o operário ganha um fixo de R$2,00. Mas, se ele processa a peça em 
+
+menos de 6 minutos, ganha um adicional de R$0,50 por cada minuto poupado. Determine a 
+distribuição de probabilidade, a média e a variância da v.a. G, sendo G a quantia ganha por peça. 
+
+Resp.: a) 4,6 min; b) R$2,75, 0,41 (centavos)2 
+ 
+
+4) Uma liga é formada pela reunião da mistura em fusão de dois metais. A liga resultante contém certa 
+porcentagem de chumbo X, que pode ser considerada como uma variável aleatória com a seguinte função 
+densidade de probabilidade 
+
+  
+
+ 
+
+?
+?
+?
+
+??
+?
+
+?
+?
+
+?
+
+0
+
+5000
+100 x
+
+xf )(  
+
+ Suponha que, L, o lucro líquido obtido (em reais) pela venda dessa liga (por kg), seja uma variável 
+aleatória tal que: L = 2 + 3X. Calcule o lucro esperado por kg. Resp.: E(L) = 102 reais, por kg. 
+
+ 
+
+5) Considere uma variável aleatória X assumindo os valores 0,1,2,3,4,5 e tal que  
+
+5432102080 ,,,,,,,*,*)( ??? jkjXP j  
+a) Para qual valor de k a expressão acima é uma função de probabilidade? 
+b) Calcule o valor esperado e a variância do número de acidentes. 
+c) Calcule )5|3( ?? XXP  
+
+Resp: (a) 1    (b)      (c) 0,0332 
+ 
+
+6) Uma v.a. X tem a seguinte função densidade de probabilidade: 
+
+ 
+?
+?
+
+?
+?
+
+?
+???
+
+??
+
+?
+
+..,0
+105),10(
+50,
+
+)(
+cc
+
+xxk
+xkx
+
+xf  
+
+ Determine: 
+
+, caso contrário 
+
+, 0 < x < 100 
+
+
+
+ 2
+
+a) a constante k, para que a f(x) seja uma fdp 
+b) a média e a variância de X 
+b) a FDA de X 
+c) P(X ? 2); P(3 ? X ? 8); P(X>1), utilizando a função definida no item (c). 
+
+Resp.a) 1/25; b) 5/3, 475/18; c)
+
+?
+?
+?
+
+?
+
+??
+?
+
+?
+
+?
+
+?
+
+?????
+
+??
+
+?
+
+?
+
+10,1
+
+105,1
+5
+2
+
+50
+
+50,
+50
+
+0,0
+
+)( 2
+
+2
+
+x
+
+xxx
+
+xx
+x
+
+xF   ;d) 2/25; 0,74; 49/50 
+
+ 
+7) Dados históricos mostram que 5% dos itens provindos de um fornecedor apresentam algum tipo de 
+
+defeito. Considerando um lote com 20 itens, calcular a probabilidade de: 
+a) Haver algum item com defeito;  
+b) Haver exatamente dois itens defeituosos; 
+c) Haver mais de dois itens defeituosos; 
+d) Qual o número esperado de itens defeituosos no lote? 
+
+Resp: (a) 0,6415     (b) 0,1887     (c) 0,0754     (d) 1 
+ 
+
+8) Uma faculdade descobriu que 20% de seus estudantes retiram-se sem completar o curso introdutório de 
+estatística. Considere que 20 estudantes tenham se registrado para o curso este semestre. 
+a) Neste exercício, estamos trabalhando com amostra ou população? Por quê? 
+b) Qual é a probabilidade de que dois ou menos se retirarão? 
+c) Qual é a probabilidade de que exatamente quatros se retirarão? 
+d) Qual é a probabilidade de que mais de três se retirarão? 
+e) Qual o valor esperado de alunos que se retiraram? 
+
+Resp: (a) População, pois estamos com todos os alunos da turma  
+em estudo  (b) 0,2061     (c) 0,2182     (d) 0,5885     (e) 4     
+
+ 
+
+9) Uma editora apresenta a probabilidade de se encontrar uma página editada com erro igual a 0,8%. Em um 
+livro de 500 páginas, determinar a probabilidade de se encontrar no máximo 4 páginas com erro. 
+
+Resp.: 0,6288 
+ 
+
+10) Num determinado processo de fabricação, 10% das peças são consideradas defeituosas. As peças são 
+acondicionadas em caixas com 5 unidades cada uma: 
+a) Qual a probabilidade de haver exatamente 3 peças defeituosas numa caixa? 
+b) Qual a probabilidade de haver duas ou mais peças defeituosas numa caixa? 
+c) Se a empresa paga uma multa de R$10,00 por caixa em que houver alguma peça defeituosa, qual o 
+
+valor esperado de multa, num total de 1000 caixas? 
+Resp.: (a) 0,0081  (b) 0,0815  (c) R$4095,00 
+
+ 
+
+11) O fluxo de carros que passam em determinado pedágio é de 1,7 carros/minuto. Qual a probabilidade de 
+passarem exatamente 2 carros em 2 minutos? 
+
+Resp.: 0,1929 
+ 
+
+12) Na exploração de petróleo, a probabilidade de sucesso no Mar do Norte é de um em quinhentas 
+perfurações. Qual a probabilidade de encontrar no máximo 8 poços produtivos em 1000 explorações? 
+Resp.: 0,9998 
+
+ 
+
+13) Uma fábrica produz válvulas, das quais 20% são defeituosas. As válvulas são vendidas em caixas com 10 
+peças. Se a caixa não tiver nenhuma válvula defeituosa, seu preço de venda é de R$10,00; tendo uma, o 
+preço é de R$8,00; duas ou três, o preço é de R$6,00; mais que três, o preço é de R$2,00. Qual o preço 
+médio de venda de uma caixa? Resp.: R$6,48. 
+
+ 
+
+14) Em um experimento com traçador radioativo, foram observados, em média, 4,4 cintilações por segundo. 
+Encontre a probabilidade de que pelo menos uma cintilação ocorra em um intervalo de tempo de 4 
+minutos. Resp. 1 
+
+ 
+
+15)  Para evitar se detido pela alfândega, um turista colocou 6 cápsulas de narcótico num vidro contendo 9 
+pílulas de vitaminas, que a elas se assemelham. Se o funcionário da alfândega seleciona 3 pílulas ao 
+acaso, sem reposição, qual é a probabilidade de que o turista seja preso por porte ilegal de narcótico? 
+Resp.: 0,8154 
+
+ 
+
+16) Uma fábrica de pneus verificou que, ao testar seus pneus nas pistas, havia em média um estouro de pneu 
+a cada 5000 km. 
+a) Qual a probabilidade de que num teste de 3000 km haja no máximo um pneu estourado? 
+
+
+
+ 3
+
+b) Qual a probabilidade de que um carro ande 8000 km sem estourar nenhum pneu? 
+Resp: (a) 0,8781    (b) 0,2019      
+
+ 
+17) Suponha que a máquina I produz por dia o dobro de peças que são produzidas pela máquina II. Se a peça 
+
+é produzida por I, a probabilidade dela ser defeituosa é de 0,03. Se é produzida por II, a probabilidade de 
+ser defeituosa é de 0,09. Admita que a produção diária das duas máquinas é misturada, formando a 
+população total das peças. Uma amostra aleatória de 10 peças é sorteada da população total. Qual será a 
+probabilidade de que essa amostra contenha: 
+a) duas peças defeituosas? 
+b) Três ou mais peças defeituosas? 
+
+Resp.: (a) 0,0746  (b) 0,0115 
+ 
+
+18) A média de artigos com algum tipo de falha de fabricação em uma hora é 3. Qual a probabilidade de: 
+a) Ter algum artigo com falha em 60 minutos 
+b) Ter três artigos com falha em 20 minutos? 
+c) Ter no mínimo dois artigos com falha em 30 minutos? 
+d) Ter nenhum artigo com falha durante 45 minutos? 
+e) Ter no máximo um artigo com falha em 80 minutos? 
+
+Resp: (a) 0,0498   (b) 0,0613   (c) 0,4423   (d) 0,1054   (e) 0,0916 
+ 
+
+19) A probabilidade de lâmpada se queimar ao ser ligada é 0,01. Numa instalação com 1000 lâmpadas, qual a 
+probabilidade de no mínimo 3 lâmpadas se queimarem ao serem ligads? Resp: 0,9972 
+
+ 
+
+20) Um carregamento de 80 alarmes contra incêndio contém 4 defeituosos. Se 3 alarmes são escolhidos 
+aleatoriamente, sem reposição, e despachados para um freguês, qual é a probabilidade de que o freguês 
+receba exatamente um alarme defeituoso? Resp.: Hiper. 0,1388 ou Bin 0,1354 
+
+ 
+
+21) Considere uma variável aleatória W com distribuição N(0,1). Determine as seguintes probabilidades: 
+a) P(W>1,84) 
+b) P(W<0,30) 
+c) P(W<-2,69) 
+d) P(W>-2,35) 
+e) P(-1,05 < W < 2,76) 
+
+Resp: (a) 0,0329  (b) 0,6179  (c) 0,0036  (d) 0,9906  (e) 0,8502 
+ 
+
+22) Considere uma variável aleatória T com distribuição N(0,1). Determine o valor de x nas seguintes 
+condições: 
+a) P(T>x)=0,945 
+b) P(T<x)=0,755 
+c) P(T>x)=0,264 
+d) P(T>-x)=0,145 
+e) P(x < T < 1,95)=0,78 
+
+Resp: (a) -1,5982  (b) 0,6903  (c) 0,6311  (d) -1,0581  (e) -0,8618 
+ 
+
+23) Os pesos de 500 malas são normalmente distribuídos com média de 66,2kg e desvio-padrão de 4,3kg. 
+Determine o número de malas que pesam: 
+a) menos que 66,2 kg; 
+b) entre 63 e 68 kg; 
+c) menos de 70 kg; 
+d) mais de 60 kg. 
+
+Resp: (a) 0,5; 250 malas   (b) 0,4332; 217 malas   (c) 0,8106; 405 malas   (d) 0,9251; 463 malas 
+ 
+
+24) Para a população masculina de uma determinada cidade, com idade entre 18 e 74 anos, a pressão 
+sistólica tem distribuição aproximadamente gaussiana com média 129 mmHg e desvio padrão 19,8 mmHg. 
+Tem-se ainda que, níveis pressóricos menores que 130 (sistólica) / 85 (diastólica) mmHg são 
+considerados normais. 
+a) Qual a probabilidade de um homem dessa população possuir pressão sistólica normal? 
+b) Selecionando-se ao acaso 1000 homens dessa população, quantos seriam diagnosticados com 
+
+hipertensão moderada (pressão sistólica entre 160 e 179 mmHg)? 
+Resp: (a) 0,5201     (b) 53 
+
+ 
+
+25) Sabe-se que para adultos do sexo masculino, com boa saúde, numa certa população, a temperatura 
+corporal segue uma distribuição Normal com média 36,8 graus e desvio-padrão 0,15 graus. 
+a) Qual a variável de interesse? Classifique-a. 
+b) Se considerarmos 1000 dessas pessoas, quantas se esperariam com temperatura entre 36,8 e 37,2 
+
+graus? 
+c) Qual a temperatura corporal que é excedida com probabilidade 20%? 
+
+Resp: (a) variável quantitativa contínua  (b) 496  (c) 36,93 
+ 
+
+
+
+ 4
+
+26) Um bom indicador do nível de intoxicação por benzeno é a quantidade de fenol encontrada na urina. A 
+quantidade de fenol na urina de moradores de certa região segue, aproximadamente, uma distribuição 
+normal de média 6 mg/L e desvio padrão 2 mg/L. Considere as seguintes definições em termos da variável 
+quantidade de fenol na urina: 
+i. Define-se como “valor de referência” a quantidade de fenol tal que 90% da população têm quantidade de 
+fenol maior ou igual a esse valor; 
+ii. Uma pessoa é considerada “atípica” se a quantidade de fenol em sua urina for superior a 9mg/l ou 
+inferior a 3 mg/L. 
+a) Sorteado um morador ao acaso, qual é a probabilidade de ser “atípico”? 
+b) Qual é o valor de referência da população? 
+
+Resp: (a) 0,1336   (b) 3,44 
+ 
+
+27) Uma máquina de encher garrafas de refrigerantes está regulada para que o volume médio de líquido em 
+cada garrafa seja de 1000 cm 3  e o desvio padrão de 10 cm 3 . Pode-se admitir que a distribuição da 
+variável volume seja normal. 
+a) Qual é a porcentagem de garrafas em que o volume de líquido é menor que 990 cm 3 ? 
+b) Qual é a porcentagem das garrafas em que o volume líquido não se desvia da média em mais que 
+
+dois desvios padrões? 
+c) O que acontecerá com a porcentagem do item (b) se a máquina for regulada de forma que a média 
+
+seja 1200 cm 3  e o desvio padrão 20 cm 3 ? Compare a porcentagem obtida com a do item (b) e 
+comente. 
+
+Resp: (a) 15,87%   (b) 95,46%   (c)   
+ 
+
+28) Um teste de aptidão feito pelos pilotos de aeronaves em treinamento inicial requer que uma série de 
+operações seja realizada em uma rápida sucessão. Suponha que o tempo necessário para completar o 
+teste seja distribuído normalmente com média de 90 minutos e desvio padrão 20 minutos. 
+
+a) Para passar no teste, o candidato deve completá-lo em menos de 80 minutos. Considerando 65 
+candidatos, quantos são esperados passar? 
+
+b) Se os 5% melhores candidatos serão alocados em aeronaves maiores, em no máximo quantos minutos 
+um candidato deve concluir o teste de aptidão para obter esta posição. 
+
+Resp: (a) 20 candidatos     (b) 57,10 minutos 
+ 
+
+29) O diâmetro interno de um anel de pistão é uma variável aleatória com distribuição N(10 cm; 0,03 cm). Um 
+anel é considerado defeituoso quando seu diâmetro interno é maior que 10,03 cm ou menor que 9,97 cm. 
+Os anéis considerados perfeitos são vendidos com um lucro de R$10,00 cada, enquanto que os anéis 
+defeituosos são vendidos para utilização em uma outra atividade, dando um lucro de R$3,00 cada. Qual é 
+o lucro médio por anel de pistão? Resp.: R$7,78 
+
+ 
+
+30) Em uma distribuição normal, a probabilidade de valores de X abaixo de 25 é 0,82, e a probabilidade de 
+valores de X acima de 20 é 0,70. Determine a probabilidade de valores de X acima de 22. Resp.: 0,4801 
+
+ 
+
+31) O tempo médio de duração de um motor elétrico é de 6 anos, com desvio padrão de 2 anos. Se a duração 
+desse motor pode ser considerada uma v.a. normal e se o motor estiver garantido, quanto tempo deve 
+valer a garantia para que 15% dos motores falhem antes de expirar a garantia? Resp.: 3,92 anos. 
+
+ 
+
+32) A perda de peso por evaporação de certo produto é uma variável aleatória com distribuição N(6,54 g, 1,3 
+g). 
+a) Qual a probabilidade do produto apresentar perda de peso por evaporação maior que 8g? 
+b) Sorteiam-se quatro produtos de um lote. Qual a probabilidade de que ao menos dois produtos 
+
+mostrem uma perda de peso por evaporação maior que 8g? (Dica: considere uma nova variável 
+aleatória Y, Y = número de produtos com perda de peso maior que 8g. Cada produto pode ter perda 
+maior que 8 (sucesso) ou menor ou igual a 8g (fracasso). Você deverá calcular a P(Y ? 2)).   
+
+Resp.: (a) 0,1314  (b) 0,0863 
+ 
+
+Bom Trabalho! 
+ 
+
+

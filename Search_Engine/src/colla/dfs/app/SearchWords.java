@@ -1,4 +1,5 @@
 package colla.dfs.app;
+
 import implementations.dm_kernel.user.JCL_FacadeImpl;
 import interfaces.kernel.JCL_facade;
 import interfaces.kernel.JCL_result;
@@ -14,8 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
 import org.apache.tika.*;
 import org.apache.tika.exception.TikaException;
+
 import colla.dfs.util.*;
 
 
@@ -37,9 +40,9 @@ public class SearchWords extends EditDistance {
 			CurLine = CurLine.toLowerCase();
 			String[] words = CurLine.split(" ");
 			words = CurLine.split(" ");
-			
 			// Verifica se a palavra ou setença esta escrita corretamente ou
 			// existe no arquivos indexado
+
 			String[] auxwords = new String[words.length];
 			for (int i = 0; i < words.length; i++) {
 				JCL_result jclr = javaCaLa.getValue(words[0].substring(0, 1));
@@ -182,37 +185,32 @@ public class SearchWords extends EditDistance {
 	}
 
 	public void index(String dir, Set<String> s) throws TikaException {
-
 		File f = new File(dir);
-
-		if (!textIndexer.contains(dir)) {
-			textIndexer.add(dir);
-			if (f.isDirectory()) {
-				String[] files = f.list();
-				for (String oneFile : files)
-					index(dir + oneFile, s);
-
-			} else {
-				try {
-					if (f.getAbsolutePath().endsWith(".pdf")
-							|| f.getAbsolutePath().endsWith(".odt")
-							|| f.getAbsolutePath().endsWith(".doc")
-							|| f.getAbsolutePath().endsWith(".docx")
-							|| f.getAbsolutePath().endsWith(".ppt")
-							|| f.getAbsolutePath().endsWith(".pptx")
-							|| f.getAbsolutePath().endsWith(".xls")
-							|| f.getAbsolutePath().endsWith(".txt")
-							|| f.getAbsolutePath().endsWith(".rtf")) {
-						text = null;
-						text = getTika().parseToString(f);
-						indexFile(f.getAbsolutePath(), s);
-
-					} else {
-						System.err.println("cannot read the file!");
+		if (f.isDirectory()) {
+			String[] files = f.list();
+			for (String oneFile : files){
+				dir = VerificaBarra(dir);
+				index(dir+oneFile, s);
+			}
+		} else {
+			try {
+				if (f.getAbsolutePath().endsWith(".pdf")
+						|| f.getAbsolutePath().endsWith(".odt")
+						|| f.getAbsolutePath().endsWith(".doc")
+						|| f.getAbsolutePath().endsWith(".docx")
+						|| f.getAbsolutePath().endsWith(".ppt")
+						|| f.getAbsolutePath().endsWith(".pptx")
+						|| f.getAbsolutePath().endsWith(".xls")
+						|| f.getAbsolutePath().endsWith(".txt")						
+						|| f.getAbsolutePath().endsWith(".rtf")) {
+					text = null;
+					text = getTika().parseToString(f);
+					indexFile(f.getAbsolutePath(), s);
+				} else {
+					System.err.println("cannot read the file!");
 					}
-				} catch (IOException e) {
-					System.err.println("cannot open the file!");
-				}
+			} catch (IOException e) {
+				System.err.println("cannot open the file!");
 			}
 		}
 	}
@@ -243,11 +241,11 @@ public class SearchWords extends EditDistance {
 			while ((readAux = input.readLine()) != null) {
 				allText.add(readAux.getBytes());
 				cont++;
-				if(cont == 100){
+				if(cont == 1000){
 					cont = 0;
 					Object[] args = { allText, FilePath, linha};
 					s.add(javaCaLa.execute("WordFilesIndexer", args));
-					linha = linha+100;
+					linha = linha+1000;
 					allText.clear();
 				}
 				
@@ -266,7 +264,16 @@ public class SearchWords extends EditDistance {
 		input.close();
 
 	}
-
+	 public  static String VerificaBarra(String pf){
+		 String f = "\\";
+		 if(pf.contains("/")){
+			 f = "/";
+		 }
+		 if(!pf.endsWith(f)){
+			 pf = pf+ f;
+		 }
+		 return pf;
+	 }
 	private static TreeSet<String> textIndexer = new TreeSet<String>();
 	private boolean testAspas;
 	private boolean control = true;

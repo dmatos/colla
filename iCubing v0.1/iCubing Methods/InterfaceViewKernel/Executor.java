@@ -9,12 +9,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import View.CollAOLAPViewer;
 
 public class Executor extends Thread
 {
@@ -23,8 +26,8 @@ public class Executor extends Thread
 	private 	String 	cubeName;
 	
 	private 	int 	numofColumns;
-	private 	int 	waitType;
 	private 	final 	int 	BLOCK_SIZE = 1;
+	private 	static int 	waitType;
 	
 	private 	File 	fileRegister;
 	
@@ -39,8 +42,7 @@ public class Executor extends Thread
 	private 	BufferedReader 	readLabels;
 	
 	private 	static boolean 	isFinished = false;
-
-
+ 	@SuppressWarnings("static-access")
 	public Executor()
 	{
 		this.fileRegister = null;
@@ -57,6 +59,7 @@ public class Executor extends Thread
 		return waitType;
 	}
 
+	@SuppressWarnings("static-access")
 	public void setWaitType(int waitType)
 	{
 		this.waitType = waitType;
@@ -107,10 +110,120 @@ public class Executor extends Thread
 		isFinished = true;
 	}
 	
+	public static class CheckNewFiles extends Thread
+	{
+		private Set<String> originalFiles; 
+		private String 		 input;
+		
+		
+		public CheckNewFiles(Set<String> filesCube,String input)
+		{
+			this.originalFiles = filesCube;
+			this.input = input;
+		}
+		
+		public void run()
+		{			
+			while(!isFinished)
+			{
+				System.out.println("While");
+				
+				File file = new File(input); 
+				
+				System.out.println();
+				
+				System.out.println("Original");
+				for(String aux : originalFiles)
+					System.out.print(" " + aux);
+				
+				System.out.println();
+				
+				String[] files = file.list();
+			
+				List<String> auxFiles = new LinkedList<String>();
+				
+				System.out.println("New");
+				for(String aux : files)
+				{
+					System.out.print(" " + aux);
+					auxFiles.add(aux);
+				}
+				
+				System.out.println();
+				
+				Collections.sort(auxFiles);
+				
+				if(!originalFiles.containsAll(auxFiles))
+				{
+					System.out.println("OPaaa");
+					auxFiles.removeAll(originalFiles);
+					String [] auxFiles1 = auxFiles.toArray(new String[auxFiles.size()]);
+					
+					originalFiles.addAll(auxFiles);
+
+					CollAOLAPViewer view = CollAOLAPViewer.getInstance();
+					view.buttonCompute_ActionPerformed(false, auxFiles1);
+				}
+				
+				System.out.println("uhsuahs");
+				
+				try
+				{
+					switch(waitType)
+					{
+						//minute
+						case 1:
+						{
+							synchronized (this) 
+							{
+								this.wait(60000);
+							}
+							break;
+						}
+						
+						//hour
+						case 2:
+						{
+							synchronized (this) 
+							{
+								this.wait(3600000);
+							}
+							break;
+						}
+						
+						//period of 8 hours
+						case 3:
+						{
+							synchronized (this)
+							{
+								this.wait(28800000);
+							}
+							
+							break;
+						}
+						
+						//day
+						case 4:
+						{
+							synchronized (this) 
+							{
+								this.wait(86400000);
+							}
+							break;
+						}					
+					}
+					
+				} catch (Exception e){ e.printStackTrace(); }
+					
+			}
+		}
+	}
+	
 	@SuppressWarnings({ "resource", "unchecked"})
-	private Boolean executeIndex(TextArea areaCube, JCL_facade javaCaLa, Boolean isSchedule)
+	private Boolean executeIndex(TextArea areaCube, JCL_facade javaCaLa,String[] files, Boolean isSchedule, Boolean firstTime)
 	{
 		Map<String,Set<String>> auxCubes = new TreeMap<String,Set<String>>();
+		Set<String> filesCube = new TreeSet<String>();
 		
 		try
 		{
@@ -120,133 +233,249 @@ public class Executor extends Thread
 		
 		catch(Exception e){ };
 
-		if(!auxCubes.containsKey(getCubeName()))
+		if(!auxCubes.containsKey(getCubeName()) || !firstTime)
 		{
-			areaCube.append("Indexing " + getCubeName() + "\n");
-			long inicio = System.nanoTime();
-								
-			try
-			{		
-				File file = new File(input); 
-				
-				String[] files = file.list();
-				
-				long numberOfFiles = files.length;
-				
-				//registering...
-				File[] args = {fileRegister};
-				javaCaLa.register(args, "Worker");
-							
-				ArrayList<String> host = (ArrayList<String>) javaCaLa.getHosts();
-				
-				int numberOfHosts = host.size();
-							
-				File labelsColumns = new File(getLabelInput());
-				readLabels = new BufferedReader(new FileReader(labelsColumns)); 
-				
-				String auxLine = readLabels.readLine();
-				
-				String [] columns = auxLine.split(" ");
-				
-				numofColumns = columns.length;
-							
-				Map<Integer,String> mapColumns = new HashMap<Integer, String>();
-				
-				for(int j = 0; j < numofColumns ; j++)
-					mapColumns.put(j, columns[j]);			
-				
-				for(String aux : host)
-				{
-					Object[] args1 = {getCubeName(),numofColumns,mapColumns};
-					javaCaLa.executeOnHost(aux, "Worker", "inicializateWorker", args1);
-				}
-				
-				int countHost = 0;
-				
-				for(int i = 0; i < numberOfFiles; i++) 
-				{
-					ArrayList<byte[]> byteList = new ArrayList<byte[]>();
-					int countBlock = 0;
-					String whichHost = new String();
+			if(firstTime)
+			{
+				areaCube.append("Indexing " + getCubeName() + "\n");
+
+				long inicio = System.nanoTime();
+									
+				try
+				{						
+					long numberOfFiles = files.length;
 					
-					File fileInput = new File(input + files[i]);
-					BufferedReader readFile = new BufferedReader(new FileReader(fileInput)); 
-					String line = null;
-										
-					if(countHost < numberOfHosts)
+					//registering...
+					File[] args = {fileRegister};
+					javaCaLa.register(args, "Worker");
+								
+					ArrayList<String> host = (ArrayList<String>) javaCaLa.getHosts();
+					
+					int numberOfHosts = host.size();
+								
+					File labelsColumns = new File(getLabelInput());
+					readLabels = new BufferedReader(new FileReader(labelsColumns)); 
+					
+					String auxLine = readLabels.readLine();
+					
+					String [] columns = auxLine.split(" ");
+					
+					numofColumns = columns.length;
+								
+					Map<Integer,String> mapColumns = new HashMap<Integer, String>();
+					
+					for(int j = 0; j < numofColumns ; j++)
+						mapColumns.put(j, columns[j]);			
+					
+					for(String aux : host)
 					{
-						whichHost = host.get(countHost);
-						hostSet.add(whichHost);
+						Object[] args1 = {getCubeName(),numofColumns,mapColumns};
+						javaCaLa.executeOnHost(aux, "Worker", "inicializateWorker", args1);
 					}
 					
-					else
-					{
-						countHost = 0;
-						whichHost = host.get(countHost);
-					}	
+					int countHost = 0;
 					
-					while((line = readFile.readLine()) != null)
+					for(int i = 0; i < numberOfFiles; i++) 
 					{
-						byteList.add(line.getBytes());
-						countBlock++;
+						filesCube.add(files[i]);
 						
-						if(countBlock == BLOCK_SIZE)
+						ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+						int countBlock = 0;
+						String whichHost = new String();
+						
+						File fileInput = new File(input + files[i]);
+						BufferedReader readFile = new BufferedReader(new FileReader(fileInput)); 
+						String line = null;
+											
+						if(countHost < numberOfHosts)
+						{
+							whichHost = host.get(countHost);
+							hostSet.add(whichHost);
+						}
+						
+						else
+						{
+							countHost = 0;
+							whichHost = host.get(countHost);
+						}	
+						
+						while((line = readFile.readLine()) != null)
+						{
+							byteList.add(line.getBytes());
+							countBlock++;
+							
+							if(countBlock == BLOCK_SIZE)
+							{
+								Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
+								tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
+								
+								countBlock = 0;
+								byteList.clear(); 
+							}
+						}
+						
+						if(byteList.size() != 0)
 						{
 							Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
 							tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
-							
-							countBlock = 0;
-							byteList.clear(); 
 						}
-					}
-					
-					if(byteList.size() != 0)
-					{
-						Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
-						tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
-					}
-					
-					countHost++;
 						
-					areaCube.append("Relation indexed: " + files[i] + "\n");
+						countHost++;
+							
+						areaCube.append("Relation indexed: " + files[i] + "\n");
+						
+						for(String ticket : tickets)
+						{
+							jcl = javaCaLa.getResultBlocking(ticket);
+							if(jcl.getErrorResult()!=null)
+								jcl.getErrorResult().printStackTrace();
+						}
+						
+						tickets.clear();
+						
+					}//end for 	
 					
-					for(String ticket : tickets)
-					{
-						jcl = javaCaLa.getResultBlocking(ticket);
-						if(jcl.getErrorResult()!=null)
-							jcl.getErrorResult().printStackTrace();
-					}
-					
-					tickets.clear();
-					
-				}//end for 	
+				} //end try
 				
-			} //end try
-			
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			} //end catch
-			
-			Map<String,Set<String>> thisCube = new TreeMap<String, Set<String>>();
-			thisCube.put(cubeName, hostSet);
-			
-			try
-			{
-				jcl = javaCaLa.getValueLocking("Cubes");
-				Map<String,Set<String>> aux = (Map<String,Set<String>>) jcl.getCorrectResult();
-				aux.putAll(thisCube);
-				javaCaLa.setValueUnlocking("Cubes", aux);
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				} //end catch
+				
+				Map<String,Set<String>> thisCube = new TreeMap<String, Set<String>>();
+				thisCube.put(cubeName, hostSet);
+				
+				try
+				{
+					jcl = javaCaLa.getValueLocking("Cubes");
+					Map<String,Set<String>> aux = (Map<String,Set<String>>) jcl.getCorrectResult();
+					aux.putAll(thisCube);
+					javaCaLa.setValueUnlocking("Cubes", aux);
+				}
+				
+				catch(Exception e){};
+									
+				time = 	(System.nanoTime() - inicio)/1000000000;	
+				
+				areaCube.append(getCubeName() + " indexed" + "\n");
+				areaCube.append("Time : " + time +" seconds" + "\n\n");
+				
+				if(isSchedule)
+				{
+					CheckNewFiles checkFiles = new CheckNewFiles(filesCube,getInput());
+					checkFiles.start();
+				}
+				
+				return true;	
 			}
-			
-			catch(Exception e){};
+		
+			else
+			{
+				areaCube.append("Re-indexing " + getCubeName() + "\n");
+
+				long inicio = System.nanoTime();
+				
+				try
+				{						
+					long numberOfFiles = files.length;
+					
+					//registering...
+					File[] args = {fileRegister};
+					javaCaLa.register(args, "Worker");
+					
+					jcl = javaCaLa.getValue("Cubes");
+					Map<String,Set<String>> aux = (Map<String,Set<String>>) jcl.getCorrectResult();
 								
-			time = 	(System.nanoTime() - inicio)/1000000000;	
-			
-			areaCube.append(getCubeName() + " indexed" + "\n");
-			areaCube.append("Time : " + time +" seconds" + "\n");
-			
-			return true;			
+					ArrayList<String> host = new ArrayList<String>(aux.get(getCubeName()));
+					
+					int numberOfHosts = host.size();
+								
+					File labelsColumns = new File(getLabelInput());
+					readLabels = new BufferedReader(new FileReader(labelsColumns)); 
+					
+					String auxLine = readLabels.readLine();
+					
+					String [] columns = auxLine.split(" ");
+					
+					numofColumns = columns.length;
+								
+					Map<Integer,String> mapColumns = new HashMap<Integer, String>();
+					
+					for(int j = 0; j < numofColumns ; j++)
+						mapColumns.put(j, columns[j]);			
+					
+					int countHost = 0;
+					
+					for(int i = 0; i < numberOfFiles; i++) 
+					{						
+						ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+						int countBlock = 0;
+						String whichHost = new String();
+						
+						File fileInput = new File(input + files[i]);
+						BufferedReader readFile = new BufferedReader(new FileReader(fileInput)); 
+						String line = null;
+											
+						if(countHost < numberOfHosts)
+							whichHost = host.get(countHost);
+						
+						else
+						{
+							countHost = 0;
+							whichHost = host.get(countHost);
+						}	
+						
+						while((line = readFile.readLine()) != null)
+						{
+							byteList.add(line.getBytes());
+							countBlock++;
+							
+							if(countBlock == BLOCK_SIZE)
+							{
+								Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
+								tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
+								
+								countBlock = 0;
+								byteList.clear(); 
+							}
+						}
+						
+						if(byteList.size() != 0)
+						{
+							Object[] args1 = {files[i],new Integer(numofColumns),mapColumns,byteList,whichHost};
+							tickets.add(javaCaLa.executeOnHost(whichHost, "Worker", "index", args1));	
+						}
+						
+						countHost++;
+							
+						areaCube.append("Relation indexed: " + files[i] + "\n");
+						
+						for(String ticket : tickets)
+						{
+							jcl = javaCaLa.getResultBlocking(ticket);
+							if(jcl.getErrorResult()!=null)
+								jcl.getErrorResult().printStackTrace();
+						}
+						
+						tickets.clear();
+						
+					}//end for 	
+					
+				} //end try
+				
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				} //end catch
+								
+				time = 	(System.nanoTime() - inicio)/1000000000;	
+				
+				areaCube.append(getCubeName() + " re-indexed" + "\n");
+				areaCube.append("Time : " + time +" seconds" + "\n\n");
+
+				
+				return true;	
+			}
 		}
 		
 		else
@@ -315,9 +544,19 @@ public class Executor extends Thread
 		return result;
 	}
 	
-	public Boolean startWork(TextArea areaCube, JCL_facade javaCaLa, Boolean isSchedule)
+	public Boolean startWork(TextArea areaCube, JCL_facade javaCaLa, Boolean isSchedule, Boolean firstTime, String [] filesInput)
 	{
-		return executeIndex(areaCube,javaCaLa,isSchedule);	
+		if(!firstTime)
+			return executeIndex(areaCube,javaCaLa,filesInput,isSchedule,firstTime);	
+		
+		else
+		{
+			File file = new File(getInput()); 
+			String[] files = file.list();
+		
+			return executeIndex(areaCube,javaCaLa,files,isSchedule,true);	
+		}
+
 	}
 	
 	public Set<String> startQuery(TextArea areaCube,String query, String whichCube,JCL_facade javaCaLa) 

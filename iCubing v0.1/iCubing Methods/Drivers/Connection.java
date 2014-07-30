@@ -2,6 +2,7 @@ package Drivers;
 
 
 
+
 public interface Connection {
 	
 	public void configure(String text);

@@ -194,6 +194,22 @@ public class Worker
 				System.err.print(" " + a);
 			System.out.println(); 
 		}	
+		
+		System.out.println();
+		
+		for(int i = 1; i < columns.length; i++)
+		{
+		Map<String, Set<String>> auxPartialCube = partialCube.get(i-1).get(getCubeName());
+			
+			for(String aux : auxPartialCube.keySet())
+			{
+				System.out.println(aux);
+				Set<String> aux1 = auxPartialCube.get(aux);
+				for(String aux2 : aux1)
+					System.out.print(" " + aux2);
+				System.out.println();
+			}
+		}
 	}
 	
 	@SuppressWarnings({"unused" })

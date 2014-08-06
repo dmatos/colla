@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.1.6" icons="true" automaticImage="JPEG" always-add-relationships="false" 
+  generalizations="true" realizations="true" associations="true" dependencies="false" nesting-relationships="true">  
+  <class id="1" language="java" name="colla.appl.server.ClientsConnectionMonitor" project="CollAServer" 
+    file="/CollAServer/src/colla/appl/server/ClientsConnectionMonitor.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="113" width="441" x="-55" y="-217"/>    
+    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="colla.appl.server.ServerStarter" project="CollAServer" 
+    file="/CollAServer/src/colla/appl/server/ServerStarter.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="95" width="439" x="-54" y="-323"/>    
+    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
+    </display>  
+  </class>  
+  <package id="3" language="java" name="colla.appl.server" project="CollAServer" 
+    file="/CollAServer/src/colla/appl/server" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="7" y="-357"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

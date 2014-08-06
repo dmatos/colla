@@ -3,6 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Kernel"/>
-	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcl_lambari_november_2013.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/colla/libraries/jcl_lambari_may_2014.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/colla/libraries/jclUser.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcl_lambari_november_2013.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/colla/libraries/jcl_lambari_may_2014.jar"/>
 	<classpathentry kind="lib" path="dist/lib/org-openide-awt.jar"/>
 	<classpathentry kind="lib" path="dist/lib/org-openide-filesystems.jar"/>
 	<classpathentry kind="lib" path="dist/lib/org-openide-util-lookup.jar"/>
 	<classpathentry kind="lib" path="dist/lib/org-openide-util.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcalendar-1.4.jar"/>
-	<classpathentry kind="lib" path="/home/dmatos/workspace/workspace/colla/libraries/jcalendarbutton-1.4.5.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/colla/libraries/jcalendar-1.4.jar"/>
+	<classpathentry kind="lib" path="/home/dmatos/workspace/colla/libraries/jcalendarbutton-1.4.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Kernel"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
